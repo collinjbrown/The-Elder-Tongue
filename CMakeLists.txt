@@ -16,13 +16,17 @@ set(BASE_SRCS
     stb_image.cpp
     game.h
     game.cpp
+    check_error.h
+    check_error.cpp
     texture_2D.cpp
     texture_2D.h
     renderer.h
-    renderer.cpp)
+    renderer.cpp
+    entity.h
+    entity.cpp)
 
 # Add source to this project's executable.
-add_executable (the-elder-tongue ${BASE_SRCS} "check_error.h" "check_error.cpp")
+add_executable (the-elder-tongue ${BASE_SRCS})
 
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)

@@ -16,8 +16,11 @@
 #include "check_error.h"
 #include "texture_2D.h"
 #include "renderer.h"
+#include "engine.h"
+#include "entity.h"
 
 Game Game::main;
+Engine Engine::main;
 
 int main(void)
 {
@@ -58,6 +61,10 @@ int main(void)
     renderer.textureIDs.push_back(test.ID);
 
     Game::main.renderer = &renderer;
+    
+    std::string s = "Test";
+    Entity* testEntity = new Entity(rand() % 9999 + 1000, s, true, &test, 0.0f, 0.0f, 0.0f, test.width, test.height);
+    Engine::main.entities.push_back(*testEntity);
 
     while (!glfwWindowShouldClose(window))
     {
@@ -75,6 +82,21 @@ int main(void)
 
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT);
+
+        // Game::main.renderer->prepareQuad(glm::vec2(-500.0f, 0.0f), 200.0f, 200.0f, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), test.ID);
+        for (int i = 0; i < Engine::main.entities.size(); i++)
+        {
+            if (Engine::main.entities[i].isShown)
+            {
+                Entity e = Engine::main.entities[i];
+
+                Game::main.renderer->prepareQuad(glm::vec2(e.posX, e.posY), e.width, e.height, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), e.texture->ID);
+            }
+        }
+
+
+        Game::main.renderer->sendToGL();
+        Game::main.renderer->resetBuffers();
 
         glfwSwapBuffers(window);
 
