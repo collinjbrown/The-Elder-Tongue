@@ -5,6 +5,9 @@
 #include "texture_2D.h"
 #include "renderer.h"
 
+// Entities are the basic objects in the game.
+// They take components and whatnot.
+
 class Entity
 {
 private:
@@ -22,7 +25,6 @@ public:
     float        width;
     float       height;
     
-
     int         Get_ID() { return ID; }
     std::string Get_Name() { return name; }
 

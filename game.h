@@ -5,6 +5,10 @@
 #include <glm/glm.hpp>
 #include <vector>
 
+// The game class holds data about the broader game state;
+// if you have data that pertains to the actual gameplay
+// and world state, put it in the engine.
+
 class Game
 {
 public:

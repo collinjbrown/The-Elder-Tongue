@@ -6,6 +6,9 @@
 
 using namespace std;
 
+// The purpose of this class is to hold all the entities and generally manage world states and all that
+// so that the main file doesn't become cluttered.
+
 class Engine
 {
 public:
