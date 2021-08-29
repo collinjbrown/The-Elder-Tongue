@@ -2,6 +2,7 @@
 #define TEXTURE_2D_H
 
 #include <string>
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
 class Texture2D

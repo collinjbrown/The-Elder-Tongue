@@ -1,4 +1,4 @@
-#include "texture_2d.h"
+#include "texture_2D.h"
 #include "stb_image.h"
 
 #include <iostream>
@@ -9,7 +9,6 @@ Texture2D::Texture2D(const char* file, bool alpha, int filter)
     wrapT(GL_REPEAT), filterMin(filter), filterMax(filter)
 {
     glGenTextures(1, &this->ID);
-    std::cout << "Texture ID from " << file << ": " << this->ID << std::endl;
 
     if (alpha)
     {
@@ -27,15 +26,17 @@ Texture2D::Texture2D(const char* file, bool alpha, int filter)
     this->width = imageWidth;
     this->height = imageHeight;
 
-    // Create texture
+    // Create
     glBindTexture(GL_TEXTURE_2D, this->ID);
     glTexImage2D(GL_TEXTURE_2D, 0, this->internalFormat, imageWidth, imageHeight, 0, this->imageFormat, GL_UNSIGNED_BYTE, data);
-    // Set texture wrap and filter modes
+    
+    // Wrap & Filter Modes
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, this->wrapS);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, this->wrapT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, this->filterMin);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, this->filterMax);
-    // Unbind texture
+    
+    // Unbind
     glBindTexture(GL_TEXTURE_2D, 0);
 
     stbi_image_free(data);

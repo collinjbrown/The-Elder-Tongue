@@ -3,31 +3,22 @@
 
 #include <array>
 #include <vector>
+#include <glm/glm.hpp>
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include "texture_2D.h"
 #include "shader.h"
-
-struct Point
-{
-    float x;
-    float y;
-};
-
-struct Color
-{
-    float r;
-    float g;
-    float b;
-    float a;
-};
+#include "texture_2D.h"
 
 struct Vertex
 {
-    Point loc;
+    float xCoord;
+    float yCoord;
 
-    Color color;
+    float rColor;
+    float gColor;
+    float bColor;
+    float aColor;
 
-    // Texture coordinates
     float sCoord;
     float tCoord;
 
@@ -42,17 +33,24 @@ struct Quad
     Vertex topLeft;
 };
 
+// Store the quads before a draw call
 class Batch
 {
 public:
     static constexpr int MAX_QUADS = 10000;
 
+    // TODO: Look into decoupling # of quads that can be rendered with # of textures that can be rendered in one batch
     std::array<Quad, MAX_QUADS> quadBuffer;
     int quadIndex = 0;
 };
 
+// A batch renderer for quads with a color and sprite
 class Renderer
 {
+public:
+    // Should be GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS for release, but
+    // would need to figure out how to use that value in the fragment shader.
+    // NOTE: Fragment shader also has hard-coded value that must match this.
     static constexpr int MAX_TEXTURES_PER_BATCH = 48;
 
     std::vector<GLuint> textureIDs;
@@ -64,7 +62,8 @@ class Renderer
     GLuint whiteTextureID;
 
     Renderer(GLuint whiteTexture);
-    void prepareQuad(Point position, float width, float height, Color color, int textureID);
+    void prepareQuad(glm::vec2 position, float width, float height, glm::vec4 rgb, int textureID); // Specify texture ID rather than index?
+    // NOTE: Directly sending a texture index rather than ID can result in the wrong texture being drawn (due to being in the wrong batch)
     void prepareQuad(int batchIndex, Quad& input);
     void prepareDownLine(float x, float y, float height);
     void prepareRightLine(float x, float y, float width);
