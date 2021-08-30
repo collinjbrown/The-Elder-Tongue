@@ -16,9 +16,11 @@
 #include "check_error.h"
 #include "texture_2D.h"
 #include "renderer.h"
-#include "ECS.h"
+#include "entity.h"
+#include "world.h"
 
 Game Game::main;
+World World::main;
 
 // This is the hub which handles updates and setup.
 // In an attempt to keep this from getting cluttered, we're keeping some information
@@ -58,6 +60,12 @@ int main(void)
     }
     #pragma endregion
 
+    #pragma region World Setup
+
+    World::main.Init();
+
+    #pragma endregion
+
     #pragma region Camera & Texture Setup
     // Now that we've finished that, we'll set up the camera
     // and textures that we'll need later.
@@ -72,10 +80,6 @@ int main(void)
 
     Game::main.renderer = &renderer;
     #pragma endregion
-
-    /*std::string s = "Test";
-    Entity* testEntity = new Entity(rand() % 9999 + 1000, s, true, &test, 0.0f, 0.0f, 0.0f, test.width, test.height);
-    EntityManager::main.entities.push_back(*testEntity);*/
 
     #pragma region Game Loop
     // This is the loop where the game runs, duh.
@@ -107,18 +111,10 @@ int main(void)
         glClear(GL_COLOR_BUFFER_BIT);
         #pragma endregion
 
-        #pragma region Update Entities
-        // Here we go through each entity, check if it should be rendered, and if so push it to the renderer.
-        // We'll soon add component updates to ensure that things like physics update before entities are rendered.
-        /*for (int i = 0; i < EntityManager::main.entities.size(); i++)
-        {
-            if (EntityManager::main.entities[i].isShown)
-            {
-                Entity e = EntityManager::main.entities[i];
+        #pragma region Update World State
 
-                Game::main.renderer->prepareQuad(glm::vec2(e.posX, e.posY), e.width, e.height, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), e.texture->ID);
-            }
-        }*/
+        World::main.Update();
+
         #pragma endregion;
 
         #pragma region Render

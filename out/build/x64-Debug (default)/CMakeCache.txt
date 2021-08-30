@@ -258,6 +258,25 @@ CMAKE_STATIC_LINKER_FLAGS_RELWITHDEBINFO:STRING=
 // Studio IDE projects all commands are done without /nologo.
 CMAKE_VERBOSE_MAKEFILE:BOOL=FALSE
 
+//Enable building with documentation.
+ENTT_BUILD_DOCS:BOOL=OFF
+
+//Enable building tests.
+ENTT_BUILD_TESTING:BOOL=OFF
+
+//Use libc++ by adding -stdlib=libc++ flag if availbale.
+ENTT_USE_LIBCPP:BOOL=ON
+
+//Enable sanitizers by adding -fsanitize=address -fno-omit-frame-pointer
+// -fsanitize=undefined flags
+ENTT_USE_SANITIZER:BOOL=OFF
+
+//Value Computed by CMake
+EnTT_BINARY_DIR:STATIC=C:/Users/CJBro/Desktop/Coding/RPGs/The Elder Tongue/out/build/x64-Debug (default)/libs/entt
+
+//Value Computed by CMake
+EnTT_SOURCE_DIR:STATIC=C:/Users/CJBro/Desktop/Coding/RPGs/The Elder Tongue/libs/entt
+
 //Value Computed by CMake
 GLFW_BINARY_DIR:STATIC=C:/Users/CJBro/Desktop/Coding/RPGs/The Elder Tongue/out/build/x64-Debug (default)/libs/glfw-3.3.4
 
@@ -432,7 +451,7 @@ CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_MT
 CMAKE_MT-ADVANCED:INTERNAL=1
 //number of local generators
-CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=6
+CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=7
 //Platform information initialized
 CMAKE_PLATFORM_INFO_INITIALIZED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_RC_COMPILER

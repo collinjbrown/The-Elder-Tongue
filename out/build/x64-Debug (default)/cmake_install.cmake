@@ -37,6 +37,7 @@ if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   include("C:/Users/CJBro/Desktop/Coding/RPGs/The Elder Tongue/out/build/x64-Debug (default)/libs/glfw-3.3.4/cmake_install.cmake")
   include("C:/Users/CJBro/Desktop/Coding/RPGs/The Elder Tongue/out/build/x64-Debug (default)/libs/glad/cmake_install.cmake")
   include("C:/Users/CJBro/Desktop/Coding/RPGs/The Elder Tongue/out/build/x64-Debug (default)/libs/glm-0.9.9.8/cmake_install.cmake")
+  include("C:/Users/CJBro/Desktop/Coding/RPGs/The Elder Tongue/out/build/x64-Debug (default)/libs/entt/cmake_install.cmake")
 
 endif()
 
