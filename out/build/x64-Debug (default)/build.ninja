@@ -43,7 +43,39 @@ include CMakeFiles\rules.ninja
 
 build cmake_object_order_depends_target_the-elder-tongue: phony || cmake_object_order_depends_target_glad cmake_object_order_depends_target_glfw
 
+build CMakeFiles\the-elder-tongue.dir\check_error.cpp.obj: CXX_COMPILER__the-elder-tongue_Debug ..\..\..\check_error.cpp || cmake_object_order_depends_target_the-elder-tongue
+  FLAGS = /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MDd /Zi /Ob0 /Od /RTC1 -std:c++17
+  INCLUDES = -I..\..\..\libs\glfw-3.3.4\include -I..\..\..\libs\glad\include -I..\..\..\libs\glm-0.9.9.8\glm\..
+  OBJECT_DIR = CMakeFiles\the-elder-tongue.dir
+  OBJECT_FILE_DIR = CMakeFiles\the-elder-tongue.dir
+  TARGET_COMPILE_PDB = CMakeFiles\the-elder-tongue.dir\
+  TARGET_PDB = the-elder-tongue.pdb
+
+build CMakeFiles\the-elder-tongue.dir\ECS.cpp.obj: CXX_COMPILER__the-elder-tongue_Debug ..\..\..\ECS.cpp || cmake_object_order_depends_target_the-elder-tongue
+  FLAGS = /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MDd /Zi /Ob0 /Od /RTC1 -std:c++17
+  INCLUDES = -I..\..\..\libs\glfw-3.3.4\include -I..\..\..\libs\glad\include -I..\..\..\libs\glm-0.9.9.8\glm\..
+  OBJECT_DIR = CMakeFiles\the-elder-tongue.dir
+  OBJECT_FILE_DIR = CMakeFiles\the-elder-tongue.dir
+  TARGET_COMPILE_PDB = CMakeFiles\the-elder-tongue.dir\
+  TARGET_PDB = the-elder-tongue.pdb
+
+build CMakeFiles\the-elder-tongue.dir\game.cpp.obj: CXX_COMPILER__the-elder-tongue_Debug ..\..\..\game.cpp || cmake_object_order_depends_target_the-elder-tongue
+  FLAGS = /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MDd /Zi /Ob0 /Od /RTC1 -std:c++17
+  INCLUDES = -I..\..\..\libs\glfw-3.3.4\include -I..\..\..\libs\glad\include -I..\..\..\libs\glm-0.9.9.8\glm\..
+  OBJECT_DIR = CMakeFiles\the-elder-tongue.dir
+  OBJECT_FILE_DIR = CMakeFiles\the-elder-tongue.dir
+  TARGET_COMPILE_PDB = CMakeFiles\the-elder-tongue.dir\
+  TARGET_PDB = the-elder-tongue.pdb
+
 build CMakeFiles\the-elder-tongue.dir\main.cpp.obj: CXX_COMPILER__the-elder-tongue_Debug ..\..\..\main.cpp || cmake_object_order_depends_target_the-elder-tongue
+  FLAGS = /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MDd /Zi /Ob0 /Od /RTC1 -std:c++17
+  INCLUDES = -I..\..\..\libs\glfw-3.3.4\include -I..\..\..\libs\glad\include -I..\..\..\libs\glm-0.9.9.8\glm\..
+  OBJECT_DIR = CMakeFiles\the-elder-tongue.dir
+  OBJECT_FILE_DIR = CMakeFiles\the-elder-tongue.dir
+  TARGET_COMPILE_PDB = CMakeFiles\the-elder-tongue.dir\
+  TARGET_PDB = the-elder-tongue.pdb
+
+build CMakeFiles\the-elder-tongue.dir\renderer.cpp.obj: CXX_COMPILER__the-elder-tongue_Debug ..\..\..\renderer.cpp || cmake_object_order_depends_target_the-elder-tongue
   FLAGS = /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MDd /Zi /Ob0 /Od /RTC1 -std:c++17
   INCLUDES = -I..\..\..\libs\glfw-3.3.4\include -I..\..\..\libs\glad\include -I..\..\..\libs\glm-0.9.9.8\glm\..
   OBJECT_DIR = CMakeFiles\the-elder-tongue.dir
@@ -67,39 +99,7 @@ build CMakeFiles\the-elder-tongue.dir\stb_image.cpp.obj: CXX_COMPILER__the-elder
   TARGET_COMPILE_PDB = CMakeFiles\the-elder-tongue.dir\
   TARGET_PDB = the-elder-tongue.pdb
 
-build CMakeFiles\the-elder-tongue.dir\game.cpp.obj: CXX_COMPILER__the-elder-tongue_Debug ..\..\..\game.cpp || cmake_object_order_depends_target_the-elder-tongue
-  FLAGS = /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MDd /Zi /Ob0 /Od /RTC1 -std:c++17
-  INCLUDES = -I..\..\..\libs\glfw-3.3.4\include -I..\..\..\libs\glad\include -I..\..\..\libs\glm-0.9.9.8\glm\..
-  OBJECT_DIR = CMakeFiles\the-elder-tongue.dir
-  OBJECT_FILE_DIR = CMakeFiles\the-elder-tongue.dir
-  TARGET_COMPILE_PDB = CMakeFiles\the-elder-tongue.dir\
-  TARGET_PDB = the-elder-tongue.pdb
-
-build CMakeFiles\the-elder-tongue.dir\check_error.cpp.obj: CXX_COMPILER__the-elder-tongue_Debug ..\..\..\check_error.cpp || cmake_object_order_depends_target_the-elder-tongue
-  FLAGS = /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MDd /Zi /Ob0 /Od /RTC1 -std:c++17
-  INCLUDES = -I..\..\..\libs\glfw-3.3.4\include -I..\..\..\libs\glad\include -I..\..\..\libs\glm-0.9.9.8\glm\..
-  OBJECT_DIR = CMakeFiles\the-elder-tongue.dir
-  OBJECT_FILE_DIR = CMakeFiles\the-elder-tongue.dir
-  TARGET_COMPILE_PDB = CMakeFiles\the-elder-tongue.dir\
-  TARGET_PDB = the-elder-tongue.pdb
-
 build CMakeFiles\the-elder-tongue.dir\texture_2D.cpp.obj: CXX_COMPILER__the-elder-tongue_Debug ..\..\..\texture_2D.cpp || cmake_object_order_depends_target_the-elder-tongue
-  FLAGS = /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MDd /Zi /Ob0 /Od /RTC1 -std:c++17
-  INCLUDES = -I..\..\..\libs\glfw-3.3.4\include -I..\..\..\libs\glad\include -I..\..\..\libs\glm-0.9.9.8\glm\..
-  OBJECT_DIR = CMakeFiles\the-elder-tongue.dir
-  OBJECT_FILE_DIR = CMakeFiles\the-elder-tongue.dir
-  TARGET_COMPILE_PDB = CMakeFiles\the-elder-tongue.dir\
-  TARGET_PDB = the-elder-tongue.pdb
-
-build CMakeFiles\the-elder-tongue.dir\renderer.cpp.obj: CXX_COMPILER__the-elder-tongue_Debug ..\..\..\renderer.cpp || cmake_object_order_depends_target_the-elder-tongue
-  FLAGS = /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MDd /Zi /Ob0 /Od /RTC1 -std:c++17
-  INCLUDES = -I..\..\..\libs\glfw-3.3.4\include -I..\..\..\libs\glad\include -I..\..\..\libs\glm-0.9.9.8\glm\..
-  OBJECT_DIR = CMakeFiles\the-elder-tongue.dir
-  OBJECT_FILE_DIR = CMakeFiles\the-elder-tongue.dir
-  TARGET_COMPILE_PDB = CMakeFiles\the-elder-tongue.dir\
-  TARGET_PDB = the-elder-tongue.pdb
-
-build CMakeFiles\the-elder-tongue.dir\entity.cpp.obj: CXX_COMPILER__the-elder-tongue_Debug ..\..\..\entity.cpp || cmake_object_order_depends_target_the-elder-tongue
   FLAGS = /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MDd /Zi /Ob0 /Od /RTC1 -std:c++17
   INCLUDES = -I..\..\..\libs\glfw-3.3.4\include -I..\..\..\libs\glad\include -I..\..\..\libs\glm-0.9.9.8\glm\..
   OBJECT_DIR = CMakeFiles\the-elder-tongue.dir
@@ -115,7 +115,7 @@ build CMakeFiles\the-elder-tongue.dir\entity.cpp.obj: CXX_COMPILER__the-elder-to
 #############################################
 # Link the executable the-elder-tongue.exe
 
-build the-elder-tongue.exe: CXX_EXECUTABLE_LINKER__the-elder-tongue_Debug CMakeFiles\the-elder-tongue.dir\main.cpp.obj CMakeFiles\the-elder-tongue.dir\shader.cpp.obj CMakeFiles\the-elder-tongue.dir\stb_image.cpp.obj CMakeFiles\the-elder-tongue.dir\game.cpp.obj CMakeFiles\the-elder-tongue.dir\check_error.cpp.obj CMakeFiles\the-elder-tongue.dir\texture_2D.cpp.obj CMakeFiles\the-elder-tongue.dir\renderer.cpp.obj CMakeFiles\the-elder-tongue.dir\entity.cpp.obj | libs\glfw-3.3.4\src\glfw3.lib libs\glad\glad.lib || libs\glad\glad.lib libs\glfw-3.3.4\src\glfw3.lib
+build the-elder-tongue.exe: CXX_EXECUTABLE_LINKER__the-elder-tongue_Debug CMakeFiles\the-elder-tongue.dir\check_error.cpp.obj CMakeFiles\the-elder-tongue.dir\ECS.cpp.obj CMakeFiles\the-elder-tongue.dir\game.cpp.obj CMakeFiles\the-elder-tongue.dir\main.cpp.obj CMakeFiles\the-elder-tongue.dir\renderer.cpp.obj CMakeFiles\the-elder-tongue.dir\shader.cpp.obj CMakeFiles\the-elder-tongue.dir\stb_image.cpp.obj CMakeFiles\the-elder-tongue.dir\texture_2D.cpp.obj | libs\glfw-3.3.4\src\glfw3.lib libs\glad\glad.lib || libs\glad\glad.lib libs\glfw-3.3.4\src\glfw3.lib
   FLAGS = /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MDd /Zi /Ob0 /Od /RTC1
   LINK_FLAGS = /machine:x64 /debug /INCREMENTAL /subsystem:console
   LINK_LIBRARIES = libs\glfw-3.3.4\src\glfw3.lib  libs\glad\glad.lib  kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib

@@ -9,21 +9,23 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 set(BASE_SRCS
-    main.cpp
-    shader.h
-    shader.cpp
-    stb_image.h
-    stb_image.cpp
-    game.h
-    game.cpp
-    check_error.h
     check_error.cpp
+    check_error.h
+    ECS.cpp
+    ECS.h
+    game.cpp
+    game.h
+    main.cpp
+    main.h
+    renderer.cpp
+    renderer.h
+    shader.cpp
+    shader.h
+    stb_image.cpp
+    stb_image.h
     texture_2D.cpp
     texture_2D.h
-    renderer.h
-    renderer.cpp
-    entity.h
-    entity.cpp)
+    )
 
 # Add source to this project's executable.
 add_executable (the-elder-tongue ${BASE_SRCS})

@@ -16,11 +16,9 @@
 #include "check_error.h"
 #include "texture_2D.h"
 #include "renderer.h"
-#include "engine.h"
-#include "entity.h"
+#include "ECS.h"
 
 Game Game::main;
-Engine Engine::main;
 
 // This is the hub which handles updates and setup.
 // In an attempt to keep this from getting cluttered, we're keeping some information
@@ -75,9 +73,9 @@ int main(void)
     Game::main.renderer = &renderer;
     #pragma endregion
 
-    std::string s = "Test";
+    /*std::string s = "Test";
     Entity* testEntity = new Entity(rand() % 9999 + 1000, s, true, &test, 0.0f, 0.0f, 0.0f, test.width, test.height);
-    Engine::main.entities.push_back(*testEntity);
+    EntityManager::main.entities.push_back(*testEntity);*/
 
     #pragma region Game Loop
     // This is the loop where the game runs, duh.
@@ -112,15 +110,15 @@ int main(void)
         #pragma region Update Entities
         // Here we go through each entity, check if it should be rendered, and if so push it to the renderer.
         // We'll soon add component updates to ensure that things like physics update before entities are rendered.
-        for (int i = 0; i < Engine::main.entities.size(); i++)
+        /*for (int i = 0; i < EntityManager::main.entities.size(); i++)
         {
-            if (Engine::main.entities[i].isShown)
+            if (EntityManager::main.entities[i].isShown)
             {
-                Entity e = Engine::main.entities[i];
+                Entity e = EntityManager::main.entities[i];
 
                 Game::main.renderer->prepareQuad(glm::vec2(e.posX, e.posY), e.width, e.height, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), e.texture->ID);
             }
-        }
+        }*/
         #pragma endregion;
 
         #pragma region Render
