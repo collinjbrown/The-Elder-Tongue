@@ -11,6 +11,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(BASE_SRCS
     check_error.cpp
     check_error.h
+    component.h
     entity.h
     game.cpp
     game.h
@@ -22,6 +23,7 @@ set(BASE_SRCS
     shader.h
     stb_image.cpp
     stb_image.h
+    system.h
     texture_2D.cpp
     texture_2D.h
     world.h
@@ -37,11 +39,10 @@ set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 add_subdirectory(libs/glfw-3.3.4)
 add_subdirectory(libs/glad)
 add_subdirectory(libs/glm-0.9.9.8)
-add_subdirectory(libs/entt)
 
 if(NOT DEFINED CMAKE_SUPPRESS_DEVELOPER_WARNINGS)
      set(CMAKE_SUPPRESS_DEVELOPER_WARNINGS 1 CACHE INTERNAL "No dev warnings")
 endif()
 
-target_link_libraries(the-elder-tongue glfw glad glm EnTT::EnTT)
+target_link_libraries(the-elder-tongue glfw glad glm)
 set_target_properties(the-elder-tongue PROPERTIES CXX_EXTENSIONS OFF)

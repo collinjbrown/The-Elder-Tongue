@@ -28,6 +28,9 @@ World World::main;
 // We don't want this to be so cluttered that you have to dig to find what you want
 // so don't put stuff here unless it really belongs.
 
+static int windowWidth = 1280;
+static int windowHeight = 960;
+
 int main(void)
 {
     #pragma region GL Rendering Setup
@@ -44,7 +47,7 @@ int main(void)
     glfwWindowHintString(GLFW_X11_CLASS_NAME, "OpenGL");
     glfwWindowHintString(GLFW_X11_INSTANCE_NAME, "OpenGL");
 
-    window = glfwCreateWindow(640, 480, "The Elder Tongue", NULL, NULL);
+    window = glfwCreateWindow(windowWidth, windowHeight, "The Elder Tongue", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -81,13 +84,46 @@ int main(void)
     Game::main.renderer = &renderer;
     #pragma endregion
 
+    #pragma region Testing
+    Entity* testEntity = World::main.CreateEntity();
+
+    PositionComponent* position = World::main.AddPosition(testEntity, 0, 0);
+    World::main.AddPhysics(testEntity, 0, 0, 0, position);
+    World::main.AddSprite(testEntity, test.width, test.height, &test, position);
+    
+    Entity* testEntity2 = World::main.CreateEntity();
+
+    PositionComponent* position2 = World::main.AddPosition(testEntity2, 100, 100);
+    World::main.AddPhysics(testEntity2, 0, 0, -0.25f, position2);
+    World::main.AddSprite(testEntity2, test.width, test.height, &test, position2);
+
+    #pragma endregion
+
     #pragma region Game Loop
     // This is the loop where the game runs, duh.
     // Everything that should happen each frame should occur here,
     // or nested somewhere within methods called in here.
+    double lastTime = glfwGetTime();
+    int frameCount = 0;
 
     while (!glfwWindowShouldClose(window))
     {
+        #pragma region FPS
+
+        double currentTime = glfwGetTime();
+        frameCount++;
+        // If a second has passed.
+        if (currentTime - lastTime >= 1.0)
+        {
+            // Display the frame count here any way you want.
+            std::cout << "Frame Count: " + std::to_string(frameCount) + "\n";
+
+            frameCount = 0;
+            lastTime = currentTime;
+        }
+
+        #pragma endregion
+
         #pragma region Update Worldview
         // Here, we make sure the camera is oriented correctly.
         glm::vec3 cam = glm::vec3(Game::main.camX, Game::main.camY, Game::main.camZ);
@@ -102,6 +138,56 @@ int main(void)
         Game::main.bottomY = Game::main.camY - halfWindowHeight;
         Game::main.rightX = Game::main.camX + halfWindowWidth;
         Game::main.leftX = Game::main.camX - halfWindowWidth;
+        #pragma endregion
+
+        #pragma region Test Input
+
+        if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS ||
+            glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        {
+            glfwSetWindowShouldClose(window, true);
+        }
+
+        if (glfwGetKey(window, GLFW_KEY_EQUAL) == GLFW_PRESS)
+        {
+            Game::main.zoom -= 0.01f;
+            Game::main.updateOrtho();
+        }
+        else if (glfwGetKey(window, GLFW_KEY_MINUS) == GLFW_PRESS)
+        {
+            Game::main.zoom += 0.01f;
+
+            Game::main.updateOrtho();
+        }
+        
+        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        {
+            Game::main.camY += 1.0f;
+
+            Game::main.updateOrtho();
+        }
+        else if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        {
+            Game::main.camY -= 1.0f;
+
+            Game::main.updateOrtho();
+        }
+        
+        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        {
+            Game::main.camX += 1.0f;
+
+            Game::main.updateOrtho();
+        }
+        else if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        {
+            Game::main.camX -= 1.0f;
+
+            Game::main.updateOrtho();
+        }
+        
+
+
         #pragma endregion
 
         #pragma region GL Color & Clear
