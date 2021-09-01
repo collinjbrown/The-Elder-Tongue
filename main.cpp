@@ -64,6 +64,8 @@ int main(void)
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    Game::main.window = window;
     #pragma endregion
 
     #pragma region World Setup
@@ -84,6 +86,10 @@ int main(void)
     Texture2D test{ "assets/sprites/test.png", true, GL_NEAREST };
     renderer.textureIDs.push_back(test.ID);
     Game::main.textureMap.emplace("test", &test);
+
+    Texture2D blank{ "assets/sprites/blank.png", true, GL_NEAREST };
+    renderer.textureIDs.push_back(blank.ID);
+    Game::main.textureMap.emplace("blank", &blank);
 
     Game::main.renderer = &renderer;
     #pragma endregion
@@ -158,41 +164,13 @@ int main(void)
 
             Game::main.updateOrtho();
         }
-        
-        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        {
-            Game::main.camY += 1.0f;
-
-            Game::main.updateOrtho();
-        }
-        else if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        {
-            Game::main.camY -= 1.0f;
-
-            Game::main.updateOrtho();
-        }
-        
-        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        {
-            Game::main.camX += 1.0f;
-
-            Game::main.updateOrtho();
-        }
-        else if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        {
-            Game::main.camX -= 1.0f;
-
-            Game::main.updateOrtho();
-        }
-        
-
 
         #pragma endregion
 
         #pragma region GL Color & Clear
         // Here we update the background color.
         // We want it black for now, so that's what it is.
-        glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
+        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         #pragma endregion
 

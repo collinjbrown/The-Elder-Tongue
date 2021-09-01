@@ -8,6 +8,7 @@
 #include <GLFW/glfw3.h>
 #include "shader.h"
 #include "texture_2D.h"
+#include "component.h"
 
 struct Vertex
 {
@@ -62,6 +63,9 @@ public:
     GLuint whiteTextureID;
 
     Renderer(GLuint whiteTexture);
+    void prepareQuad(PositionComponent* pos, float width, float height, glm::vec4 rgb, int textureID);
+    void prepareQuad(PositionComponent* pos, ColliderComponent* col, float width, float height, glm::vec4 rgb, int textureID);
+    void Renderer::prepareQuad(glm::vec2 topRight, glm::vec2 bottomRight, glm::vec2 bottomLeft, glm::vec2 topLeft, glm::vec4 rgb, int textureID);
     void prepareQuad(glm::vec2 position, float width, float height, glm::vec4 rgb, int textureID); // Specify texture ID rather than index?
     // NOTE: Directly sending a texture index rather than ID can result in the wrong texture being drawn (due to being in the wrong batch)
     void prepareQuad(int batchIndex, Quad& input);

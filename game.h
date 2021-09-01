@@ -17,6 +17,7 @@ class Game
 public:
 	static Game main;
 	map<string, Texture2D*> textureMap;
+	GLFWwindow* window;
 
 	float camX = 0.0f;
 	float camY = 0.0f;

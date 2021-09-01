@@ -7,6 +7,7 @@
 #include <algorithm>
 #include "check_error.h"
 #include "game.h"
+#include "component.h"
 
 Renderer::Renderer(GLuint whiteTexture) : batches(1), shader("assets/shaders/quad.vert", "assets/shaders/quad.frag"), whiteTextureID(whiteTexture)
 {
@@ -122,6 +123,137 @@ void Renderer::prepareQuad(glm::vec2 position, float width, float height,
     quad.bottomRight = { rightX, bottomY,   r, g, b, a,   1.0, 0.0,    glTextureIndex };
     quad.bottomLeft = { leftX,  bottomY,   r, g, b, a,   0.0, 0.0,    glTextureIndex };
     quad.topLeft = { leftX,  topY,      r, g, b, a,   0.0, 1.0,    glTextureIndex };
+}
+
+void Renderer::prepareQuad(PositionComponent* pos, float width, float height,
+    glm::vec4 rgb, int textureID)
+{
+    // Figure out which batch should be written to
+    // -------------------------------------------
+    auto result = std::find(textureIDs.begin(), textureIDs.end(), textureID);
+    int location;
+    if (result == textureIDs.end())
+    {
+        location = textureIDs.size();
+        textureIDs.push_back(textureID);
+    }
+    else
+    {
+        location = result - textureIDs.begin();
+    }
+
+    int batchIndex = location / MAX_TEXTURES_PER_BATCH;
+    float glTextureIndex = location % MAX_TEXTURES_PER_BATCH;
+    Batch& batch = batches[batchIndex];
+
+    // Initialize the data for the quad
+    // --------------------------------
+    Quad& quad = batch.quadBuffer[batch.quadIndex];
+    batch.quadIndex++;
+
+    const float rightX = pos->x + (width / 2.0f);
+    const float leftX = pos->x - (width / 2.0f);
+    const float topY = pos->y + (height / 2.0f);
+    const float bottomY = pos->y - (height / 2.0f);
+
+    const glm::vec2 topRight = glm::vec2(pos->x, pos->y) + pos->Rotate(glm::vec2((width / 2.0f), (height / 2.0f)));
+    const glm::vec2 bottomRight = glm::vec2(pos->x, pos->y) + pos->Rotate(glm::vec2((width / 2.0f), -(height / 2.0f)));
+    const glm::vec2 bottomLeft = glm::vec2(pos->x, pos->y) + pos->Rotate(glm::vec2(-(width / 2.0f), -(height / 2.0f)));
+    const glm::vec2 topLeft = glm::vec2(pos->x, pos->y) + pos->Rotate(glm::vec2(-(width / 2.0f), (height / 2.0f)));
+
+    const float r = rgb.r;
+    const float g = rgb.g;
+    const float b = rgb.b;
+    const float a = rgb.a;
+
+    quad.topRight = { topRight.x, topRight.y,      r, g, b, a,   1.0, 1.0,    glTextureIndex };
+    quad.bottomRight = { bottomRight.x, bottomRight.y,   r, g, b, a,   1.0, 0.0,    glTextureIndex };
+    quad.bottomLeft = { bottomLeft.x,  bottomLeft.y,   r, g, b, a,   0.0, 0.0,    glTextureIndex };
+    quad.topLeft = { topLeft.x,  topLeft.y,      r, g, b, a,   0.0, 1.0,    glTextureIndex };
+}
+
+void Renderer::prepareQuad(PositionComponent* pos, ColliderComponent* col, float width, float height,
+    glm::vec4 rgb, int textureID)
+{
+    // Figure out which batch should be written to
+    // -------------------------------------------
+    auto result = std::find(textureIDs.begin(), textureIDs.end(), textureID);
+    int location;
+    if (result == textureIDs.end())
+    {
+        location = textureIDs.size();
+        textureIDs.push_back(textureID);
+    }
+    else
+    {
+        location = result - textureIDs.begin();
+    }
+
+    int batchIndex = location / MAX_TEXTURES_PER_BATCH;
+    float glTextureIndex = location % MAX_TEXTURES_PER_BATCH;
+    Batch& batch = batches[batchIndex];
+
+    // Initialize the data for the quad
+    // --------------------------------
+    Quad& quad = batch.quadBuffer[batch.quadIndex];
+    batch.quadIndex++;
+
+    const float rightX = pos->x + (col->width / 2.0f) + col->offsetX;
+    const float leftX = pos->x - (col->width / 2.0f) + col->offsetX;
+    const float topY = pos->y + (col->height / 2.0f) + col->offsetY;
+    const float bottomY = pos->y - (col->height / 2.0f) + col->offsetY;
+
+    const glm::vec2 topRight = glm::vec2(pos->x, pos->y) + pos->Rotate(glm::vec2((width / 2.0f), (height / 2.0f)));
+    const glm::vec2 bottomRight = glm::vec2(pos->x, pos->y) + pos->Rotate(glm::vec2((width / 2.0f), -(height / 2.0f)));
+    const glm::vec2 bottomLeft = glm::vec2(pos->x, pos->y) + pos->Rotate(glm::vec2(-(width / 2.0f), -(height / 2.0f)));
+    const glm::vec2 topLeft = glm::vec2(pos->x, pos->y) + pos->Rotate(glm::vec2(-(width / 2.0f), (height / 2.0f)));
+
+    const float r = rgb.r;
+    const float g = rgb.g;
+    const float b = rgb.b;
+    const float a = rgb.a;
+
+    quad.topRight = { topRight.x, topRight.y,      r, g, b, a,   1.0, 1.0,    glTextureIndex };
+    quad.bottomRight = { bottomRight.x, bottomRight.y,   r, g, b, a,   1.0, 0.0,    glTextureIndex };
+    quad.bottomLeft = { bottomLeft.x,  bottomLeft.y,   r, g, b, a,   0.0, 0.0,    glTextureIndex };
+    quad.topLeft = { topLeft.x,  topLeft.y,      r, g, b, a,   0.0, 1.0,    glTextureIndex };
+}
+
+void Renderer::prepareQuad(glm::vec2 topRight, glm::vec2 bottomRight, glm::vec2 bottomLeft, glm::vec2 topLeft,
+    glm::vec4 rgb, int textureID)
+{
+    // Figure out which batch should be written to
+    // -------------------------------------------
+    auto result = std::find(textureIDs.begin(), textureIDs.end(), textureID);
+    int location;
+    if (result == textureIDs.end())
+    {
+        location = textureIDs.size();
+        textureIDs.push_back(textureID);
+    }
+    else
+    {
+        location = result - textureIDs.begin();
+    }
+
+    int batchIndex = location / MAX_TEXTURES_PER_BATCH;
+    float glTextureIndex = location % MAX_TEXTURES_PER_BATCH;
+    Batch& batch = batches[batchIndex];
+
+    // Initialize the data for the quad
+    // --------------------------------
+    Quad& quad = batch.quadBuffer[batch.quadIndex];
+    batch.quadIndex++;
+
+    const float r = rgb.r;
+    const float g = rgb.g;
+    const float b = rgb.b;
+    const float a = rgb.a;
+
+    quad.topRight = { topRight.x, topRight.y,      r, g, b, a,   1.0, 1.0,    glTextureIndex };
+    quad.bottomRight = { bottomRight.x, bottomRight.y,   r, g, b, a,   1.0, 0.0,    glTextureIndex };
+    quad.bottomLeft = { bottomLeft.x,  bottomLeft.y,   r, g, b, a,   0.0, 0.0,    glTextureIndex };
+    quad.topLeft = { topLeft.x,  topLeft.y,      r, g, b, a,   0.0, 1.0,    glTextureIndex };
 }
 
 void Renderer::prepareQuad(int batchIndex, Quad& input)
