@@ -62,6 +62,10 @@ public:
 		RenderingSystem* renderingSystem = new RenderingSystem();
 		ComponentBlock* renderingBlock = new ComponentBlock(renderingSystem, spriteComponentID);
 		componentBlocks.push_back(renderingBlock);
+
+		ColliderSystem* colliderSystem = new ColliderSystem();
+		ComponentBlock* colliderBlock = new ComponentBlock(colliderSystem, colliderComponentID);
+		componentBlocks.push_back(colliderBlock);
 	}
 
 	void Update(float deltaTime)
@@ -70,11 +74,19 @@ public:
 
 		if (round == 1)
 		{
-			Entity* e = CreateEntity("Bob");
+			Entity* bob = CreateEntity("Bob");
 			Texture2D* tex = Game::main.textureMap["test"];
-			ECS::main.RegisterComponent(new PositionComponent(e, true, 0, 0), e);
-			ECS::main.RegisterComponent(new PhysicsComponent(e, true, 5.0f, 5.0f, 0.1f, 0), e);
-			ECS::main.RegisterComponent(new SpriteComponent(e, true, tex->width, tex->height, tex), e);
+			ECS::main.RegisterComponent(new PositionComponent(bob, true, 0, 5), bob);
+			ECS::main.RegisterComponent(new PhysicsComponent(bob, true, 0.0f, 0.0f, 0.1f, 10.0f), bob);
+			ECS::main.RegisterComponent(new ColliderComponent(bob, true, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f), bob);
+			ECS::main.RegisterComponent(new SpriteComponent(bob, true, tex->width, tex->height, tex), bob);
+
+			Entity* joe = CreateEntity("Joe");
+			Texture2D* tex2 = Game::main.textureMap["test"];
+			ECS::main.RegisterComponent(new PositionComponent(joe, true, 0, -100), joe);
+			ECS::main.RegisterComponent(new PhysicsComponent(joe, true, 0.0f, 0.0f, 0.1f, 0.0f), joe);
+			ECS::main.RegisterComponent(new ColliderComponent(joe, true, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f), joe);
+			ECS::main.RegisterComponent(new SpriteComponent(joe, true, tex2->width, tex2->height, tex2), joe);
 		}
 
 		for (int i = 0; i < componentBlocks.size(); i++)

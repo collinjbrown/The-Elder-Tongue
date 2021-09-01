@@ -189,7 +189,7 @@ int main(void)
         #pragma region GL Color & Clear
         // Here we update the background color.
         // We want it black for now, so that's what it is.
-        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+        glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         #pragma endregion
 

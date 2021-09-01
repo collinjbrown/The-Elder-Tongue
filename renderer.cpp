@@ -113,10 +113,10 @@ void Renderer::prepareQuad(glm::vec2 position, float width, float height,
     const float topY = position.y + (height / 2.0f);
     const float bottomY = position.y - (height / 2.0f);
 
-    const float r = rgb.x;
-    const float g = rgb.y;
-    const float b = rgb.z;
-    const float a = rgb.w;
+    const float r = rgb.r;
+    const float g = rgb.g;
+    const float b = rgb.b;
+    const float a = rgb.a;
 
     quad.topRight = { rightX, topY,      r, g, b, a,   1.0, 1.0,    glTextureIndex };
     quad.bottomRight = { rightX, bottomY,   r, g, b, a,   1.0, 0.0,    glTextureIndex };

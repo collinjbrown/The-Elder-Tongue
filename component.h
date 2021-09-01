@@ -9,6 +9,7 @@ class Entity;
 static int positionComponentID = 1;
 static int physicsComponentID = 2;
 static int spriteComponentID = 3;
+static int colliderComponentID = 4;
 
 class Component
 {
@@ -69,9 +70,40 @@ public:
 		ID = spriteComponentID;
 		this->active = active;
 		this->entity = entity;
+
 		this->width = width;
 		this->height = height;
 		this->sprite = sprite;
+	}
+};
+
+
+class ColliderComponent : public Component
+{
+public:
+	float mass;
+	float bounce;
+
+	float width;
+	float height;
+
+	float offsetX;
+	float offsetY;
+
+	ColliderComponent(Entity* entity, bool active, float mass, float bounce, float width, float height, float offsetX, float offsetY)
+	{
+		ID = colliderComponentID;
+		this->active = active;
+		this->entity = entity;
+
+		this->mass = mass;
+		this->bounce = bounce;
+
+		this->width = width;
+		this->height = height;
+		
+		this->offsetX = offsetX;
+		this->offsetY = offsetY;
 	}
 };
 
