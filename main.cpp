@@ -61,6 +61,9 @@ int main(void)
         std::cout << "Failed to initialize GLAD" << '\n';
         return -1;
     }
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     #pragma endregion
 
     #pragma region World Setup
