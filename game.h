@@ -4,6 +4,9 @@
 #include "renderer.h"
 #include <glm/glm.hpp>
 #include <vector>
+#include <map>
+
+using namespace std;
 
 // The game class holds data about the broader game state;
 // if you have data that pertains to the actual gameplay
@@ -13,6 +16,7 @@ class Game
 {
 public:
 	static Game main;
+	map<string, Texture2D*> textureMap;
 
 	float camX = 0.0f;
 	float camY = 0.0f;

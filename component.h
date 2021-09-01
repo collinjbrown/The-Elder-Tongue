@@ -1,15 +1,21 @@
 #ifndef COMPONENT_H
 #define COMPONENT_H
 
-#include "entity.h"
 #include "renderer.h"
 #include "texture_2D.h"
+
+class Entity;
+
+static int positionComponentID = 1;
+static int physicsComponentID = 2;
+static int spriteComponentID = 3;
 
 class Component
 {
 public:
 	bool active;
 	Entity* entity;
+	int ID;
 };
 
 class PositionComponent : public Component
@@ -17,9 +23,13 @@ class PositionComponent : public Component
 public:
 	float x;
 	float y;
+	float z;
 
-	PositionComponent(float x, float y)
+	PositionComponent(Entity* entity, bool active, float x, float y)
 	{
+		ID = positionComponentID;
+		this->active = active;
+		this->entity = entity;
 		this->x = x;
 		this->y = y;
 	}
@@ -30,15 +40,19 @@ class PhysicsComponent : public Component
 public:
 	float velocityX;
 	float velocityY;
-	float gravityMod;
-	PositionComponent* position;
 
-	PhysicsComponent(float vX, float vY, float gravMod, PositionComponent* position)
+	float drag;					// How much velocity one loses each turn.
+	float gravityMod;			// How much gravity should one experience.
+
+	PhysicsComponent(Entity* entity, bool active, float vX, float vY, float drag, float gravityMod)
 	{
+		ID = physicsComponentID;
+		this->active = active;
+		this->entity = entity;
 		this->velocityX = vX;
 		this->velocityY = vY;
-		this->gravityMod = gravMod;
-		this->position = position;
+		this->drag = drag;
+		this->gravityMod = gravityMod;
 	}
 };
 
@@ -48,15 +62,16 @@ public:
 	float width;
 	float height;
 
-	Texture2D* texture;
-	PositionComponent* position;
+	Texture2D* sprite;
 
-	SpriteComponent(float width, float height, Texture2D* texture, PositionComponent* position)
+	SpriteComponent(Entity* entity, bool active, float width, float height, Texture2D* sprite)
 	{
+		ID = spriteComponentID;
+		this->active = active;
+		this->entity = entity;
 		this->width = width;
 		this->height = height;
-		this->texture = texture;
-		this->position = position;
+		this->sprite = sprite;
 	}
 };
 

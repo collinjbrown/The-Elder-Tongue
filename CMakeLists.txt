@@ -12,6 +12,7 @@ set(BASE_SRCS
     check_error.cpp
     check_error.h
     component.h
+    ecs.h
     entity.h
     game.cpp
     game.h
@@ -26,7 +27,6 @@ set(BASE_SRCS
     system.h
     texture_2D.cpp
     texture_2D.h
-    world.h
     )
 
 # Add source to this project's executable.

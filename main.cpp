@@ -17,10 +17,10 @@
 #include "texture_2D.h"
 #include "renderer.h"
 #include "entity.h"
-#include "world.h"
+#include "ecs.h"
 
 Game Game::main;
-World World::main;
+ECS ECS::main;
 
 // This is the hub which handles updates and setup.
 // In an attempt to keep this from getting cluttered, we're keeping some information
@@ -65,7 +65,7 @@ int main(void)
 
     #pragma region World Setup
 
-    World::main.Init();
+    ECS::main.Init();
 
     #pragma endregion
 
@@ -80,23 +80,9 @@ int main(void)
 
     Texture2D test{ "assets/sprites/test.png", true, GL_NEAREST };
     renderer.textureIDs.push_back(test.ID);
+    Game::main.textureMap.emplace("test", &test);
 
     Game::main.renderer = &renderer;
-    #pragma endregion
-
-    #pragma region Testing
-    Entity* testEntity = World::main.CreateEntity();
-
-    PositionComponent* position = World::main.AddPosition(testEntity, 0, 0);
-    World::main.AddPhysics(testEntity, 0, 0, 0, position);
-    World::main.AddSprite(testEntity, test.width, test.height, &test, position);
-    
-    Entity* testEntity2 = World::main.CreateEntity();
-
-    PositionComponent* position2 = World::main.AddPosition(testEntity2, 100, 100);
-    World::main.AddPhysics(testEntity2, 0, 0, -0.25f, position2);
-    World::main.AddSprite(testEntity2, test.width, test.height, &test, position2);
-
     #pragma endregion
 
     #pragma region Game Loop
@@ -106,10 +92,20 @@ int main(void)
     double lastTime = glfwGetTime();
     int frameCount = 0;
 
+    float checkedTime = glfwGetTime();
+    float elapsedTime = 0.0f;
+
     while (!glfwWindowShouldClose(window))
     {
-        #pragma region FPS
+        #pragma region Elapsed Time
 
+        float deltaTime = glfwGetTime() - checkedTime;
+        // std::cout << "Delta Time: " + std::to_string(deltaTime) + "\n";
+        checkedTime = glfwGetTime();
+
+        #pragma endregion
+
+        #pragma region FPS
         double currentTime = glfwGetTime();
         frameCount++;
         // If a second has passed.
@@ -199,7 +195,7 @@ int main(void)
 
         #pragma region Update World State
 
-        World::main.Update();
+        ECS::main.Update(deltaTime);
 
         #pragma endregion;
 
