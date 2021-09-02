@@ -28,6 +28,14 @@ ECS ECS::main;
 // We don't want this to be so cluttered that you have to dig to find what you want
 // so don't put stuff here unless it really belongs.
 
+static int windowMoved = 0;
+double startMoveTime = 0.0;
+double endMoveTime = 0.0;
+void WindowPosCallback(GLFWwindow* window, int xpos, int ypos)
+{
+    windowMoved = 1;
+}
+
 int main(void)
 {
     int windowWidth = Game::main.windowWidth;
@@ -61,6 +69,8 @@ int main(void)
         std::cout << "Failed to initialize GLAD" << '\n';
         return -1;
     }
+
+    glfwSetWindowPosCallback(window, WindowPosCallback);
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -104,6 +114,9 @@ int main(void)
     float checkedTime = glfwGetTime();
     float elapsedTime = 0.0f;
 
+    bool fullscreen = false;
+    float lastChange = glfwGetTime();
+
     while (!glfwWindowShouldClose(window))
     {
         #pragma region Elapsed Time
@@ -130,6 +143,29 @@ int main(void)
         #pragma endregion
 
         #pragma region Update Worldview
+
+        int w, h;
+        glfwGetWindowSize(window, &w, &h);
+
+        Game::main.windowWidth = w;
+        Game::main.windowHeight = h;
+
+        if (glfwGetKey(window, GLFW_KEY_F11) == GLFW_PRESS && glfwGetTime() > lastChange + 0.5f)
+        {
+            lastChange = glfwGetTime();
+
+            if (fullscreen)
+            {
+                fullscreen = false;
+                glfwSetWindowMonitor(window, NULL, 0, 0, 1280, 960, GLFW_REFRESH_RATE);
+            }
+            else
+            {
+                fullscreen = true;
+                glfwSetWindowMonitor(window, glfwGetPrimaryMonitor(), 0, 0, 1920, 1080, GLFW_REFRESH_RATE);
+            }
+        }
+
         // Here, we make sure the camera is oriented correctly.
         glm::vec3 cam = glm::vec3(Game::main.camX, Game::main.camY, Game::main.camZ);
         glm::vec3 center = cam + glm::vec3(0.0f, 0.0f, -1.0f);
@@ -155,14 +191,21 @@ int main(void)
 
         if (glfwGetKey(window, GLFW_KEY_EQUAL) == GLFW_PRESS)
         {
-            Game::main.zoom -= 0.01f;
-            Game::main.updateOrtho();
+            if (Game::main.zoom - 10.0f * deltaTime > 0.5f)
+            {
+                Game::main.zoom -= 10.0f * deltaTime;
+
+                Game::main.updateOrtho();
+            }
         }
         else if (glfwGetKey(window, GLFW_KEY_MINUS) == GLFW_PRESS)
         {
-            Game::main.zoom += 0.01f;
+            if (Game::main.zoom + 10.0f * deltaTime < 5)
+            {
+                Game::main.zoom += 10.0f * deltaTime;
 
-            Game::main.updateOrtho();
+                Game::main.updateOrtho();
+            }
         }
 
         #pragma endregion
@@ -176,7 +219,12 @@ int main(void)
 
         #pragma region Update World State
 
-        ECS::main.Update(deltaTime);
+        int focus = glfwGetWindowAttrib(window, GLFW_FOCUSED);
+
+        if (focus && !windowMoved)
+        {
+            ECS::main.Update(deltaTime);
+        }
 
         #pragma endregion;
 
@@ -187,8 +235,8 @@ int main(void)
 
         glfwSwapBuffers(window);
 
+        windowMoved = 0;
         glfwPollEvents();
-
         glCheckError();
         #pragma endregion
     }
