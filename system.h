@@ -25,7 +25,7 @@ public:
 		for (int i = 0; i < sprites.size(); i++)
 		{
 			SpriteComponent* s = sprites[i];
-			PositionComponent* pos = (PositionComponent*)s->entity->componentIDMap[positionComponentID];
+			PositionComponent* pos = s->pos;
 			Game::main.renderer->prepareQuad(pos, s->width, s->height, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), s->sprite->ID);
 		}
 	}
@@ -46,7 +46,7 @@ public:
 		for (int i = 0; i < phys.size(); i++)
 		{
 			PhysicsComponent* p = phys[i];
-			PositionComponent* pos = (PositionComponent*)p->entity->componentIDMap[positionComponentID];
+			PositionComponent* pos = p->pos;
 
 			if (!pos->stat)
 			{
@@ -107,14 +107,16 @@ class ColliderSystem : public System
 		for (int i = 0; i < colls.size(); i++)
 		{
 			ColliderComponent* cA = colls[i];
-			PositionComponent* posA = (PositionComponent*)cA->entity->componentIDMap[positionComponentID];
+			PositionComponent* posA = cA->pos;
 			PhysicsComponent* physA = (PhysicsComponent*)cA->entity->componentIDMap[physicsComponentID];
 
-			float tentativeADX = (physA->velocityX - physA->drag) * deltaTime;
-			float tentativeADY = ((physA->velocityY - physA->drag) + (physA->gravityMod * deltaTime)) * deltaTime;
+			/*float tentativeADX = (physA->velocityX - physA->drag) * deltaTime;
+			float tentativeADY = ((physA->velocityY - physA->drag) + (physA->gravityMod * deltaTime)) * deltaTime;*/
 
-			// Change this later so that it isn't so slow.
-			// I'm assuming this is slow.
+			// Right now, the game can support as many colliders as we realistically need.
+			// But it can't support a ton. It'll run fairly well at a couple hundred colliders
+			// so I'm not really worried about that.
+
 			for (int j = 0; j < colls.size(); j++)
 			{
 				ColliderComponent* cB = colls[j];
@@ -122,13 +124,22 @@ class ColliderSystem : public System
 				if (cB->entity->Get_ID() != cA->entity->Get_ID())
 				{
 					PositionComponent* posB = (PositionComponent*)cB->entity->componentIDMap[positionComponentID];
-					PhysicsComponent* physB = (PhysicsComponent*)cB->entity->componentIDMap[physicsComponentID];
 
-					float tentativeBDX = (physB->velocityX - physB->drag) * deltaTime;
-					float tentativeBDY = ((physB->velocityY - physB->drag) + (physB->gravityMod * deltaTime)) * deltaTime;
+					// Test to see if they're even remotely near one another (with respects to their collider size.)
+					float d = sqrt(((posB->y - posA->y) * (posB->y - posA->y)) + ((posB->x - posA->x) * (posB->x - posA->x)));
+					float dA = sqrt((cA->width * cA->width) + (cA->height * cA->height));
+					float dB = sqrt((cB->width * cB->width) + (cB->height * cB->height));
+					
+					if (d < dA + dB)
+					{
+						PhysicsComponent* physB = (PhysicsComponent*)cB->entity->componentIDMap[physicsComponentID];
 
-					// This does not yet solve for tunneling.
-					TestAndResolveCollision(cA, posA, physA, cB, posB, physB);
+						/*float tentativeBDX = (physB->velocityX - physB->drag) * deltaTime;
+						float tentativeBDY = ((physB->velocityY - physB->drag) + (physB->gravityMod * deltaTime)) * deltaTime;*/
+
+						// This does not yet solve for tunneling.
+						TestAndResolveCollision(cA, posA, physA, cB, posB, physB);
+					}
 				}
 			}
 		}
@@ -563,8 +574,6 @@ public:
 		{
 			MovementComponent* m = move[i];
 			PhysicsComponent* phys = (PhysicsComponent*)m->entity->componentIDMap[physicsComponentID];
-
-			
 
 			if (glfwGetKey(Game::main.window, GLFW_KEY_W) == GLFW_PRESS)
 			{

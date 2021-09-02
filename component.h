@@ -89,11 +89,15 @@ public:
 	float drag;					// How much velocity one loses each turn.
 	float gravityMod;			// How much gravity should one experience.
 
-	PhysicsComponent(Entity* entity, bool active, float vX, float vY, float vR, float drag, float gravityMod)
+	PositionComponent* pos;
+
+	PhysicsComponent(Entity* entity, bool active, PositionComponent* pos, float vX, float vY, float vR, float drag, float gravityMod)
 	{
 		ID = physicsComponentID;
 		this->active = active;
 		this->entity = entity;
+		this->pos = pos;
+
 		this->velocityX = vX;
 		this->velocityY = vY;
 		this->rotVelocity = vR;
@@ -109,12 +113,14 @@ public:
 	float height;
 
 	Texture2D* sprite;
+	PositionComponent* pos;
 
-	SpriteComponent(Entity* entity, bool active, float width, float height, Texture2D* sprite)
+	SpriteComponent(Entity* entity, bool active, PositionComponent* pos, float width, float height, Texture2D* sprite)
 	{
 		ID = spriteComponentID;
 		this->active = active;
 		this->entity = entity;
+		this->pos = pos;
 
 		this->width = width;
 		this->height = height;
@@ -136,11 +142,14 @@ public:
 	float offsetX;
 	float offsetY;
 
-	ColliderComponent(Entity* entity, bool active, float mass, float bounce, float friction, float width, float height, float offsetX, float offsetY)
+	PositionComponent* pos;
+
+	ColliderComponent(Entity* entity, bool active, PositionComponent* pos, float mass, float bounce, float friction, float width, float height, float offsetX, float offsetY)
 	{
 		ID = colliderComponentID;
 		this->active = active;
 		this->entity = entity;
+		this->pos = pos;
 
 		this->mass = mass;
 		this->bounce = bounce;
