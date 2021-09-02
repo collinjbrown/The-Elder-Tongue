@@ -28,11 +28,11 @@ ECS ECS::main;
 // We don't want this to be so cluttered that you have to dig to find what you want
 // so don't put stuff here unless it really belongs.
 
-static int windowWidth = 1280;
-static int windowHeight = 960;
-
 int main(void)
 {
+    int windowWidth = Game::main.windowWidth;
+    int windowHeight = Game::main.windowHeight;
+
     #pragma region GL Rendering Setup
     // Here we're initiating all the stuff related to rendering.
     GLFWwindow* window;

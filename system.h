@@ -22,11 +22,23 @@ public:
 
 	void Update(float deltaTime)
 	{
+		float screenLeft = (Game::main.camX - (Game::main.windowWidth * Game::main.zoom / 1.0f));
+		float screenRight = (Game::main.camX + (Game::main.windowWidth * Game::main.zoom / 1.0f));
+		float screenBottom = (Game::main.camY - (Game::main.windowHeight * Game::main.zoom / 1.0f));
+		float screenTop = (Game::main.camY + (Game::main.windowHeight * Game::main.zoom / 1.0f));
+		float screenElev = Game::main.camZ;
+
 		for (int i = 0; i < sprites.size(); i++)
 		{
 			SpriteComponent* s = sprites[i];
 			PositionComponent* pos = s->pos;
-			Game::main.renderer->prepareQuad(pos, s->width, s->height, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), s->sprite->ID);
+
+			if (pos->x + (s->width / 2.0f) > screenLeft && pos->x - (s->width / 2.0f) < screenRight &&
+				pos->y + (s->height / 2.0f) > screenBottom && pos->y - (s->height / 2.0f) < screenTop &&
+				pos->z < screenElev)
+			{
+				Game::main.renderer->prepareQuad(pos, s->width, s->height, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), s->sprite->ID);
+			}
 		}
 	}
 
@@ -125,20 +137,24 @@ class ColliderSystem : public System
 				{
 					PositionComponent* posB = (PositionComponent*)cB->entity->componentIDMap[positionComponentID];
 
-					// Test to see if they're even remotely near one another (with respects to their collider size.)
-					float d = sqrt(((posB->y - posA->y) * (posB->y - posA->y)) + ((posB->x - posA->x) * (posB->x - posA->x)));
-					float dA = sqrt((cA->width * cA->width) + (cA->height * cA->height));
-					float dB = sqrt((cB->width * cB->width) + (cB->height * cB->height));
-					
-					if (d < dA + dB)
+					// Two static objects shouldn't be able to collide because they won't be able to resolve that collision.
+					if (!posA->stat || !posB->stat)
 					{
-						PhysicsComponent* physB = (PhysicsComponent*)cB->entity->componentIDMap[physicsComponentID];
+						// Test to see if they're even remotely near one another (with respects to their collider size.)
+						float d = sqrt(((posB->y - posA->y) * (posB->y - posA->y)) + ((posB->x - posA->x) * (posB->x - posA->x)));
+						float dA = sqrt((cA->width * cA->width) + (cA->height * cA->height));
+						float dB = sqrt((cB->width * cB->width) + (cB->height * cB->height));
 
-						/*float tentativeBDX = (physB->velocityX - physB->drag) * deltaTime;
-						float tentativeBDY = ((physB->velocityY - physB->drag) + (physB->gravityMod * deltaTime)) * deltaTime;*/
+						if (d < dA + dB)
+						{
+							PhysicsComponent* physB = (PhysicsComponent*)cB->entity->componentIDMap[physicsComponentID];
 
-						// This does not yet solve for tunneling.
-						TestAndResolveCollision(cA, posA, physA, cB, posB, physB);
+							/*float tentativeBDX = (physB->velocityX - physB->drag) * deltaTime;
+							float tentativeBDY = ((physB->velocityY - physB->drag) + (physB->gravityMod * deltaTime)) * deltaTime;*/
+
+							// This does not yet solve for tunneling.
+							TestAndResolveCollision(cA, posA, physA, cB, posB, physB);
+						}
 					}
 				}
 			}
@@ -281,7 +297,7 @@ class ColliderSystem : public System
 
 		float totalMass = colA->mass + colB->mass;
 
-		// Game::main.renderer->prepareQuad(aTopRight, aBottomRight, aBottomLeft, aTopLeft, glm::vec4(1.0f, 0.0f, 0.0f, 0.5f), Game::main.textureMap["blank"]->ID);
+		Game::main.renderer->prepareQuad(aTopRight, aBottomRight, aBottomLeft, aTopLeft, glm::vec4(1.0f, 0.0f, 0.0f, 0.5f), Game::main.textureMap["blank"]->ID);
 
 		for (int s = 0; s < 2; s++)
 		{
@@ -577,21 +593,32 @@ public:
 
 			if (glfwGetKey(Game::main.window, GLFW_KEY_W) == GLFW_PRESS)
 			{
-				phys->velocityY += 1.0f;
+				if (phys->velocityY < m->maxSpeed)
+				{
+					phys->velocityY += m->acceleration * deltaTime;
+				}
 			}
 			else if (glfwGetKey(Game::main.window, GLFW_KEY_S) == GLFW_PRESS)
 			{
-				phys->velocityY -= 1.0f;
+				if (phys->velocityY > -m->maxSpeed)
+				{
+					phys->velocityY -= m->acceleration * deltaTime;
+				}
 			}
 
 			if (glfwGetKey(Game::main.window, GLFW_KEY_D) == GLFW_PRESS)
 			{
-				phys->velocityX += 1.0f;
+				if (phys->velocityX < m->maxSpeed)
+				{
+					phys->velocityX += m->acceleration * deltaTime;
+				}
 			}
 			else if (glfwGetKey(Game::main.window, GLFW_KEY_A) == GLFW_PRESS)
 			{
-
-				phys->velocityX -= 1.0f;
+				if (phys->velocityX > -m->maxSpeed)
+				{
+					phys->velocityX -= m->acceleration * deltaTime;
+				}
 			}
 		}
 	}
@@ -599,6 +626,34 @@ public:
 	void AddComponent(Component* component)
 	{
 		move.push_back((MovementComponent*)component);
+	}
+};
+
+class CameraFollowSystem : public System
+{
+public:
+	vector<CameraFollowComponent*> folls;
+
+	void Update(float deltaTime)
+	{
+		for (int i = 0; i < folls.size(); i++)
+		{
+			CameraFollowComponent* f = folls[i];
+			PositionComponent* pos = (PositionComponent*)f->entity->componentIDMap[positionComponentID];
+
+			Game::main.camX = Lerp(Game::main.camX, pos->x, f->speed * deltaTime);
+			Game::main.camY = Lerp(Game::main.camY, pos->y, f->speed * deltaTime);
+		}
+	}
+
+	float Lerp(float a, float b, float t)
+	{
+		return (1 - t) * a + t * b;
+	}
+
+	void AddComponent(Component* component)
+	{
+		folls.push_back((CameraFollowComponent*)component);
 	}
 };
 

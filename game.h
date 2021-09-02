@@ -19,13 +19,13 @@ public:
 	map<string, Texture2D*> textureMap;
 	GLFWwindow* window;
 
+	int windowWidth = 1280;
+	int windowHeight = 960;
+
 	float camX = 0.0f;
 	float camY = 0.0f;
 	float camZ = 100.0f;
 	float zoom = 1.0f;
-
-	int windowWidth = 1280;
-	int windowHeight = 720;
 
 	float topY;
 	float bottomY;

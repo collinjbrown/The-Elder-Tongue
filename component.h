@@ -14,6 +14,7 @@ static int physicsComponentID = 2;
 static int spriteComponentID = 3;
 static int colliderComponentID = 4;
 static int movementComponentID = 5;
+static int cameraFollowComponentID = 6;
 
 class Component
 {
@@ -166,17 +167,34 @@ public:
 class MovementComponent : public Component
 {
 public:
+	float acceleration;
 	float maxSpeed;
 	float maxJumpHeight;
 
-	MovementComponent(Entity* entity, bool active, float maxSpeed, float maxJumpHeight)
+	MovementComponent(Entity* entity, bool active, float acceleration, float maxSpeed, float maxJumpHeight)
 	{
 		this->ID = movementComponentID;
 		this->active = active;
 		this->entity = entity;
 
+		this->acceleration = acceleration;
 		this->maxSpeed = maxSpeed;
 		this->maxJumpHeight = maxJumpHeight;
+	}
+};
+
+class CameraFollowComponent : public Component
+{
+public:
+	float speed;
+
+	CameraFollowComponent(Entity* entity, bool active, float speed)
+	{
+		this->ID = cameraFollowComponentID;
+		this->active = active;
+		this->entity = entity;
+
+		this->speed = speed;
 	}
 };
 
