@@ -172,6 +172,69 @@ void Renderer::prepareQuad(PositionComponent* pos, float width, float height,
     quad.topLeft = { topLeft.x,  topLeft.y,      r, g, b, a,   0.0, 1.0,    glTextureIndex };
 }
 
+
+void Renderer::prepareQuad(PositionComponent* pos, float width, float height,
+    glm::vec4 rgb, int animID, int cellX, int cellY, int cols, int rows)
+{
+    // Figure out which batch should be written to
+    // -------------------------------------------
+    auto result = std::find(textureIDs.begin(), textureIDs.end(), animID);
+    int location;
+    if (result == textureIDs.end())
+    {
+        location = textureIDs.size();
+        textureIDs.push_back(animID);
+    }
+    else
+    {
+        location = result - textureIDs.begin();
+    }
+
+    int batchIndex = location / MAX_TEXTURES_PER_BATCH;
+    float glTextureIndex = location % MAX_TEXTURES_PER_BATCH;
+    Batch& batch = batches[batchIndex];
+
+    
+    // Figure out how cells should be handled.
+    // ---------------------------------------
+    float cellXMod = 1.0f / rows;
+    float cellYMod = 1.0f / cols;
+
+    float uvX0 =  cellX* cellXMod;
+    float uvY0 = cellY* cellYMod;
+    float uvX1 =  uvX0 + cellXMod;
+    float uvY1 = uvY0 + cellYMod;
+
+    /*std::cout << std::to_string(uvX0) + "/" + std::to_string(uvY0) + "\n";
+    std::cout << std::to_string(uvX1) + "/" + std::to_string(uvY1) + "\n";*/
+
+    // Initialize the data for the quad
+    // --------------------------------
+    Quad& quad = batch.quadBuffer[batch.quadIndex];
+    batch.quadIndex++;
+
+    const float rightX = pos->x + (width / 2.0f);
+    const float leftX = pos->x - (width / 2.0f);
+    const float topY = pos->y + (height / 2.0f);
+    const float bottomY = pos->y - (height / 2.0f);
+
+    const glm::vec2 topRight = glm::vec2(pos->x, pos->y) + pos->Rotate(glm::vec2((width / 2.0f), (height / 2.0f)));
+    const glm::vec2 bottomRight = glm::vec2(pos->x, pos->y) + pos->Rotate(glm::vec2((width / 2.0f), -(height / 2.0f)));
+    const glm::vec2 bottomLeft = glm::vec2(pos->x, pos->y) + pos->Rotate(glm::vec2(-(width / 2.0f), -(height / 2.0f)));
+    const glm::vec2 topLeft = glm::vec2(pos->x, pos->y) + pos->Rotate(glm::vec2(-(width / 2.0f), (height / 2.0f)));
+
+    const float r = rgb.r;
+    const float g = rgb.g;
+    const float b = rgb.b;
+    const float a = rgb.a;
+
+    quad.topRight = { topRight.x, topRight.y,      r, g, b, a,   uvX1, uvY1,    glTextureIndex };
+    quad.bottomRight = { bottomRight.x, bottomRight.y,   r, g, b, a,   uvX1, uvY0,    glTextureIndex };
+    quad.bottomLeft = { bottomLeft.x,  bottomLeft.y,   r, g, b, a,   uvX0, uvY0,    glTextureIndex };
+    quad.topLeft = { topLeft.x,  topLeft.y,      r, g, b, a,   uvX0, uvY1,    glTextureIndex };
+}
+
+
 void Renderer::prepareQuad(PositionComponent* pos, ColliderComponent* col, float width, float height,
     glm::vec4 rgb, int textureID)
 {

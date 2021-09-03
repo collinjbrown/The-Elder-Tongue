@@ -1,10 +1,10 @@
-#include "texture_2D.h"
+#include "animation_2D.h"
 #include "external/stb_image.h"
 
 #include <iostream>
 #include <climits>
 
-Texture2D::Texture2D(const char* file, bool alpha, int filter)
+Animation2D::Animation2D(const char* file, bool alpha, int columns, int rows, float speed, int filter)
     : width(0), height(0), internalFormat(GL_RGB), imageFormat(GL_RGB), wrapS(GL_REPEAT),
     wrapT(GL_REPEAT), filterMin(filter), filterMax(filter)
 {
@@ -26,23 +26,27 @@ Texture2D::Texture2D(const char* file, bool alpha, int filter)
     this->width = imageWidth;
     this->height = imageHeight;
 
+    this->columns = columns;
+    this->rows = rows;
+    this->speed = speed;
+
     // Create
     glBindTexture(GL_TEXTURE_2D, this->ID);
     glTexImage2D(GL_TEXTURE_2D, 0, this->internalFormat, imageWidth, imageHeight, 0, this->imageFormat, GL_UNSIGNED_BYTE, data);
-    
+
     // Wrap & Filter Modes
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, this->wrapS);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, this->wrapT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, this->filterMin);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, this->filterMax);
-    
+
     // Unbind
     glBindTexture(GL_TEXTURE_2D, 0);
 
     stbi_image_free(data);
 }
 
-Texture2D::Texture2D()
+Animation2D::Animation2D()
     : width(1), height(1), internalFormat(GL_RGB), imageFormat(GL_RGB), wrapS(GL_REPEAT),
     wrapT(GL_REPEAT), filterMin(GL_LINEAR), filterMax(GL_LINEAR)
 {
@@ -58,9 +62,4 @@ Texture2D::Texture2D()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }
 
-void Texture2D::bind() const { glBindTexture(GL_TEXTURE_2D, this->ID); }
-
-Texture2D* Texture2D::whiteTexture()
-{
-    return new Texture2D();
-}
+void Animation2D::bind() const { glBindTexture(GL_TEXTURE_2D, this->ID); }

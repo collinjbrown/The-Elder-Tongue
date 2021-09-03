@@ -15,10 +15,10 @@ public:
 	virtual void AddComponent(Component* component) = 0;
 };
 
-class RenderingSystem : public System
+class StaticRenderingSystem : public System
 {
 public:
-	vector<SpriteComponent*> sprites;
+	vector<StaticSpriteComponent*> sprites;
 
 	void Update(float deltaTime)
 	{
@@ -30,21 +30,25 @@ public:
 
 		for (int i = 0; i < sprites.size(); i++)
 		{
-			SpriteComponent* s = sprites[i];
-			PositionComponent* pos = s->pos;
+			StaticSpriteComponent* s = sprites[i];
 
-			if (pos->x + (s->width / 2.0f) > screenLeft && pos->x - (s->width / 2.0f) < screenRight &&
-				pos->y + (s->height / 2.0f) > screenBottom && pos->y - (s->height / 2.0f) < screenTop &&
-				pos->z < screenElev)
+			if (s->active)
 			{
-				Game::main.renderer->prepareQuad(pos, s->width, s->height, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), s->sprite->ID);
+				PositionComponent* pos = s->pos;
+
+				if (pos->x + (s->width / 2.0f) > screenLeft && pos->x - (s->width / 2.0f) < screenRight &&
+					pos->y + (s->height / 2.0f) > screenBottom && pos->y - (s->height / 2.0f) < screenTop &&
+					pos->z < screenElev)
+				{
+					Game::main.renderer->prepareQuad(pos, s->width, s->height, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), s->sprite->ID);
+				}
 			}
 		}
 	}
 
 	void AddComponent(Component* component)
 	{
-		sprites.push_back((SpriteComponent*)component);
+		sprites.push_back((StaticSpriteComponent*)component);
 	}
 };
 
@@ -58,48 +62,52 @@ public:
 		for (int i = 0; i < phys.size(); i++)
 		{
 			PhysicsComponent* p = phys[i];
-			PositionComponent* pos = p->pos;
 
-			if (!pos->stat)
+			if (p->active)
 			{
-				p->velocityY -= p->gravityMod * deltaTime;
+				PositionComponent* pos = p->pos;
 
-				if (p->velocityX > 0)
+				if (!pos->stat)
 				{
-					p->velocityX -= p->drag * deltaTime;
-				}
-				else if (p->velocityX < 0)
-				{
-					p->velocityX += p->drag * deltaTime;
-				}
+					p->velocityY -= p->gravityMod * deltaTime;
 
-				if (p->velocityY > 0)
-				{
-					p->velocityY -= p->drag * deltaTime;
-				}
-				else if (p->velocityY < 0)
-				{
-					p->velocityY += p->drag * deltaTime;
-				}
+					if (p->velocityX > 0)
+					{
+						p->velocityX -= p->drag * deltaTime;
+					}
+					else if (p->velocityX < 0)
+					{
+						p->velocityX += p->drag * deltaTime;
+					}
 
-				if (p->rotVelocity > 0)
-				{
-					p->rotVelocity -= p->drag * deltaTime;
-				}
-				else if (p->rotVelocity < 0)
-				{
-					p->rotVelocity += p->drag * deltaTime;
-				}
+					if (p->velocityY > 0)
+					{
+						p->velocityY -= p->drag * deltaTime;
+					}
+					else if (p->velocityY < 0)
+					{
+						p->velocityY += p->drag * deltaTime;
+					}
 
-				pos->x += p->velocityX * deltaTime;
-				pos->y += p->velocityY * deltaTime;
-				pos->rotation += p->rotVelocity * deltaTime;
-			}
-			else
-			{
-				p->velocityX = 0;
-				p->velocityY = 0;
-				p->rotVelocity = 0;
+					if (p->rotVelocity > 0)
+					{
+						p->rotVelocity -= p->drag * deltaTime;
+					}
+					else if (p->rotVelocity < 0)
+					{
+						p->rotVelocity += p->drag * deltaTime;
+					}
+
+					pos->x += p->velocityX * deltaTime;
+					pos->y += p->velocityY * deltaTime;
+					pos->rotation += p->rotVelocity * deltaTime;
+				}
+				else
+				{
+					p->velocityX = 0;
+					p->velocityY = 0;
+					p->rotVelocity = 0;
+				}
 			}
 		}
 	}
@@ -119,47 +127,90 @@ class ColliderSystem : public System
 		for (int i = 0; i < colls.size(); i++)
 		{
 			ColliderComponent* cA = colls[i];
-			PositionComponent* posA = cA->pos;
-			PhysicsComponent* physA = (PhysicsComponent*)cA->entity->componentIDMap[physicsComponentID];
 
-			/*float tentativeADX = (physA->velocityX - physA->drag) * deltaTime;
-			float tentativeADY = ((physA->velocityY - physA->drag) + (physA->gravityMod * deltaTime)) * deltaTime;*/
-
-			// Right now, the game can support as many colliders as we realistically need.
-			// But it can't support a ton. It'll run fairly well at a couple hundred colliders
-			// so I'm not really worried about that.
-
-			for (int j = 0; j < colls.size(); j++)
+			if (cA->active)
 			{
-				ColliderComponent* cB = colls[j];
+				PositionComponent* posA = cA->pos;
+				PhysicsComponent* physA = (PhysicsComponent*)cA->entity->componentIDMap[physicsComponentID];
 
-				if (cB->entity->Get_ID() != cA->entity->Get_ID())
+				/*float tentativeADX = (physA->velocityX - physA->drag) * deltaTime;
+				float tentativeADY = ((physA->velocityY - physA->drag) + (physA->gravityMod * deltaTime)) * deltaTime;*/
+
+				// Right now, the game can support as many colliders as we realistically need.
+				// But it can't support a ton. It'll run fairly well at a couple hundred colliders
+				// so I'm not really worried about that.
+
+				for (int j = 0; j < colls.size(); j++)
 				{
-					PositionComponent* posB = (PositionComponent*)cB->entity->componentIDMap[positionComponentID];
+					ColliderComponent* cB = colls[j];
 
-					// Two static objects shouldn't be able to collide because they won't be able to resolve that collision.
-					if (!posA->stat || !posB->stat)
+					if (cB->entity->Get_ID() != cA->entity->Get_ID())
 					{
-						// Test to see if they're even remotely near one another (with respects to their collider size.)
-						float d = sqrt(((posB->y - posA->y) * (posB->y - posA->y)) + ((posB->x - posA->x) * (posB->x - posA->x)));
-						float dA = sqrt((cA->width * cA->width) + (cA->height * cA->height));
-						float dB = sqrt((cB->width * cB->width) + (cB->height * cB->height));
+						PositionComponent* posB = (PositionComponent*)cB->entity->componentIDMap[positionComponentID];
 
-						if (d < dA + dB)
+						// Two static objects shouldn't be able to collide because they won't be able to resolve that collision.
+						if (!posA->stat || !posB->stat)
 						{
-							PhysicsComponent* physB = (PhysicsComponent*)cB->entity->componentIDMap[physicsComponentID];
+							// Test to see if they're even remotely near one another (with respects to their collider size.)
+							float d = sqrt(((posB->y - posA->y) * (posB->y - posA->y)) + ((posB->x - posA->x) * (posB->x - posA->x)));
+							float dA = sqrt((cA->width * cA->width) + (cA->height * cA->height));
+							float dB = sqrt((cB->width * cB->width) + (cB->height * cB->height));
 
-							/*float tentativeBDX = (physB->velocityX - physB->drag) * deltaTime;
-							float tentativeBDY = ((physB->velocityY - physB->drag) + (physB->gravityMod * deltaTime)) * deltaTime;*/
+							if (d < dA + dB)
+							{
+								// Test to see if they're platforms. We don't want two platforms colliding.
+								if (!cA->platform || !cB->platform)
+								{
+									// Test to see if one is a platform and the other is coming from the right direction.
 
-							// This does not yet solve for tunneling.
-							TestAndResolveCollision(cA, posA, physA, cB, posB, physB);
-						}
-					}
-				}
-			}
-		}
-	}
+									float aBot = posA->y - (cA->height / 2.0f) + cA->offsetY;
+									float aTop = posA->y + (cA->height / 2.0f) + cA->offsetY;
+
+									float bBot = posB->y - (cB->height / 2.0f) + cB->offsetY;
+									float bTop = posB->y + (cB->height / 2.0f) + cB->offsetY;
+
+
+									// I'm an idiot.
+									// What is going on is this:
+									// Let's say A is above B. B is a platform. A is not.
+									// A will only collide with B if the following rules apply:
+
+									/*if (!cA->platform && !cB->platform ||
+										cA->platform && bBot > aTop ||
+										cB->platform && aBot > bTop)*/
+
+										// This won't work properly because that's not how collisions work.
+										// When A collides with B, even if most of it is above B, it won't
+										// properly collide because the bottom of A is below the top of B.
+										// This is a really simple mistake, and I feel kinda dumb;
+										// I've caught myself thinking about collisions as if they actually
+										// take place in continuous time.
+										// We need to add a little leeway
+										// (which will also probably require me to deal with tunneling).
+
+									float platformLeeway = 1.0f;
+
+									if (!cA->platform && !cB->platform ||
+										cA->platform && bBot > aTop - platformLeeway ||
+										cB->platform && aBot > bTop - platformLeeway)
+									{
+										PhysicsComponent* physB = (PhysicsComponent*)cB->entity->componentIDMap[physicsComponentID];
+
+										/*float tentativeBDX = (physB->velocityX - physB->drag) * deltaTime;
+										float tentativeBDY = ((physB->velocityY - physB->drag) + (physB->gravityMod * deltaTime)) * deltaTime;*/
+
+										// This does not yet solve for tunneling.
+										TestAndResolveCollision(cA, posA, physA, cB, posB, physB);
+
+									}
+								} // Bin gar keine Russin, stamm’ aus Litauen, echt deutsch.
+							} // And when we were children, staying at the arch-duke's,
+						} // My cousin's, he took me out on a sled,
+					} // And I was frightened. He said, Marie,
+				} // Marie, hold on tight. And down we went.
+			} // In the mountains, there you feel free.
+		} // I read, much of the night,
+	} // and go south in the winter.
 
 	bool AreOverlapping(ColliderComponent* colA, PositionComponent* posA, ColliderComponent* colB, PositionComponent* posB)
 	{
@@ -297,7 +348,7 @@ class ColliderSystem : public System
 
 		float totalMass = colA->mass + colB->mass;
 
-		Game::main.renderer->prepareQuad(aTopRight, aBottomRight, aBottomLeft, aTopLeft, glm::vec4(1.0f, 0.0f, 0.0f, 0.5f), Game::main.textureMap["blank"]->ID);
+		// Game::main.renderer->prepareQuad(aTopRight, aBottomRight, aBottomLeft, aTopLeft, glm::vec4(1.0f, 0.0f, 0.0f, 0.5f), Game::main.textureMap["blank"]->ID);
 
 		for (int s = 0; s < 2; s++)
 		{
@@ -589,35 +640,39 @@ public:
 		for (int i = 0; i < move.size(); i++)
 		{
 			MovementComponent* m = move[i];
-			PhysicsComponent* phys = (PhysicsComponent*)m->entity->componentIDMap[physicsComponentID];
 
-			if (glfwGetKey(Game::main.window, GLFW_KEY_W) == GLFW_PRESS)
+			if (m->active)
 			{
-				if (phys->velocityY < m->maxSpeed)
-				{
-					phys->velocityY += m->acceleration * deltaTime;
-				}
-			}
-			else if (glfwGetKey(Game::main.window, GLFW_KEY_S) == GLFW_PRESS)
-			{
-				if (phys->velocityY > -m->maxSpeed)
-				{
-					phys->velocityY -= m->acceleration * deltaTime;
-				}
-			}
+				PhysicsComponent* phys = (PhysicsComponent*)m->entity->componentIDMap[physicsComponentID];
 
-			if (glfwGetKey(Game::main.window, GLFW_KEY_D) == GLFW_PRESS)
-			{
-				if (phys->velocityX < m->maxSpeed)
+				if (glfwGetKey(Game::main.window, GLFW_KEY_W) == GLFW_PRESS)
 				{
-					phys->velocityX += m->acceleration * deltaTime;
+					if (phys->velocityY < m->maxSpeed)
+					{
+						phys->velocityY += m->acceleration * deltaTime;
+					}
 				}
-			}
-			else if (glfwGetKey(Game::main.window, GLFW_KEY_A) == GLFW_PRESS)
-			{
-				if (phys->velocityX > -m->maxSpeed)
+				else if (glfwGetKey(Game::main.window, GLFW_KEY_S) == GLFW_PRESS)
 				{
-					phys->velocityX -= m->acceleration * deltaTime;
+					if (phys->velocityY > -m->maxSpeed)
+					{
+						phys->velocityY -= m->acceleration * deltaTime;
+					}
+				}
+
+				if (glfwGetKey(Game::main.window, GLFW_KEY_D) == GLFW_PRESS)
+				{
+					if (phys->velocityX < m->maxSpeed)
+					{
+						phys->velocityX += m->acceleration * deltaTime;
+					}
+				}
+				else if (glfwGetKey(Game::main.window, GLFW_KEY_A) == GLFW_PRESS)
+				{
+					if (phys->velocityX > -m->maxSpeed)
+					{
+						phys->velocityX -= m->acceleration * deltaTime;
+					}
 				}
 			}
 		}
@@ -639,10 +694,14 @@ public:
 		for (int i = 0; i < folls.size(); i++)
 		{
 			CameraFollowComponent* f = folls[i];
-			PositionComponent* pos = (PositionComponent*)f->entity->componentIDMap[positionComponentID];
 
-			Game::main.camX = Lerp(Game::main.camX, pos->x, f->speed * deltaTime);
-			Game::main.camY = Lerp(Game::main.camY, pos->y, f->speed * deltaTime);
+			if (f->active)
+			{
+				PositionComponent* pos = (PositionComponent*)f->entity->componentIDMap[positionComponentID];
+
+				Game::main.camX = Lerp(Game::main.camX, pos->x, f->speed * deltaTime);
+				Game::main.camY = Lerp(Game::main.camY, pos->y, f->speed * deltaTime);
+			}
 		}
 	}
 
@@ -654,6 +713,104 @@ public:
 	void AddComponent(Component* component)
 	{
 		folls.push_back((CameraFollowComponent*)component);
+	}
+};
+
+class AnimationSystem : public System
+{
+public:
+	vector<AnimationComponent*> anims;
+
+	void Update(float deltaTime)
+	{
+		float screenLeft = (Game::main.camX - (Game::main.windowWidth * Game::main.zoom / 1.0f));
+		float screenRight = (Game::main.camX + (Game::main.windowWidth * Game::main.zoom / 1.0f));
+		float screenBottom = (Game::main.camY - (Game::main.windowHeight * Game::main.zoom / 1.0f));
+		float screenTop = (Game::main.camY + (Game::main.windowHeight * Game::main.zoom / 1.0f));
+		float screenElev = Game::main.camZ;
+
+		for (int i = 0; i < anims.size(); i++)
+		{
+			// Animations work by taking a big-ass spritesheet
+			// and moving through the uvs by increments equal
+			// to one divided by the width and height of each sprite;
+			// this means we need to know how many such cells are in
+			// the whole sheet (for both rows and columns), so that
+			// we can feed the right cell coordinates into the
+			// renderer. This shouldn't be too difficult; the real
+			// question is how we'll manage conditions for different
+			// animations.
+			// We could just have a map containing strings and animations
+			// and set the active animation by calling some function, sending
+			// to that the name of the requested animation in the form of that
+			// string, but that doesn't seem like the ideal way to do it.
+			// We might try that first and then decide later whether
+			// there isn't a better way to handle this.
+
+			AnimationComponent* a = anims[i];
+
+			if (a->active)
+			{
+				a->lastTick += deltaTime;
+				Animation2D* activeAnimation = a->animations[a->activeAnimation];
+
+				int cellX = a->activeX, cellY = a->activeY;
+
+
+				if (activeAnimation->speed < a->lastTick)
+				{
+					a->lastTick = 0;
+
+					if ((a->activeX + 1) * (activeAnimation->width / activeAnimation->columns) < activeAnimation->width)
+					{
+						cellX = a->activeX += 1;
+						cellY = a->activeY;
+					}
+					else
+					{
+						cellX = a->activeX = 0;
+
+						if ((a->activeY + 1) * (activeAnimation->height / activeAnimation->rows) < activeAnimation->height)
+						{
+							cellY = a->activeY += 1;
+						}
+						else
+						{
+							cellX = a->activeX = 0;
+							cellY = a->activeY = 0;
+						}
+					}
+				}
+
+				PositionComponent* pos = a->pos;
+
+				if (pos->x + ((activeAnimation->width / activeAnimation->columns) / 2.0f) > screenLeft && pos->x - ((activeAnimation->width / activeAnimation->columns) / 2.0f) < screenRight &&
+					pos->y + ((activeAnimation->height / activeAnimation->rows) / 2.0f) > screenBottom && pos->y - ((activeAnimation->height / activeAnimation->rows) / 2.0f) < screenTop &&
+					pos->z < screenElev)
+				{
+					// std::cout << std::to_string(cellX) + "/" + std::to_string(cellY) + "\n";
+
+					Game::main.renderer->prepareQuad(pos, activeAnimation->width, activeAnimation->height, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), activeAnimation->ID, cellX, cellY, activeAnimation->columns, activeAnimation->rows);
+				}
+
+			}
+		}
+	}
+
+	void SetAnimation(AnimationComponent* a, std::string s)
+	{
+		if (a->animations[s] != NULL)
+		{
+			a->activeAnimation = s;
+			a->activeX = 0;
+			a->activeY = 0;
+			a->lastTick = 0;
+		}
+	}
+
+	void AddComponent(Component* component)
+	{
+		anims.push_back((AnimationComponent*)component);
 	}
 };
 

@@ -4,8 +4,9 @@
 #define _USE_MATH_DEFINES
 
 #include "renderer.h"
-#include "texture_2D.h"
 #include <math.h>
+#include <map>
+#include <vector>
 
 class Entity;
 
@@ -14,7 +15,8 @@ static int physicsComponentID = 2;
 static int spriteComponentID = 3;
 static int colliderComponentID = 4;
 static int movementComponentID = 5;
-static int cameraFollowComponentID = 6;
+static int animationComponentID = 6;
+static int cameraFollowComponentID = 7;
 
 class Component
 {
@@ -107,7 +109,7 @@ public:
 	}
 };
 
-class SpriteComponent : public Component
+class StaticSpriteComponent : public Component
 {
 public:
 	float width;
@@ -116,7 +118,7 @@ public:
 	Texture2D* sprite;
 	PositionComponent* pos;
 
-	SpriteComponent(Entity* entity, bool active, PositionComponent* pos, float width, float height, Texture2D* sprite)
+	StaticSpriteComponent(Entity* entity, bool active, PositionComponent* pos, float width, float height, Texture2D* sprite)
 	{
 		ID = spriteComponentID;
 		this->active = active;
@@ -133,6 +135,8 @@ public:
 class ColliderComponent : public Component
 {
 public:
+	bool platform; // Only collides on the top.
+
 	float mass;
 	float bounce;
 	float friction;
@@ -145,13 +149,14 @@ public:
 
 	PositionComponent* pos;
 
-	ColliderComponent(Entity* entity, bool active, PositionComponent* pos, float mass, float bounce, float friction, float width, float height, float offsetX, float offsetY)
+	ColliderComponent(Entity* entity, bool active, PositionComponent* pos, bool platform, float mass, float bounce, float friction, float width, float height, float offsetX, float offsetY)
 	{
 		ID = colliderComponentID;
 		this->active = active;
 		this->entity = entity;
 		this->pos = pos;
 
+		this->platform = platform;
 		this->mass = mass;
 		this->bounce = bounce;
 		this->friction = friction;
@@ -169,9 +174,12 @@ class MovementComponent : public Component
 public:
 	float acceleration;
 	float maxSpeed;
+
 	float maxJumpHeight;
 
-	MovementComponent(Entity* entity, bool active, float acceleration, float maxSpeed, float maxJumpHeight)
+	bool canMove;
+
+	MovementComponent(Entity* entity, bool active, float acceleration, float maxSpeed, float maxJumpHeight, bool canMove)
 	{
 		this->ID = movementComponentID;
 		this->active = active;
@@ -180,6 +188,7 @@ public:
 		this->acceleration = acceleration;
 		this->maxSpeed = maxSpeed;
 		this->maxJumpHeight = maxJumpHeight;
+		this->canMove = canMove;
 	}
 };
 
@@ -195,6 +204,56 @@ public:
 		this->entity = entity;
 
 		this->speed = speed;
+	}
+};
+
+class AnimationComponent : public Component
+{
+public:
+	int activeX;
+	int activeY;
+
+	std::string activeAnimation;
+	map<std::string, Animation2D*> animations;
+	PositionComponent* pos;
+
+	float lastTick;
+
+	AnimationComponent(Entity* entity, bool active, PositionComponent* pos, Animation2D* idleAnimation, std::string animationName)
+	{
+		this->ID = animationComponentID;
+		this->entity = entity;
+		this->active = active;
+
+		lastTick = 0;
+		activeX = 0;
+		activeY = 0;
+
+		this->pos = pos;
+		activeAnimation = animationName;
+		animations.emplace(animationName, idleAnimation);
+	}
+};
+
+class HealthComponent : public Component
+{
+public:
+	// Rather than having health, the Elder Tongue
+	// focuses on fatigue and other such things;
+	// most humans die in one (direct) hit from a sword,
+	// unless they are protected by magic,
+	// but they will accrue debuffs as they collide with
+	// things and exert themselves.
+	// They may also bleed out over a longer period of time
+	// from smaller wounds they receive.
+
+	float fatigue;
+	float blood;
+
+	HealthComponent(float fatigue, float blood)
+	{
+		this->fatigue = fatigue;
+		this->blood = blood;
 	}
 };
 

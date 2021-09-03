@@ -9,6 +9,8 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 set(BASE_SRCS
+    animation_2D.cpp
+    animation_2D.h
     check_error.cpp
     check_error.h
     component.h
@@ -22,8 +24,8 @@ set(BASE_SRCS
     renderer.h
     shader.cpp
     shader.h
-    stb_image.cpp
-    stb_image.h
+    external/stb_image.cpp
+    external/stb_image.h
     system.h
     texture_2D.cpp
     texture_2D.h

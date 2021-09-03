@@ -101,6 +101,14 @@ int main(void)
     renderer.textureIDs.push_back(blank.ID);
     Game::main.textureMap.emplace("blank", &blank);
 
+    Texture2D test2{ "assets/animations/testIdle.png", true, GL_NEAREST };
+    renderer.textureIDs.push_back(test2.ID);
+    Game::main.textureMap.emplace("test2", &test2);
+
+    Animation2D testIdle{ "assets/animations/testIdle.png", true, 2, 2, 1.0f, GL_NEAREST };
+    renderer.textureIDs.push_back(testIdle.ID);
+    Game::main.animationMap.emplace("testIdle", &testIdle);
+
     Game::main.renderer = &renderer;
     #pragma endregion
 
