@@ -38,10 +38,10 @@ void WindowPosCallback(GLFWwindow* window, int xpos, int ypos)
 
 int main(void)
 {
+    #pragma region GL Rendering Setup
     int windowWidth = Game::main.windowWidth;
     int windowHeight = Game::main.windowHeight;
 
-    #pragma region GL Rendering Setup
     // Here we're initiating all the stuff related to rendering.
     GLFWwindow* window;
 
@@ -105,9 +105,13 @@ int main(void)
     renderer.textureIDs.push_back(test2.ID);
     Game::main.textureMap.emplace("test2", &test2);
 
-    Animation2D testIdle{ "assets/animations/testIdle.png", true, 2, 2, 1.0f, GL_NEAREST };
+    Animation2D testIdle{ "assets/animations/testIdle.png", true, 2, 2, 1.0f, { 2, 2 }, GL_NEAREST };
     renderer.textureIDs.push_back(testIdle.ID);
     Game::main.animationMap.emplace("testIdle", &testIdle);
+
+    Animation2D testWalk{ "assets/animations/testWalk.png", true, 3, 3, 1.0f, { 3, 3, 2 }, GL_NEAREST };
+    renderer.textureIDs.push_back(testWalk.ID);
+    Game::main.animationMap.emplace("testWalk", &testWalk);
 
     Game::main.renderer = &renderer;
     #pragma endregion

@@ -4,7 +4,7 @@
 #include <string>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <map>
+#include <vector>
 
 class Animation2D
 {
@@ -18,7 +18,7 @@ public:
     unsigned int        columns;
     unsigned int        rows;
     unsigned int        speed;
-    std::map<int, int>  rowsCols;
+    std::vector<int>    rowsToCols;
     GLuint              internalFormat;
     GLuint              imageFormat;
     GLuint              wrapS;
@@ -26,7 +26,7 @@ public:
     GLuint              filterMin;
     GLuint              filterMax;
 
-    Animation2D(const char* file, bool alpha, int columns, int rows, float speed, int filter = GL_LINEAR);
+    Animation2D(const char* file, bool alpha, int columns, int rows, float speed, std::vector<int> rowsToColls, int filter = GL_LINEAR);
 
     void bind() const;
 };

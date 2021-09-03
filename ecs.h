@@ -88,6 +88,7 @@ public:
 		{
 			Entity* player = CreateEntity("The Player");
 			Animation2D* anim1 = Game::main.animationMap["testIdle"];
+			Animation2D* anim2 = Game::main.animationMap["testWalk"];
 			// Texture2D* tex2 = Game::main.textureMap["test2"];
 			ECS::main.RegisterComponent(new PositionComponent(player, true, false, 0, -100, 0.0f), player);
 			ECS::main.RegisterComponent(new PhysicsComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 0.1f, 100.0f), player);
@@ -96,6 +97,8 @@ public:
 			ECS::main.RegisterComponent(new CameraFollowComponent(player, true, 10.0f), player);
 			// ECS::main.RegisterComponent(new StaticSpriteComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], tex2->width, tex2->height, tex2), player);
 			ECS::main.RegisterComponent(new AnimationComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], anim1, "testIdle"), player);
+			AnimationComponent* a = (AnimationComponent*)player->componentIDMap[animationComponentID];
+			a->AddAnimation("testWalk", anim2);
 
 			for (int i = 0; i < 50; i++)
 			{

@@ -219,6 +219,22 @@ public:
 
 	float lastTick;
 
+	void SetAnimation(std::string s)
+	{
+		if (animations[s] != NULL)
+		{
+			activeAnimation = s;
+			activeX = 0;
+			activeY = 0;
+			lastTick = 0;
+		}
+	}
+
+	void AddAnimation(std::string s, Animation2D* anim)
+	{
+		animations.emplace(s, anim);
+	}
+
 	AnimationComponent(Entity* entity, bool active, PositionComponent* pos, Animation2D* idleAnimation, std::string animationName)
 	{
 		this->ID = animationComponentID;

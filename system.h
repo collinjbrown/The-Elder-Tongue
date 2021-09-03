@@ -761,7 +761,7 @@ public:
 				{
 					a->lastTick = 0;
 
-					if ((a->activeX + 1) * (activeAnimation->width / activeAnimation->columns) < activeAnimation->width)
+					if (a->activeX + 1 < activeAnimation->rowsToCols[cellY])
 					{
 						cellX = a->activeX += 1;
 						cellY = a->activeY;
@@ -770,7 +770,7 @@ public:
 					{
 						cellX = a->activeX = 0;
 
-						if ((a->activeY + 1) * (activeAnimation->height / activeAnimation->rows) < activeAnimation->height)
+						if (a->activeY + 1 < activeAnimation->columns)
 						{
 							cellY = a->activeY += 1;
 						}
@@ -794,17 +794,6 @@ public:
 				}
 
 			}
-		}
-	}
-
-	void SetAnimation(AnimationComponent* a, std::string s)
-	{
-		if (a->animations[s] != NULL)
-		{
-			a->activeAnimation = s;
-			a->activeX = 0;
-			a->activeY = 0;
-			a->lastTick = 0;
 		}
 	}
 

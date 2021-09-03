@@ -79,3 +79,8 @@
 1214	1387	652344582	the-elder-tongue.exe	3a5a61e02e3d0f6e
 2	1169	652344600	CMakeFiles/the-elder-tongue.dir/main.cpp.obj	fc09a18cfc32a831
 1169	1343	652344600	the-elder-tongue.exe	3a5a61e02e3d0f6e
+2	801	652383485	CMakeFiles/the-elder-tongue.dir/animation_2D.cpp.obj	ab2b9f0abe9c3d46
+7	974	652383485	CMakeFiles/the-elder-tongue.dir/game.cpp.obj	569f1a456d41b20a
+5	1024	652383485	CMakeFiles/the-elder-tongue.dir/renderer.cpp.obj	e73e7b5ec643e3ba
+11	1533	652383486	CMakeFiles/the-elder-tongue.dir/main.cpp.obj	fc09a18cfc32a831
+1534	1792	652383486	the-elder-tongue.exe	3a5a61e02e3d0f6e
