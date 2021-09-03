@@ -680,14 +680,14 @@ public:
 				{
 					if (phys->velocityY < m->maxSpeed)
 					{
-						phys->velocityY += m->acceleration * deltaTime;
+						phys->velocityY += m->maxJumpHeight * deltaTime;
 					}
 				}
 				else if (glfwGetKey(Game::main.window, GLFW_KEY_S) == GLFW_PRESS)
 				{
 					if (phys->velocityY > -m->maxSpeed)
 					{
-						phys->velocityY -= m->acceleration * deltaTime;
+						phys->velocityY -= m->maxJumpHeight * deltaTime;
 					}
 				}
 
