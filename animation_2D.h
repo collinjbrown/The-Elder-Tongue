@@ -17,7 +17,7 @@ public:
     unsigned int        height;
     unsigned int        columns;
     unsigned int        rows;
-    unsigned int        speed;
+    float               speed;
     std::vector<int>    rowsToCols;
     GLuint              internalFormat;
     GLuint              imageFormat;

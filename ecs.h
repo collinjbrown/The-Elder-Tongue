@@ -2,6 +2,7 @@
 #define ECS_H
 
 #include <vector>
+#include <map>
 #include "system.h"
 #include "component.h"
 
@@ -59,6 +60,10 @@ public:
 		ComponentBlock* physicsBlock = new ComponentBlock(physicsSystem, physicsComponentID);
 		componentBlocks.push_back(physicsBlock);
 
+		AnimationControllerSystem* animationControllerSystem = new AnimationControllerSystem();
+		ComponentBlock* animationControllerBlock = new ComponentBlock(animationControllerSystem, animationControllerComponentID);
+		componentBlocks.push_back(animationControllerBlock);
+
 		AnimationSystem* animationSystem = new AnimationSystem();
 		ComponentBlock* animationBlock = new ComponentBlock(animationSystem, animationComponentID);
 		componentBlocks.push_back(animationBlock);
@@ -91,13 +96,14 @@ public:
 			Animation2D* anim2 = Game::main.animationMap["testWalk"];
 			// Texture2D* tex2 = Game::main.textureMap["test2"];
 			ECS::main.RegisterComponent(new PositionComponent(player, true, false, 0, -100, 0.0f), player);
-			ECS::main.RegisterComponent(new PhysicsComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 0.1f, 100.0f), player);
+			ECS::main.RegisterComponent(new PhysicsComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 100.0f, 1000.0f), player);
 			ECS::main.RegisterComponent(new ColliderComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], false, 1.0f, 0.25f, 1.0f, 25.0f, 55.0f, 0.0f, 0.0f), player);
-			ECS::main.RegisterComponent(new MovementComponent(player, true, 1000.0f, 1000.0f, 10.0f, true), player);
+			ECS::main.RegisterComponent(new MovementComponent(player, true, 1000.0f, 500.0f, 10.0f, true), player);
 			ECS::main.RegisterComponent(new CameraFollowComponent(player, true, 10.0f), player);
 			// ECS::main.RegisterComponent(new StaticSpriteComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], tex2->width, tex2->height, tex2), player);
 			ECS::main.RegisterComponent(new AnimationComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], anim1, "testIdle"), player);
 			AnimationComponent* a = (AnimationComponent*)player->componentIDMap[animationComponentID];
+			ECS::main.RegisterComponent(new DragonriderAnimationControllerComponent(player, true, a), player);
 			a->AddAnimation("testWalk", anim2);
 
 			for (int i = 0; i < 50; i++)

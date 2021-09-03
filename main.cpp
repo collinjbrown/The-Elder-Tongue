@@ -101,15 +101,11 @@ int main(void)
     renderer.textureIDs.push_back(blank.ID);
     Game::main.textureMap.emplace("blank", &blank);
 
-    Texture2D test2{ "assets/animations/testIdle.png", true, GL_NEAREST };
-    renderer.textureIDs.push_back(test2.ID);
-    Game::main.textureMap.emplace("test2", &test2);
-
-    Animation2D testIdle{ "assets/animations/testIdle.png", true, 2, 2, 1.0f, { 2, 2 }, GL_NEAREST };
+    Animation2D testIdle{ "assets/animations/base/baseIdle.png", true, 2, 2, 1.0f, { 2, 2 }, GL_NEAREST };
     renderer.textureIDs.push_back(testIdle.ID);
     Game::main.animationMap.emplace("testIdle", &testIdle);
 
-    Animation2D testWalk{ "assets/animations/testWalk.png", true, 3, 3, 1.0f, { 3, 3, 2 }, GL_NEAREST };
+    Animation2D testWalk{ "assets/animations/base/baseWalk.png", true, 3, 3, 0.1f, { 2, 3, 3 }, GL_NEAREST };
     renderer.textureIDs.push_back(testWalk.ID);
     Game::main.animationMap.emplace("testWalk", &testWalk);
 
@@ -203,18 +199,18 @@ int main(void)
 
         if (glfwGetKey(window, GLFW_KEY_EQUAL) == GLFW_PRESS)
         {
-            if (Game::main.zoom - 10.0f * deltaTime > 0.5f)
+            if (Game::main.zoom - 5.0f * deltaTime > 0.1f)
             {
-                Game::main.zoom -= 10.0f * deltaTime;
+                Game::main.zoom -= 5.0f * deltaTime;
 
                 Game::main.updateOrtho();
             }
         }
         else if (glfwGetKey(window, GLFW_KEY_MINUS) == GLFW_PRESS)
         {
-            if (Game::main.zoom + 10.0f * deltaTime < 5)
+            if (Game::main.zoom + 5.0f * deltaTime < 2.5f)
             {
-                Game::main.zoom += 10.0f * deltaTime;
+                Game::main.zoom += 5.0f * deltaTime;
 
                 Game::main.updateOrtho();
             }

@@ -174,7 +174,7 @@ void Renderer::prepareQuad(PositionComponent* pos, float width, float height,
 
 
 void Renderer::prepareQuad(PositionComponent* pos, float width, float height,
-    glm::vec4 rgb, int animID, int cellX, int cellY, int cols, int rows)
+    glm::vec4 rgb, int animID, int cellX, int cellY, int cols, int rows, bool flipped)
 {
     // Figure out which batch should be written to
     // -------------------------------------------
@@ -205,6 +205,15 @@ void Renderer::prepareQuad(PositionComponent* pos, float width, float height,
     float uvX1 =  uvX0 + cellXMod;
     float uvY1 = uvY0 + cellYMod;
 
+    if (flipped)
+    {
+        float tempX0 = uvX0;
+        float tempY0 = uvY0;
+
+        uvX0 = uvX1;
+        uvX1 = tempX0;
+    }
+
     /*std::cout << std::to_string(uvX0) + "/" + std::to_string(uvY0) + "\n";
     std::cout << std::to_string(uvX1) + "/" + std::to_string(uvY1) + "\n";*/
 
@@ -213,15 +222,15 @@ void Renderer::prepareQuad(PositionComponent* pos, float width, float height,
     Quad& quad = batch.quadBuffer[batch.quadIndex];
     batch.quadIndex++;
 
-    const float rightX = pos->x + (width / 2.0f);
-    const float leftX = pos->x - (width / 2.0f);
-    const float topY = pos->y + (height / 2.0f);
-    const float bottomY = pos->y - (height / 2.0f);
+    const float rightX = pos->x + (width / (float)cols);
+    const float leftX = pos->x - (width / (float)cols);
+    const float topY = pos->y + (height / (float)rows);
+    const float bottomY = pos->y - (height / (float)rows);
 
-    const glm::vec2 topRight = glm::vec2(pos->x, pos->y) + pos->Rotate(glm::vec2((width / 2.0f), (height / 2.0f)));
-    const glm::vec2 bottomRight = glm::vec2(pos->x, pos->y) + pos->Rotate(glm::vec2((width / 2.0f), -(height / 2.0f)));
-    const glm::vec2 bottomLeft = glm::vec2(pos->x, pos->y) + pos->Rotate(glm::vec2(-(width / 2.0f), -(height / 2.0f)));
-    const glm::vec2 topLeft = glm::vec2(pos->x, pos->y) + pos->Rotate(glm::vec2(-(width / 2.0f), (height / 2.0f)));
+    const glm::vec2 topRight = glm::vec2(pos->x, pos->y) + pos->Rotate(glm::vec2((width / (float)cols), (height / (float)rows)));
+    const glm::vec2 bottomRight = glm::vec2(pos->x, pos->y) + pos->Rotate(glm::vec2((width / (float)cols), -(height / (float)rows)));
+    const glm::vec2 bottomLeft = glm::vec2(pos->x, pos->y) + pos->Rotate(glm::vec2(-(width / (float)cols), -(height / (float)rows)));
+    const glm::vec2 topLeft = glm::vec2(pos->x, pos->y) + pos->Rotate(glm::vec2(-(width / (float)cols), (height / (float)rows)));
 
     const float r = rgb.r;
     const float g = rgb.g;

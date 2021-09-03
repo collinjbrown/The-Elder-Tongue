@@ -16,7 +16,10 @@ static int spriteComponentID = 3;
 static int colliderComponentID = 4;
 static int movementComponentID = 5;
 static int animationComponentID = 6;
-static int cameraFollowComponentID = 7;
+static int animationControllerComponentID = 7;
+static int cameraFollowComponentID = 8;
+
+static int dragonriderAnimControllerSubID = 1;
 
 class Component
 {
@@ -135,7 +138,10 @@ public:
 class ColliderComponent : public Component
 {
 public:
-	bool platform; // Only collides on the top.
+	bool platform;		// Only collides on the top.
+	bool onPlatform;	// Every frame that you collide with a platform,
+						// this is set to true so that I don't have to
+						// raycast to check if you're on a platform.
 
 	float mass;
 	float bounce;
@@ -213,6 +219,8 @@ public:
 	int activeX;
 	int activeY;
 
+	bool flipped;
+
 	std::string activeAnimation;
 	map<std::string, Animation2D*> animations;
 	PositionComponent* pos;
@@ -225,7 +233,7 @@ public:
 		{
 			activeAnimation = s;
 			activeX = 0;
-			activeY = 0;
+			activeY = animations[s]->rows - 1;
 			lastTick = 0;
 		}
 	}
@@ -244,12 +252,37 @@ public:
 		lastTick = 0;
 		activeX = 0;
 		activeY = 0;
+		flipped = false;
 
 		this->pos = pos;
 		activeAnimation = animationName;
 		animations.emplace(animationName, idleAnimation);
 	}
 };
+
+
+class AnimationControllerComponent : public Component
+{
+public:
+	AnimationComponent* animator;
+	int subID;
+};
+
+
+class DragonriderAnimationControllerComponent : public AnimationControllerComponent
+{
+public:
+	DragonriderAnimationControllerComponent(Entity* entity, bool active, AnimationComponent* animator)
+	{
+		this->ID = animationControllerComponentID;
+		this->subID = dragonriderAnimControllerSubID;
+		this->entity = entity;
+		this->active = active;
+
+		this->animator = animator;
+	}
+};
+
 
 class HealthComponent : public Component
 {

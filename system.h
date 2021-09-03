@@ -98,6 +98,21 @@ public:
 						p->rotVelocity += p->drag * deltaTime;
 					}
 
+					if (abs(p->velocityX) < 0.5f)
+					{
+						p->velocityX = 0;
+					}
+
+					if (abs(p->velocityY) < 0.5f)
+					{
+						p->velocityY = 0;
+					}
+
+					if (abs(p->rotVelocity) < 0.5f)
+					{
+						p->rotVelocity = 0;
+					}
+
 					pos->x += p->velocityX * deltaTime;
 					pos->y += p->velocityY * deltaTime;
 					pos->rotation += p->rotVelocity * deltaTime;
@@ -127,6 +142,7 @@ class ColliderSystem : public System
 		for (int i = 0; i < colls.size(); i++)
 		{
 			ColliderComponent* cA = colls[i];
+			cA->onPlatform = false;
 
 			if (cA->active)
 			{
@@ -200,7 +216,17 @@ class ColliderSystem : public System
 										float tentativeBDY = ((physB->velocityY - physB->drag) + (physB->gravityMod * deltaTime)) * deltaTime;*/
 
 										// This does not yet solve for tunneling.
-										TestAndResolveCollision(cA, posA, physA, cB, posB, physB);
+										if (TestAndResolveCollision(cA, posA, physA, cB, posB, physB))
+										{
+											if (cA->platform)
+											{
+												cB->onPlatform = true;
+											}
+											else if (cB->platform)
+											{
+												cA->onPlatform = true;
+											}
+										}
 
 									}
 								} // Bin gar keine Russin, stamm’ aus Litauen, echt deutsch.
@@ -309,7 +335,7 @@ class ColliderSystem : public System
 		return false;
 	}
 
-	void TestAndResolveCollision(ColliderComponent* colA, PositionComponent* posA, PhysicsComponent* physA, ColliderComponent* colB, PositionComponent* posB, PhysicsComponent* physB)
+	bool TestAndResolveCollision(ColliderComponent* colA, PositionComponent* posA, PhysicsComponent* physA, ColliderComponent* colB, PositionComponent* posB, PhysicsComponent* physB)
 	{
 		float aCX = colA->offsetX;
 		float aCY = colA->offsetY;
@@ -347,6 +373,7 @@ class ColliderSystem : public System
 		std::array<glm::vec2, 4> colliderTwo = { bTopLeft, bTopRight, bBottomRight, bBottomLeft };
 
 		float totalMass = colA->mass + colB->mass;
+		bool collided = false;
 
 		// Game::main.renderer->prepareQuad(aTopRight, aBottomRight, aBottomLeft, aTopLeft, glm::vec4(1.0f, 0.0f, 0.0f, 0.5f), Game::main.textureMap["blank"]->ID);
 
@@ -380,6 +407,7 @@ class ColliderSystem : public System
 								collEdge = edgeB - edgeA;
 							}
 
+							collided = true;
 							displacement.x += (1.0f - t1) * (lineB.x - lineA.x);
 							displacement.y += (1.0f - t1) * (lineB.y - lineA.y);
 						}
@@ -502,6 +530,7 @@ class ColliderSystem : public System
 								collEdge = edgeB - edgeA;
 							}
 
+							collided = true;
 							displacement.x += (1.0f - t1) * (lineB.x - lineA.x);
 							displacement.y += (1.0f - t1) * (lineB.y - lineA.y);
 						}
@@ -597,6 +626,8 @@ class ColliderSystem : public System
 				}
 			}
 		}
+
+		return collided;
 	}
 
 	float Norm(glm::vec2 a)
@@ -716,6 +747,59 @@ public:
 	}
 };
 
+class AnimationControllerSystem : public System
+{
+public:
+	vector<AnimationControllerComponent*> controllers;
+
+	void Update(float deltaTime)
+	{
+		for (int i = 0; i < controllers.size(); i++)
+		{
+			AnimationControllerComponent* c = controllers[i];
+
+			if (c->subID == dragonriderAnimControllerSubID)
+			{
+				// I'm thinking what we'll do is just hard code the various animation conditions
+				// into the animation controller; this will serve as the animation controller
+				// for the player and other dragon riders.
+
+				// We are going to assume that any entity with a dragon rider animation controller component
+				// (that is a long-ass name) also has a physics and collider component.
+				// I think I can safely assume this because dragonriders should basically always
+				// have the same set of components, aside from the player's.
+
+				DragonriderAnimationControllerComponent* d = (DragonriderAnimationControllerComponent*)c;
+				PhysicsComponent* p = (PhysicsComponent*)d->entity->componentIDMap[physicsComponentID];
+				ColliderComponent* col = (ColliderComponent*)d->entity->componentIDMap[colliderComponentID];
+
+				if (p->velocityX < 0)
+				{
+					c->animator->flipped = true;
+				}
+				else if (p->velocityX > 0)
+				{
+					c->animator->flipped = false;
+				}
+
+				if (abs(p->velocityX) > 0.5f && col->onPlatform && c->animator->activeAnimation != "testWalk")
+				{
+					c->animator->SetAnimation("testWalk");
+				}
+				else if (abs(p->velocityX) < 0.5f && c->animator->activeAnimation != "testIdle")
+				{
+					c->animator->SetAnimation("testIdle");
+				}
+			}
+		}
+	}
+
+	void AddComponent(Component* component)
+	{
+		controllers.push_back((AnimationControllerComponent*)component);
+	}
+};
+
 class AnimationSystem : public System
 {
 public:
@@ -752,10 +836,10 @@ public:
 			if (a->active)
 			{
 				a->lastTick += deltaTime;
+
 				Animation2D* activeAnimation = a->animations[a->activeAnimation];
 
 				int cellX = a->activeX, cellY = a->activeY;
-
 
 				if (activeAnimation->speed < a->lastTick)
 				{
@@ -764,20 +848,19 @@ public:
 					if (a->activeX + 1 < activeAnimation->rowsToCols[cellY])
 					{
 						cellX = a->activeX += 1;
-						cellY = a->activeY;
 					}
 					else
 					{
 						cellX = a->activeX = 0;
 
-						if (a->activeY + 1 < activeAnimation->columns)
+						if (a->activeY - 1 >= 0)
 						{
-							cellY = a->activeY += 1;
+							cellY = a->activeY -= 1;
 						}
 						else
 						{
 							cellX = a->activeX = 0;
-							cellY = a->activeY = 0;
+							cellY = a->activeY = activeAnimation->rows - 1;
 						}
 					}
 				}
@@ -788,9 +871,8 @@ public:
 					pos->y + ((activeAnimation->height / activeAnimation->rows) / 2.0f) > screenBottom && pos->y - ((activeAnimation->height / activeAnimation->rows) / 2.0f) < screenTop &&
 					pos->z < screenElev)
 				{
-					// std::cout << std::to_string(cellX) + "/" + std::to_string(cellY) + "\n";
-
-					Game::main.renderer->prepareQuad(pos, activeAnimation->width, activeAnimation->height, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), activeAnimation->ID, cellX, cellY, activeAnimation->columns, activeAnimation->rows);
+					// std::cout << std::to_string(activeAnimation->width) + "/" + std::to_string(activeAnimation->height) + "\n";
+					Game::main.renderer->prepareQuad(pos, activeAnimation->width, activeAnimation->height, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), activeAnimation->ID, cellX, cellY, activeAnimation->columns, activeAnimation->rows, a->flipped);
 				}
 
 			}

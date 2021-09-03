@@ -26,7 +26,7 @@ public:
 	float camX = 0.0f;
 	float camY = 0.0f;
 	float camZ = 100.0f;
-	float zoom = 1.0f;
+	float zoom = 0.25f;
 
 	float topY;
 	float bottomY;
