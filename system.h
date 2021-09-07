@@ -66,36 +66,40 @@ public:
 			if (p->active)
 			{
 				PositionComponent* pos = p->pos;
+				ColliderComponent* col = (ColliderComponent*)p->entity->componentIDMap[colliderComponentID];
 
 				if (!pos->stat)
 				{
 					p->velocityY -= p->gravityMod * deltaTime;
 
-					if (p->velocityX > 0)
+					if (col != nullptr)
 					{
-						p->velocityX -= p->drag * deltaTime;
-					}
-					else if (p->velocityX < 0)
-					{
-						p->velocityX += p->drag * deltaTime;
-					}
+						if (p->velocityX > 0 && col->onPlatform)
+						{
+							p->velocityX -= p->drag * deltaTime;
+						}
+						else if (p->velocityX < 0 && col->onPlatform)
+						{
+							p->velocityX += p->drag * deltaTime;
+						}
 
-					if (p->velocityY > 0)
-					{
-						p->velocityY -= p->drag * deltaTime;
-					}
-					else if (p->velocityY < 0)
-					{
-						p->velocityY += p->drag * deltaTime;
-					}
+						if (p->velocityY > 0 && col->onPlatform)
+						{
+							p->velocityY -= p->drag * deltaTime;
+						}
+						else if (p->velocityY < 0 && col->onPlatform)
+						{
+							p->velocityY += p->drag * deltaTime;
+						}
 
-					if (p->rotVelocity > 0)
-					{
-						p->rotVelocity -= p->drag * deltaTime;
-					}
-					else if (p->rotVelocity < 0)
-					{
-						p->rotVelocity += p->drag * deltaTime;
+						if (p->rotVelocity > 0 && col->onPlatform)
+						{
+							p->rotVelocity -= p->drag * deltaTime;
+						}
+						else if (p->rotVelocity < 0 && col->onPlatform)
+						{
+							p->rotVelocity += p->drag * deltaTime;
+						}
 					}
 
 					if (abs(p->velocityX) < 0.5f)
@@ -204,7 +208,7 @@ class ColliderSystem : public System
 										// We need to add a little leeway
 										// (which will also probably require me to deal with tunneling).
 
-									float platformLeeway = 1.0f;
+									float platformLeeway = 2.0f;
 
 									if (!cA->platform && !cB->platform ||
 										cA->platform && bBot > aTop - platformLeeway ||
@@ -227,7 +231,54 @@ class ColliderSystem : public System
 												cA->onPlatform = true;
 											}
 										}
+										/*else
+										{
+											float adX = physA->velocityX;
+											float adY = physA->velocityY - (physA->gravityMod * deltaTime);
 
+											if (physA->velocityX > 0)
+											{
+												adX -= physA->drag * deltaTime;
+											}
+											else if (physA->velocityX < 0)
+											{
+												adX += physA->drag * deltaTime;
+											}
+
+											if (physA->velocityY > 0)
+											{
+												adY -= physA->drag * deltaTime;
+											}
+											else if (physA->velocityY < 0)
+											{
+												adY += physA->drag * deltaTime;
+											}
+
+											float bdX = physB->velocityX;
+											float bdY = physB->velocityY - (physB->gravityMod * deltaTime);
+
+											if (physB->velocityX > 0)
+											{
+												bdX -= physB->drag * deltaTime;
+											}
+											else if (physB->velocityX < 0)
+											{
+												bdX += physB->drag * deltaTime;
+											}
+
+											if (physB->velocityY > 0)
+											{
+												bdY -= physB->drag * deltaTime;
+											}
+											else if (physB->velocityY < 0)
+											{
+												bdY += physB->drag * deltaTime;
+											}
+
+											glm::vec2 tentativeA = glm::vec2(posA->x + adX, posA->y + adY);
+											glm::vec2 tentativeB = glm::vec2(posB->x + bdX, posB->y + bdY);
+
+										}*/
 									}
 								} // Bin gar keine Russin, stamm’ aus Litauen, echt deutsch.
 							} // And when we were children, staying at the arch-duke's,
@@ -238,7 +289,7 @@ class ColliderSystem : public System
 		} // I read, much of the night,
 	} // and go south in the winter.
 
-	bool AreOverlapping(ColliderComponent* colA, PositionComponent* posA, ColliderComponent* colB, PositionComponent* posB)
+	bool AreOverlapping(ColliderComponent* colA, glm::vec2 posA, PositionComponent* posAO, ColliderComponent* colB, glm::vec2 posB, PositionComponent* posBO)
 	{
 		float aCX = colA->offsetX;
 		float aCY = colA->offsetY;
@@ -259,19 +310,19 @@ class ColliderSystem : public System
 		float bRX = (colB->width / 2.0f) + colB->offsetX;
 		float bTY = (colB->height / 2.0f) + colB->offsetY;
 
-		glm::vec2 aCenter = glm::vec2(posA->x, posA->y) + posA->Rotate(glm::vec2(aCX, aCY));
-		glm::vec2 aTopLeft = glm::vec2(posA->x, posA->y) + posA->Rotate(glm::vec2(aLX, aTY));
-		glm::vec2 aBottomLeft = glm::vec2(posA->x, posA->y) + posA->Rotate(glm::vec2(aLX, aBY));
-		glm::vec2 aTopRight = glm::vec2(posA->x, posA->y) + posA->Rotate(glm::vec2(aRX, aTY));
-		glm::vec2 aBottomRight = glm::vec2(posA->x, posA->y) + posA->Rotate(glm::vec2(aRX, aBY));
+		glm::vec2 aCenter = glm::vec2(posA.x, posA.y) + posAO->Rotate(glm::vec2(aCX, aCY));
+		glm::vec2 aTopLeft = glm::vec2(posA.x, posA.y) + posAO->Rotate(glm::vec2(aLX, aTY));
+		glm::vec2 aBottomLeft = glm::vec2(posA.x, posA.y) + posAO->Rotate(glm::vec2(aLX, aBY));
+		glm::vec2 aTopRight = glm::vec2(posA.x, posA.y) + posAO->Rotate(glm::vec2(aRX, aTY));
+		glm::vec2 aBottomRight = glm::vec2(posA.x, posA.y) + posAO->Rotate(glm::vec2(aRX, aBY));
 
 		std::array<glm::vec2, 4> colliderOne = { aTopLeft, aTopRight, aBottomRight, aBottomLeft };
 
-		glm::vec2 bCenter = glm::vec2(posB->x, posB->y) + posA->Rotate(glm::vec2(bCX, bCY));
-		glm::vec2 bTopLeft = glm::vec2(posB->x, posB->y) + posB->Rotate(glm::vec2(bLX, bTY));
-		glm::vec2 bBottomLeft = glm::vec2(posB->x, posB->y) + posB->Rotate(glm::vec2(bLX, bBY));
-		glm::vec2 bTopRight = glm::vec2(posB->x, posB->y) + posB->Rotate(glm::vec2(bRX, bTY));
-		glm::vec2 bBottomRight = glm::vec2(posB->x, posB->y) + posB->Rotate(glm::vec2(bRX, bBY));
+		glm::vec2 bCenter = glm::vec2(posB.x, posB.y) + posBO->Rotate(glm::vec2(bCX, bCY));
+		glm::vec2 bTopLeft = glm::vec2(posB.x, posB.y) + posBO->Rotate(glm::vec2(bLX, bTY));
+		glm::vec2 bBottomLeft = glm::vec2(posB.x, posB.y) + posBO->Rotate(glm::vec2(bLX, bBY));
+		glm::vec2 bTopRight = glm::vec2(posB.x, posB.y) + posBO->Rotate(glm::vec2(bRX, bTY));
+		glm::vec2 bBottomRight = glm::vec2(posB.x, posB.y) + posBO->Rotate(glm::vec2(bRX, bBY));
 
 		std::array<glm::vec2, 4> colliderTwo = { bTopLeft, bTopRight, bBottomRight, bBottomLeft };
 
@@ -364,7 +415,7 @@ class ColliderSystem : public System
 
 		std::array<glm::vec2, 4> colliderOne = { aTopLeft, aTopRight, aBottomRight, aBottomLeft };
 
-		glm::vec2 bCenter = glm::vec2(posB->x, posB->y) + posA->Rotate(glm::vec2(bCX, bCY));
+		glm::vec2 bCenter = glm::vec2(posB->x, posB->y) + posB->Rotate(glm::vec2(bCX, bCY));
 		glm::vec2 bTopLeft = glm::vec2(posB->x, posB->y) + posB->Rotate(glm::vec2(bLX, bTY));
 		glm::vec2 bBottomLeft = glm::vec2(posB->x, posB->y) + posB->Rotate(glm::vec2(bLX, bBY));
 		glm::vec2 bTopRight = glm::vec2(posB->x, posB->y) + posB->Rotate(glm::vec2(bRX, bTY));
@@ -683,7 +734,12 @@ public:
 					move->jumping = false;
 				}
 
-				if (glfwGetMouseButton(Game::main.window, GLFW_MOUSE_BUTTON_2) == GLFW_PRESS && move->canMove && !move->preparingToJump && col->onPlatform)
+				if (move->preparingToJump)
+				{
+					CalculateProjection(phys, m, move);
+				}
+
+				if (glfwGetMouseButton(Game::main.window, GLFW_MOUSE_BUTTON_2) == GLFW_PRESS && move->canMove && !move->preparingToJump && col->onPlatform && phys->velocityX < 0.5f)
 				{
 					move->canMove = false;
 					move->preparingToJump = true;
@@ -714,6 +770,42 @@ public:
 					{
 						phys->velocityX -= move->acceleration * deltaTime;
 					}
+				}
+			}
+		}
+	}
+
+	void CalculateProjection(PhysicsComponent* phys, InputComponent* m, MovementComponent* move)
+	{
+		float dT = 0.0025f;
+
+		Texture2D* s = Game::main.textureMap["dot"];
+
+		float screenLeft = (Game::main.camX - (Game::main.windowWidth * Game::main.zoom / 1.0f));
+		float screenRight = (Game::main.camX + (Game::main.windowWidth * Game::main.zoom / 1.0f));
+		float screenBottom = (Game::main.camY - (Game::main.windowHeight * Game::main.zoom / 1.0f));
+		float screenTop = (Game::main.camY + (Game::main.windowHeight * Game::main.zoom / 1.0f));
+		float screenElev = Game::main.camZ;
+
+		float leapXVel = (Game::main.mouseX - phys->pos->x) * move->maxJumpHeight;
+		float leapYVel = (Game::main.mouseY - phys->pos->y) * move->maxJumpHeight;
+
+		glm::vec2 projVel = glm::vec2(leapXVel, leapYVel);
+		glm::vec2 projPos = glm::vec2(phys->pos->x, phys->pos->y);
+
+		for (int i = 0; i < m->projectionDepth; i++)
+		{
+			projVel.y -= phys->gravityMod * dT;
+
+			projPos += (projVel * dT);
+
+			if (i % 25 == 0 && i != 0)
+			{
+				if (projPos.x + (s->width / 2.0f) > screenLeft && projPos.x - (s->width / 2.0f) < screenRight &&
+					projPos.y + (s->height / 2.0f) > screenBottom && projPos.y - (s->height / 2.0f) < screenTop)
+				{
+
+					Game::main.renderer->prepareQuad(projPos, s->width / 2.0f, s->height / 2.0f, glm::vec4(1.0f, 1.0f, 1.0f, 0.5f), s->ID);
 				}
 			}
 		}

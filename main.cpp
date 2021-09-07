@@ -93,6 +93,10 @@ int main(void)
 
     Renderer renderer{ whiteTexture->ID };
 
+    Texture2D dot{ "assets/sprites/dot.png", true, GL_NEAREST };
+    renderer.textureIDs.push_back(dot.ID);
+    Game::main.textureMap.emplace("dot", &dot);
+
     Texture2D test{ "assets/sprites/test.png", true, GL_NEAREST };
     renderer.textureIDs.push_back(test.ID);
     Game::main.textureMap.emplace("test", &test);

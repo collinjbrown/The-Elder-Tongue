@@ -180,14 +180,16 @@ class InputComponent : public Component
 {
 public:
 	bool acceptInput;
+	int projectionDepth;
 
-	InputComponent(Entity* entity, bool active, bool acceptInput)
+	InputComponent(Entity* entity, bool active, bool acceptInput, float projectionDepth)
 	{
 		this->ID = inputComponentID;
 		this->active = active;
 		this->entity = entity;
 
 		this->acceptInput = acceptInput;
+		this->projectionDepth = projectionDepth;
 	}
 };
 
