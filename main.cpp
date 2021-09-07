@@ -105,25 +105,53 @@ int main(void)
     renderer.textureIDs.push_back(blank.ID);
     Game::main.textureMap.emplace("blank", &blank);
 
-    Animation2D testIdle{ "assets/animations/base/baseIdle.png", true, 2, 2, 1.0f, { 2, 2 }, GL_NEAREST };
+    #pragma region Player Animations
+
+    Animation2D baseIdle{ "assets/animations/base/baseIdle.png", true, 2, 2, 1.0f, { 2, 2 }, GL_NEAREST };
+    renderer.textureIDs.push_back(baseIdle.ID);
+    Game::main.animationMap.emplace("baseIdle", &baseIdle);
+
+    Animation2D baseWalk{ "assets/animations/base/baseWalk.png", true, 3, 3, 0.1f, { 2, 3, 3 }, GL_NEAREST };
+    renderer.textureIDs.push_back(baseWalk.ID);
+    Game::main.animationMap.emplace("baseWalk", &baseWalk);
+
+    Animation2D baseJumpPrep{ "assets/animations/base/baseJumpPrep.png", true, 1, 1, 5.0f, { 1 }, GL_NEAREST };
+    renderer.textureIDs.push_back(baseJumpPrep.ID);
+    Game::main.animationMap.emplace("baseJumpPrep", &baseJumpPrep);
+
+    Animation2D baseJumpUp{ "assets/animations/base/baseJumpUp.png", true, 1, 1, 5.0f, { 1 }, GL_NEAREST };
+    renderer.textureIDs.push_back(baseJumpUp.ID);
+    Game::main.animationMap.emplace("baseJumpUp", &baseJumpUp);
+
+    Animation2D baseJumpDown{ "assets/animations/base/baseJumpDown.png", true, 2, 2, 1.0f, { 2, 2 }, GL_NEAREST };
+    renderer.textureIDs.push_back(baseJumpDown.ID);
+    Game::main.animationMap.emplace("baseJumpDown", &baseJumpDown);
+
+    #pragma endregion
+
+    #pragma region Test Character Animations
+
+    Animation2D testIdle{ "assets/animations/test/testIdle.png", true, 2, 2, 1.0f, { 2, 2 }, GL_NEAREST };
     renderer.textureIDs.push_back(testIdle.ID);
     Game::main.animationMap.emplace("testIdle", &testIdle);
 
-    Animation2D testWalk{ "assets/animations/base/baseWalk.png", true, 3, 3, 0.1f, { 2, 3, 3 }, GL_NEAREST };
+    Animation2D testWalk{ "assets/animations/test/testWalk.png", true, 3, 3, 0.1f, { 2, 3, 3 }, GL_NEAREST };
     renderer.textureIDs.push_back(testWalk.ID);
     Game::main.animationMap.emplace("testWalk", &testWalk);
 
-    Animation2D testJumpPrep{ "assets/animations/base/baseLeapPrep.png", true, 1, 1, 5.0f, { 1 }, GL_NEAREST };
+    Animation2D testJumpPrep{ "assets/animations/test/testJumpPrep.png", true, 1, 1, 5.0f, { 1 }, GL_NEAREST };
     renderer.textureIDs.push_back(testJumpPrep.ID);
     Game::main.animationMap.emplace("testJumpPrep", &testJumpPrep);
 
-    Animation2D testJumpUp{ "assets/animations/base/baseJumpUp.png", true, 1, 1, 5.0f, { 1 }, GL_NEAREST };
+    Animation2D testJumpUp{ "assets/animations/test/testJumpUp.png", true, 1, 1, 5.0f, { 1 }, GL_NEAREST };
     renderer.textureIDs.push_back(testJumpUp.ID);
     Game::main.animationMap.emplace("testJumpUp", &testJumpUp);
 
-    Animation2D testJumpDown{ "assets/animations/base/baseJumpDown.png", true, 2, 2, 1.0f, { 2, 2 }, GL_NEAREST };
+    Animation2D testJumpDown{ "assets/animations/test/testJumpDown.png", true, 2, 2, 1.0f, { 2, 2 }, GL_NEAREST };
     renderer.textureIDs.push_back(testJumpDown.ID);
     Game::main.animationMap.emplace("testJumpDown", &testJumpDown);
+
+    #pragma endregion
 
     Game::main.renderer = &renderer;
     #pragma endregion
@@ -140,6 +168,9 @@ int main(void)
 
     bool fullscreen = false;
     float lastChange = glfwGetTime();
+
+    bool slowTime = false;
+    float slowLastChange = glfwGetTime();
 
     while (!glfwWindowShouldClose(window))
     {
@@ -221,8 +252,7 @@ int main(void)
         Game::main.mouseX = worldMouse.x;
         Game::main.mouseY = worldMouse.y;
 
-        if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS ||
-            glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         {
             glfwSetWindowShouldClose(window, true);
         }
@@ -256,6 +286,25 @@ int main(void)
         #pragma endregion
 
         #pragma region Update World State
+
+        if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS && glfwGetTime() > slowLastChange + 0.5f)
+        {
+            slowLastChange = glfwGetTime();
+
+            if (!slowTime)
+            {
+                slowTime = true;
+            }
+            else
+            {
+                slowTime = false;
+            }
+        }
+
+        if (slowTime)
+        {
+            deltaTime *= 0.5f;
+        }
 
         int focus = glfwGetWindowAttrib(window, GLFW_FOCUSED);
 

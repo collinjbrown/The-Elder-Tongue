@@ -238,54 +238,13 @@ class ColliderSystem : public System
 												cA->onPlatform = true;
 											}
 										}
-										/*else
+										else if (cB->platform)
 										{
-											float adX = physA->velocityX;
-											float adY = physA->velocityY - (physA->gravityMod * deltaTime);
-
-											if (physA->velocityX > 0)
+											if (RaycastDown(1, 10, cA, posA, cB, posB))
 											{
-												adX -= physA->drag * deltaTime;
+												cA->onPlatform = true;
 											}
-											else if (physA->velocityX < 0)
-											{
-												adX += physA->drag * deltaTime;
-											}
-
-											if (physA->velocityY > 0)
-											{
-												adY -= physA->drag * deltaTime;
-											}
-											else if (physA->velocityY < 0)
-											{
-												adY += physA->drag * deltaTime;
-											}
-
-											float bdX = physB->velocityX;
-											float bdY = physB->velocityY - (physB->gravityMod * deltaTime);
-
-											if (physB->velocityX > 0)
-											{
-												bdX -= physB->drag * deltaTime;
-											}
-											else if (physB->velocityX < 0)
-											{
-												bdX += physB->drag * deltaTime;
-											}
-
-											if (physB->velocityY > 0)
-											{
-												bdY -= physB->drag * deltaTime;
-											}
-											else if (physB->velocityY < 0)
-											{
-												bdY += physB->drag * deltaTime;
-											}
-
-											glm::vec2 tentativeA = glm::vec2(posA->x + adX, posA->y + adY);
-											glm::vec2 tentativeB = glm::vec2(posB->x + bdX, posB->y + bdY);
-
-										}*/
+										}
 									}
 								} // Bin gar keine Russin, stamm’ aus Litauen, echt deutsch.
 							} // And when we were children, staying at the arch-duke's,
@@ -296,17 +255,12 @@ class ColliderSystem : public System
 		} // I read, much of the night,
 	} // and go south in the winter.
 
-	bool AreOverlapping(ColliderComponent* colA, glm::vec2 posA, PositionComponent* posAO, ColliderComponent* colB, glm::vec2 posB, PositionComponent* posBO)
+	bool RaycastDown(float size, float distance, ColliderComponent* colA, PositionComponent* posA, ColliderComponent* colB, PositionComponent* posB)
 	{
-		float aCX = colA->offsetX;
-		float aCY = colA->offsetY;
+		float ryC = colA->height / 2.0f;
 
-		float aLX = -(colA->width / 2.0f) + colA->offsetX;
-		float aBY = -(colA->height / 2.0f) + colA->offsetY;
-
-		float aRX = (colA->width / 2.0f) + colA->offsetX;
-		float aTY = (colA->height / 2.0f) + colA->offsetY;
-
+		float nR = -size;
+		float r = size;
 
 		float bCX = colB->offsetX;
 		float bCY = colB->offsetY;
@@ -317,19 +271,19 @@ class ColliderSystem : public System
 		float bRX = (colB->width / 2.0f) + colB->offsetX;
 		float bTY = (colB->height / 2.0f) + colB->offsetY;
 
-		glm::vec2 aCenter = glm::vec2(posA.x, posA.y) + posAO->Rotate(glm::vec2(aCX, aCY));
-		glm::vec2 aTopLeft = glm::vec2(posA.x, posA.y) + posAO->Rotate(glm::vec2(aLX, aTY));
-		glm::vec2 aBottomLeft = glm::vec2(posA.x, posA.y) + posAO->Rotate(glm::vec2(aLX, aBY));
-		glm::vec2 aTopRight = glm::vec2(posA.x, posA.y) + posAO->Rotate(glm::vec2(aRX, aTY));
-		glm::vec2 aBottomRight = glm::vec2(posA.x, posA.y) + posAO->Rotate(glm::vec2(aRX, aBY));
+		glm::vec2 aCenter = glm::vec2(posA->x, posA->y);
+		glm::vec2 aTopLeft = glm::vec2(posA->x, posA->y) + posA->Rotate(glm::vec2(nR, r - ryC));
+		glm::vec2 aBottomLeft = glm::vec2(posA->x, posA->y) + posA->Rotate(glm::vec2(nR, nR - size - ryC));
+		glm::vec2 aTopRight = glm::vec2(posA->x, posA->y) + posA->Rotate(glm::vec2(r, r - ryC));
+		glm::vec2 aBottomRight = glm::vec2(posA->x, posA->y) + posA->Rotate(glm::vec2(r, nR - size - ryC));
 
 		std::array<glm::vec2, 4> colliderOne = { aTopLeft, aTopRight, aBottomRight, aBottomLeft };
 
-		glm::vec2 bCenter = glm::vec2(posB.x, posB.y) + posBO->Rotate(glm::vec2(bCX, bCY));
-		glm::vec2 bTopLeft = glm::vec2(posB.x, posB.y) + posBO->Rotate(glm::vec2(bLX, bTY));
-		glm::vec2 bBottomLeft = glm::vec2(posB.x, posB.y) + posBO->Rotate(glm::vec2(bLX, bBY));
-		glm::vec2 bTopRight = glm::vec2(posB.x, posB.y) + posBO->Rotate(glm::vec2(bRX, bTY));
-		glm::vec2 bBottomRight = glm::vec2(posB.x, posB.y) + posBO->Rotate(glm::vec2(bRX, bBY));
+		glm::vec2 bCenter = glm::vec2(posB->x, posB->y) + posB->Rotate(glm::vec2(bCX, bCY));
+		glm::vec2 bTopLeft = glm::vec2(posB->x, posB->y) + posB->Rotate(glm::vec2(bLX, bTY));
+		glm::vec2 bBottomLeft = glm::vec2(posB->x, posB->y) + posB->Rotate(glm::vec2(bLX, bBY));
+		glm::vec2 bTopRight = glm::vec2(posB->x, posB->y) + posB->Rotate(glm::vec2(bRX, bTY));
+		glm::vec2 bBottomRight = glm::vec2(posB->x, posB->y) + posB->Rotate(glm::vec2(bRX, bBY));
 
 		std::array<glm::vec2, 4> colliderTwo = { bTopLeft, bTopRight, bBottomRight, bBottomLeft };
 
@@ -355,7 +309,7 @@ class ColliderSystem : public System
 
 						if (t1 >= 0.0f && t1 < 1.0f && t2 >= 0.0f && t2 < 1.0f)
 						{
-							Game::main.renderer->prepareQuad(aTopRight, aBottomRight, aBottomLeft, aTopLeft, glm::vec4(1.0f, 0.0f, 0.0f, 0.5f), Game::main.textureMap["blank"]->ID);
+							// Game::main.renderer->prepareQuad(aTopRight, aBottomRight, aBottomLeft, aTopLeft, glm::vec4(1.0f, 0.0f, 0.0f, 0.5f), Game::main.textureMap["blank"]->ID);
 							return true;
 						}
 					}
@@ -381,7 +335,7 @@ class ColliderSystem : public System
 
 						if (t1 >= 0.0f && t1 < 1.0f && t2 >= 0.0f && t2 < 1.0f)
 						{
-							Game::main.renderer->prepareQuad(aTopRight, aBottomRight, aBottomLeft, aTopLeft, glm::vec4(1.0f, 0.0f, 0.0f, 0.5f), Game::main.textureMap["blank"]->ID);
+							// Game::main.renderer->prepareQuad(aTopRight, aBottomRight, aBottomLeft, aTopLeft, glm::vec4(1.0f, 0.0f, 0.0f, 0.5f), Game::main.textureMap["blank"]->ID);
 							return true;
 						}
 					}
@@ -389,7 +343,7 @@ class ColliderSystem : public System
 			}
 		}
 
-		Game::main.renderer->prepareQuad(aTopRight, aBottomRight, aBottomLeft, aTopLeft, glm::vec4(0.0f, 0.0f, 0.0f, 0.5f), Game::main.textureMap["blank"]->ID);
+		// Game::main.renderer->prepareQuad(aTopRight, aBottomRight, aBottomLeft, aTopLeft, glm::vec4(0.0f, 0.0f, 0.0f, 0.5f), Game::main.textureMap["blank"]->ID);
 		return false;
 	}
 
@@ -941,26 +895,26 @@ public:
 
 				if (abs(p->velocityY) > 10.0f && !col->onPlatform)
 				{
-					if (c->animator->activeAnimation != "testJumpUp" && p->velocityY > 0)
+					if (c->animator->activeAnimation != "jumpUp" && p->velocityY > 0)
 					{
-						c->animator->SetAnimation("testJumpUp");
+						c->animator->SetAnimation("jumpUp");
 					}
-					else if (c->animator->activeAnimation != "testJumpDown" && p->velocityY < 0)
+					else if (c->animator->activeAnimation != "jumpDown" && p->velocityY < 0)
 					{
-						c->animator->SetAnimation("testJumpDown");
+						c->animator->SetAnimation("jumpDown");
 					}
 				}
-				else if (move->preparingToJump && c->animator->activeAnimation != "testJumpPrep")
+				else if (move->preparingToJump && c->animator->activeAnimation != "jumpPrep")
 				{
-					c->animator->SetAnimation("testJumpPrep");
+					c->animator->SetAnimation("jumpPrep");
 				}
-				else if (abs(p->velocityX) > 0.5f && col->onPlatform && move->canMove && c->animator->activeAnimation != "testWalk")
+				else if (abs(p->velocityX) > 0.5f && col->onPlatform && move->canMove && c->animator->activeAnimation != "walk")
 				{
-					c->animator->SetAnimation("testWalk");
+					c->animator->SetAnimation("walk");
 				}
-				else if (abs(p->velocityX) < 0.5f && move->canMove && c->animator->activeAnimation != "testIdle")
+				else if (abs(p->velocityX) < 0.5f && move->canMove && c->animator->activeAnimation != "idle")
 				{
-					c->animator->SetAnimation("testIdle");
+					c->animator->SetAnimation("idle");
 				}
 			}
 		}
