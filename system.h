@@ -70,10 +70,13 @@ public:
 
 				if (!pos->stat)
 				{
-					p->velocityY -= p->gravityMod * deltaTime;
-
 					if (col != nullptr)
 					{
+						if (!col->onPlatform)
+						{
+							p->velocityY -= p->gravityMod * deltaTime;
+						}
+
 						if (p->velocityX > 0 && col->onPlatform)
 						{
 							p->velocityX -= p->drag * deltaTime;
@@ -100,6 +103,10 @@ public:
 						{
 							p->rotVelocity += p->drag * deltaTime;
 						}
+					}
+					else
+					{
+						p->velocityY -= p->gravityMod * deltaTime;
 					}
 
 					if (abs(p->velocityX) < 0.5f)
@@ -750,8 +757,25 @@ public:
 					move->jumping = true;
 					move->preparingToJump = false;
 
-					float leapXVel = (Game::main.mouseX - phys->pos->x) * move->maxJumpHeight;
-					float leapYVel = (Game::main.mouseY - phys->pos->y) * move->maxJumpHeight;
+					float leapXVel, leapYVel;
+
+					if (Game::main.mouseX < phys->pos->x)
+					{
+						leapXVel = max(-400 * move->maxJumpHeight, (Game::main.mouseX - phys->pos->x) * move->maxJumpHeight);
+					}
+					else
+					{
+						leapXVel = min(400 * move->maxJumpHeight, (Game::main.mouseX - phys->pos->x) * move->maxJumpHeight);
+					}
+
+					if (Game::main.mouseY < phys->pos->y)
+					{
+						leapYVel = max(-400 * move->maxJumpHeight, (Game::main.mouseY - phys->pos->y) * move->maxJumpHeight);
+					}
+					else
+					{
+						leapYVel = min(400 * move->maxJumpHeight, (Game::main.mouseY - phys->pos->y) * move->maxJumpHeight);
+					}
 
 					phys->velocityX += leapXVel;
 					phys->velocityY += leapYVel;
@@ -787,8 +811,25 @@ public:
 		float screenTop = (Game::main.camY + (Game::main.windowHeight * Game::main.zoom / 1.0f));
 		float screenElev = Game::main.camZ;
 
-		float leapXVel = (Game::main.mouseX - phys->pos->x) * move->maxJumpHeight;
-		float leapYVel = (Game::main.mouseY - phys->pos->y) * move->maxJumpHeight;
+		float leapXVel, leapYVel;
+
+		if (Game::main.mouseX < phys->pos->x)
+		{
+			leapXVel = max(-400 * move->maxJumpHeight, (Game::main.mouseX - phys->pos->x) * move->maxJumpHeight);
+		}
+		else
+		{
+			leapXVel = min(400 * move->maxJumpHeight, (Game::main.mouseX - phys->pos->x) * move->maxJumpHeight);
+		}
+
+		if (Game::main.mouseY < phys->pos->y)
+		{
+			leapYVel = max(-400 * move->maxJumpHeight, (Game::main.mouseY - phys->pos->y) * move->maxJumpHeight);
+		}
+		else
+		{
+			leapYVel = min(400 * move->maxJumpHeight, (Game::main.mouseY - phys->pos->y) * move->maxJumpHeight);
+		}
 
 		glm::vec2 projVel = glm::vec2(leapXVel, leapYVel);
 		glm::vec2 projPos = glm::vec2(phys->pos->x, phys->pos->y);
@@ -810,6 +851,7 @@ public:
 			}
 		}
 	}
+
 
 	void AddComponent(Component* component)
 	{

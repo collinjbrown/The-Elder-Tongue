@@ -100,7 +100,7 @@ public:
 			// Texture2D* tex2 = Game::main.textureMap["test2"];
 			ECS::main.RegisterComponent(new PositionComponent(player, true, false, 0, 100, 0.0f), player);
 			ECS::main.RegisterComponent(new PhysicsComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 100.0f, 1000.0f), player);
-			ECS::main.RegisterComponent(new ColliderComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], false, 1.0f, 0.25f, 1.0f, 25.0f, 55.0f, 0.0f, 0.0f), player);
+			ECS::main.RegisterComponent(new ColliderComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], false, 1.0f, 0.2f, 1.0f, 25.0f, 55.0f, 0.0f, 0.0f), player);
 			ECS::main.RegisterComponent(new MovementComponent(player, true, 1000.0f, 500.0f, 2.5f, true), player);
 			ECS::main.RegisterComponent(new InputComponent(player, true, true, 5000), player);
 			ECS::main.RegisterComponent(new CameraFollowComponent(player, true, 10.0f), player);
@@ -113,11 +113,16 @@ public:
 			a->AddAnimation("testJumpUp", anim4);
 			a->AddAnimation("testJumpDown", anim5);
 
+			Entity* platform = CreateEntity("floor");
+			Texture2D* tex3 = Game::main.textureMap["blank"];
+			ECS::main.RegisterComponent(new PositionComponent(platform, true, true, 100, 500, 0.0f), platform);
+			ECS::main.RegisterComponent(new PhysicsComponent(platform, true, (PositionComponent*)platform->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 0.1f, 0.0f), platform);
+			ECS::main.RegisterComponent(new ColliderComponent(platform, true, (PositionComponent*)platform->componentIDMap[positionComponentID], true, 1000.0f, 0.0f, 1.0f, 540.0f, 80.0f, 0.0f, 0.0f), platform);
+			ECS::main.RegisterComponent(new StaticSpriteComponent(platform, true, (PositionComponent*)platform->componentIDMap[positionComponentID], tex3->width * 35, tex3->height * 5.0f, tex3), platform);
 
 			for (int i = 0; i < 50; i++)
 			{
 				Entity* floor = CreateEntity("floor");
-				Texture2D* tex3 = Game::main.textureMap["blank"];
 				ECS::main.RegisterComponent(new PositionComponent(floor, true, true, i * 500, -200, 0.0f), floor);
 				ECS::main.RegisterComponent(new PhysicsComponent(floor, true, (PositionComponent*)floor->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 0.1f, 0.0f), floor);
 				ECS::main.RegisterComponent(new ColliderComponent(floor, true, (PositionComponent*)floor->componentIDMap[positionComponentID], true, 1000.0f, 0.0f, 1.0f, 540.0f, 80.0f, 0.0f, 0.0f), floor);
