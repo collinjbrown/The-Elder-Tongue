@@ -746,7 +746,7 @@ public:
 					CalculateProjection(phys, m, move);
 				}
 
-				if (glfwGetMouseButton(Game::main.window, GLFW_MOUSE_BUTTON_2) == GLFW_PRESS && move->canMove && !move->preparingToJump && col->onPlatform && phys->velocityX < 0.5f)
+				if (glfwGetMouseButton(Game::main.window, GLFW_MOUSE_BUTTON_2) == GLFW_PRESS && move->canMove && !move->preparingToJump && col->onPlatform && abs(phys->velocityX) < 0.5f)
 				{
 					move->canMove = false;
 					move->preparingToJump = true;
