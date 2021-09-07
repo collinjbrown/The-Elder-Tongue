@@ -109,6 +109,18 @@ int main(void)
     renderer.textureIDs.push_back(testWalk.ID);
     Game::main.animationMap.emplace("testWalk", &testWalk);
 
+    Animation2D testJumpPrep{ "assets/animations/base/baseLeapPrep.png", true, 1, 1, 5.0f, { 1 }, GL_NEAREST };
+    renderer.textureIDs.push_back(testJumpPrep.ID);
+    Game::main.animationMap.emplace("testJumpPrep", &testJumpPrep);
+
+    Animation2D testJumpUp{ "assets/animations/base/baseJumpUp.png", true, 1, 1, 5.0f, { 1 }, GL_NEAREST };
+    renderer.textureIDs.push_back(testJumpUp.ID);
+    Game::main.animationMap.emplace("testJumpUp", &testJumpUp);
+
+    Animation2D testJumpDown{ "assets/animations/base/baseJumpDown.png", true, 2, 2, 1.0f, { 2, 2 }, GL_NEAREST };
+    renderer.textureIDs.push_back(testJumpDown.ID);
+    Game::main.animationMap.emplace("testJumpDown", &testJumpDown);
+
     Game::main.renderer = &renderer;
     #pragma endregion
 
@@ -189,7 +201,21 @@ int main(void)
         Game::main.leftX = Game::main.camX - halfWindowWidth;
         #pragma endregion
 
-        #pragma region Test Input
+        #pragma region Input
+        double mPosX;
+        double mPosY;
+        glfwGetCursorPos(window, &mPosX, &mPosY);
+
+        const double xNDC = (mPosX / (Game::main.windowWidth / 2.0f)) - 1.0f;
+        const double yNDC = 1.0f - (mPosY / (Game::main.windowHeight / 2.0f));
+        glm::mat4 VP = Game::main.projection * Game::main.view;
+        glm::mat4 VPinv = glm::inverse(VP);
+        glm::vec4 mouseClip = glm::vec4((float)xNDC, (float)yNDC, 1.0f, 1.0f);
+        glm::vec4 worldMouse = VPinv * mouseClip;
+        Game::main.deltaMouseX = worldMouse.x - Game::main.mouseX;
+        Game::main.deltaMouseY = worldMouse.y - Game::main.mouseY;
+        Game::main.mouseX = worldMouse.x;
+        Game::main.mouseY = worldMouse.y;
 
         if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS ||
             glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)

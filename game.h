@@ -26,7 +26,13 @@ public:
 	float camX = 0.0f;
 	float camY = 0.0f;
 	float camZ = 100.0f;
-	float zoom = 0.25f;
+	float zoom = 1.0f;
+
+	float mouseX = 0.0f;
+	float mouseY = 0.0f;
+
+	float deltaMouseX = 0.0f;
+	float deltaMouseY = 0.0f;
 
 	float topY;
 	float bottomY;

@@ -14,10 +14,11 @@ static int positionComponentID = 1;
 static int physicsComponentID = 2;
 static int spriteComponentID = 3;
 static int colliderComponentID = 4;
-static int movementComponentID = 5;
+static int inputComponentID = 5;
 static int animationComponentID = 6;
 static int animationControllerComponentID = 7;
 static int cameraFollowComponentID = 8;
+static int movementComponentID = 9;
 
 static int dragonriderAnimControllerSubID = 1;
 
@@ -175,26 +176,45 @@ public:
 	}
 };
 
+class InputComponent : public Component
+{
+public:
+	bool acceptInput;
+
+	InputComponent(Entity* entity, bool active, bool acceptInput)
+	{
+		this->ID = inputComponentID;
+		this->active = active;
+		this->entity = entity;
+
+		this->acceptInput = acceptInput;
+	}
+};
+
+
 class MovementComponent : public Component
 {
 public:
 	float acceleration;
 	float maxSpeed;
-
 	float maxJumpHeight;
 
+	bool jumping;
+	bool preparingToJump;
 	bool canMove;
 
 	MovementComponent(Entity* entity, bool active, float acceleration, float maxSpeed, float maxJumpHeight, bool canMove)
 	{
 		this->ID = movementComponentID;
-		this->active = active;
 		this->entity = entity;
+		this->active = active;
 
 		this->acceleration = acceleration;
 		this->maxSpeed = maxSpeed;
 		this->maxJumpHeight = maxJumpHeight;
 		this->canMove = canMove;
+		this->jumping = false;
+		this->preparingToJump = false;
 	}
 };
 

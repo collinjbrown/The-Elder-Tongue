@@ -661,48 +661,58 @@ class ColliderSystem : public System
 	}
 };
 
-class MovementSystem : public System
+class InputSystem : public System
 {
 public:
-	vector<MovementComponent*> move;
+	vector<InputComponent*> move;
 
 	void Update(float deltaTime)
 	{
 		for (int i = 0; i < move.size(); i++)
 		{
-			MovementComponent* m = move[i];
+			InputComponent* m = move[i];
 
 			if (m->active)
 			{
+				MovementComponent* move = (MovementComponent*)m->entity->componentIDMap[movementComponentID];
 				PhysicsComponent* phys = (PhysicsComponent*)m->entity->componentIDMap[physicsComponentID];
-
-				if (glfwGetKey(Game::main.window, GLFW_KEY_W) == GLFW_PRESS)
+				ColliderComponent* col = (ColliderComponent*)m->entity->componentIDMap[colliderComponentID];
+				
+				if (move->jumping && col->onPlatform)
 				{
-					if (phys->velocityY < m->maxSpeed)
-					{
-						phys->velocityY += m->maxJumpHeight * deltaTime;
-					}
-				}
-				else if (glfwGetKey(Game::main.window, GLFW_KEY_S) == GLFW_PRESS)
-				{
-					if (phys->velocityY > -m->maxSpeed)
-					{
-						phys->velocityY -= m->maxJumpHeight * deltaTime;
-					}
+					move->jumping = false;
 				}
 
-				if (glfwGetKey(Game::main.window, GLFW_KEY_D) == GLFW_PRESS)
+				if (glfwGetMouseButton(Game::main.window, GLFW_MOUSE_BUTTON_2) == GLFW_PRESS && move->canMove && !move->preparingToJump && col->onPlatform)
 				{
-					if (phys->velocityX < m->maxSpeed)
+					move->canMove = false;
+					move->preparingToJump = true;
+				}
+				else if (glfwGetMouseButton(Game::main.window, GLFW_MOUSE_BUTTON_2) != GLFW_PRESS && move->preparingToJump)
+				{
+					move->canMove = true;
+					move->jumping = true;
+					move->preparingToJump = false;
+
+					float leapXVel = (Game::main.mouseX - phys->pos->x) * move->maxJumpHeight;
+					float leapYVel = (Game::main.mouseY - phys->pos->y) * move->maxJumpHeight;
+
+					phys->velocityX += leapXVel;
+					phys->velocityY += leapYVel;
+				}
+
+				if (glfwGetKey(Game::main.window, GLFW_KEY_D) == GLFW_PRESS && move->canMove && !move->jumping && !move->preparingToJump && col->onPlatform)
+				{
+					if (phys->velocityX < move->maxSpeed)
 					{
-						phys->velocityX += m->acceleration * deltaTime;
+						phys->velocityX += move->acceleration * deltaTime;
 					}
 				}
-				else if (glfwGetKey(Game::main.window, GLFW_KEY_A) == GLFW_PRESS)
+				else if (glfwGetKey(Game::main.window, GLFW_KEY_A) == GLFW_PRESS && move->canMove && !move->jumping && !move->preparingToJump && col->onPlatform)
 				{
-					if (phys->velocityX > -m->maxSpeed)
+					if (phys->velocityX > -move->maxSpeed)
 					{
-						phys->velocityX -= m->acceleration * deltaTime;
+						phys->velocityX -= move->acceleration * deltaTime;
 					}
 				}
 			}
@@ -711,7 +721,7 @@ public:
 
 	void AddComponent(Component* component)
 	{
-		move.push_back((MovementComponent*)component);
+		move.push_back((InputComponent*)component);
 	}
 };
 
@@ -772,6 +782,7 @@ public:
 				DragonriderAnimationControllerComponent* d = (DragonriderAnimationControllerComponent*)c;
 				PhysicsComponent* p = (PhysicsComponent*)d->entity->componentIDMap[physicsComponentID];
 				ColliderComponent* col = (ColliderComponent*)d->entity->componentIDMap[colliderComponentID];
+				MovementComponent* move = (MovementComponent*)d->entity->componentIDMap[movementComponentID];
 
 				if (p->velocityX < 0)
 				{
@@ -782,11 +793,38 @@ public:
 					c->animator->flipped = false;
 				}
 
-				if (abs(p->velocityX) > 0.5f && col->onPlatform && c->animator->activeAnimation != "testWalk")
+				if (d->entity->componentIDMap[inputComponentID] != nullptr)
+				{
+					if (move->preparingToJump && Game::main.mouseX < p->pos->x)
+					{
+						c->animator->flipped = true;
+					}
+					else if (move->preparingToJump && Game::main.mouseX > p->pos->x)
+					{
+						c->animator->flipped = false;
+					}
+				}
+
+				if (abs(p->velocityY) > 10.0f && !col->onPlatform)
+				{
+					if (c->animator->activeAnimation != "testJumpUp" && p->velocityY > 0)
+					{
+						c->animator->SetAnimation("testJumpUp");
+					}
+					else if (c->animator->activeAnimation != "testJumpDown" && p->velocityY < 0)
+					{
+						c->animator->SetAnimation("testJumpDown");
+					}
+				}
+				else if (move->preparingToJump && c->animator->activeAnimation != "testJumpPrep")
+				{
+					c->animator->SetAnimation("testJumpPrep");
+				}
+				else if (abs(p->velocityX) > 0.5f && col->onPlatform && move->canMove && c->animator->activeAnimation != "testWalk")
 				{
 					c->animator->SetAnimation("testWalk");
 				}
-				else if (abs(p->velocityX) < 0.5f && c->animator->activeAnimation != "testIdle")
+				else if (abs(p->velocityX) < 0.5f && move->canMove && c->animator->activeAnimation != "testIdle")
 				{
 					c->animator->SetAnimation("testIdle");
 				}
@@ -884,5 +922,6 @@ public:
 		anims.push_back((AnimationComponent*)component);
 	}
 };
+
 
 #endif
