@@ -19,6 +19,8 @@ static int animationComponentID = 6;
 static int animationControllerComponentID = 7;
 static int cameraFollowComponentID = 8;
 static int movementComponentID = 9;
+static int healthComponentID = 10;
+static int duelistComponentID = 11;
 
 static int dragonriderAnimControllerSubID = 1;
 
@@ -305,7 +307,6 @@ public:
 	}
 };
 
-
 class HealthComponent : public Component
 {
 public:
@@ -318,14 +319,48 @@ public:
 	// They may also bleed out over a longer period of time
 	// from smaller wounds they receive.
 
+	float health;
 	float fatigue;
 	float blood;
 
-	HealthComponent(float fatigue, float blood)
+	float bleeding;
+	float coalgulationRate;
+
+	bool dead;
+
+	HealthComponent(Entity* entity, bool active, float health, float fatigue, float blood, float bleeding, float coagulationRate, bool dead)
 	{
+		this->ID = healthComponentID;
+		this->entity = entity;
+		this->active = active;
+
+		this->health = health;
 		this->fatigue = fatigue;
 		this->blood = blood;
+
+		this->bleeding = bleeding;
+		this->coalgulationRate = coagulationRate;
+
+		this->dead = dead;
 	}
 };
+
+class DuelistComponent : public Component
+{
+public:
+	bool hasSword;
+	bool isDrawn;
+
+	DuelistComponent(Entity* entity, bool active, bool hasSword, bool isDrawn)
+	{
+		this->ID = duelistComponentID;
+		this->entity = entity;
+		this->active = active;
+
+		this->hasSword = hasSword;
+		this->isDrawn = isDrawn;
+	}
+};
+
 
 #endif

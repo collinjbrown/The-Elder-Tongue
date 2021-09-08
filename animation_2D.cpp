@@ -4,7 +4,7 @@
 #include <iostream>
 #include <climits>
 
-Animation2D::Animation2D(const char* file, bool alpha, int columns, int rows, float speed, std::vector<int> rowsToCols, int filter)
+Animation2D::Animation2D(const char* file, bool alpha, int columns, int rows, float speed, std::vector<int> rowsToCols, bool loop, int filter)
     : width(0), height(0), internalFormat(GL_RGB), imageFormat(GL_RGB), wrapS(GL_REPEAT),
     wrapT(GL_REPEAT), filterMin(filter), filterMax(filter)
 {
@@ -30,6 +30,7 @@ Animation2D::Animation2D(const char* file, bool alpha, int columns, int rows, fl
     this->rows = rows;
     this->speed = speed;
     this->rowsToCols = rowsToCols;
+    this->loop = loop;
 
     // Create
     glBindTexture(GL_TEXTURE_2D, this->ID);

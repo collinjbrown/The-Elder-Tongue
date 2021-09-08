@@ -18,6 +18,7 @@ public:
     unsigned int        columns;
     unsigned int        rows;
     float               speed;
+    bool                loop;
     std::vector<int>    rowsToCols;
     GLuint              internalFormat;
     GLuint              imageFormat;
@@ -26,7 +27,7 @@ public:
     GLuint              filterMin;
     GLuint              filterMax;
 
-    Animation2D(const char* file, bool alpha, int columns, int rows, float speed, std::vector<int> rowsToColls, int filter = GL_LINEAR);
+    Animation2D(const char* file, bool alpha, int columns, int rows, float speed, std::vector<int> rowsToColls, bool loop, int filter = GL_LINEAR);
 
     void bind() const;
 };

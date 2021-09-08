@@ -107,49 +107,58 @@ int main(void)
 
     #pragma region Player Animations
 
-    Animation2D baseIdle{ "assets/animations/base/baseIdle.png", true, 2, 2, 1.0f, { 2, 2 }, GL_NEAREST };
+    Animation2D baseIdle{ "assets/animations/base/baseIdle.png", true, 2, 2, 1.0f, { 2, 2 }, true, GL_NEAREST };
     renderer.textureIDs.push_back(baseIdle.ID);
     Game::main.animationMap.emplace("baseIdle", &baseIdle);
 
-    Animation2D baseWalk{ "assets/animations/base/baseWalk.png", true, 3, 3, 0.1f, { 2, 3, 3 }, GL_NEAREST };
+    Animation2D baseWalk{ "assets/animations/base/baseWalk.png", true, 3, 3, 0.1f, { 2, 3, 3 }, true, GL_NEAREST };
     renderer.textureIDs.push_back(baseWalk.ID);
     Game::main.animationMap.emplace("baseWalk", &baseWalk);
 
-    Animation2D baseJumpPrep{ "assets/animations/base/baseJumpPrep.png", true, 1, 1, 5.0f, { 1 }, GL_NEAREST };
+    Animation2D baseJumpPrep{ "assets/animations/base/baseJumpPrep.png", true, 1, 1, 5.0f, { 1 }, true, GL_NEAREST };
     renderer.textureIDs.push_back(baseJumpPrep.ID);
     Game::main.animationMap.emplace("baseJumpPrep", &baseJumpPrep);
 
-    Animation2D baseJumpUp{ "assets/animations/base/baseJumpUp.png", true, 1, 1, 5.0f, { 1 }, GL_NEAREST };
+    Animation2D baseJumpUp{ "assets/animations/base/baseJumpUp.png", true, 1, 1, 5.0f, { 1 }, true, GL_NEAREST };
     renderer.textureIDs.push_back(baseJumpUp.ID);
     Game::main.animationMap.emplace("baseJumpUp", &baseJumpUp);
 
-    Animation2D baseJumpDown{ "assets/animations/base/baseJumpDown.png", true, 2, 2, 1.0f, { 2, 2 }, GL_NEAREST };
+    Animation2D baseJumpDown{ "assets/animations/base/baseJumpDown.png", true, 2, 2, 1.0f, { 2, 2 }, true, GL_NEAREST };
     renderer.textureIDs.push_back(baseJumpDown.ID);
     Game::main.animationMap.emplace("baseJumpDown", &baseJumpDown);
+
+    Animation2D baseDeath{ "assets/animations/base/baseDying.png", true, 4, 4, 1.0f, { 2, 4, 4, 4 }, false, GL_NEAREST };
+    renderer.textureIDs.push_back(baseDeath.ID);
+    Game::main.animationMap.emplace("baseDeath", &baseDeath);
+
 
     #pragma endregion
 
     #pragma region Test Character Animations
 
-    Animation2D testIdle{ "assets/animations/test/testIdle.png", true, 2, 2, 1.0f, { 2, 2 }, GL_NEAREST };
+    Animation2D testIdle{ "assets/animations/test/testIdle.png", true, 2, 2, 1.0f, { 2, 2 }, true, GL_NEAREST };
     renderer.textureIDs.push_back(testIdle.ID);
     Game::main.animationMap.emplace("testIdle", &testIdle);
 
-    Animation2D testWalk{ "assets/animations/test/testWalk.png", true, 3, 3, 0.1f, { 2, 3, 3 }, GL_NEAREST };
+    Animation2D testWalk{ "assets/animations/test/testWalk.png", true, 3, 3, 0.1f, { 2, 3, 3 }, true, GL_NEAREST };
     renderer.textureIDs.push_back(testWalk.ID);
     Game::main.animationMap.emplace("testWalk", &testWalk);
 
-    Animation2D testJumpPrep{ "assets/animations/test/testJumpPrep.png", true, 1, 1, 5.0f, { 1 }, GL_NEAREST };
+    Animation2D testJumpPrep{ "assets/animations/test/testJumpPrep.png", true, 1, 1, 5.0f, { 1 }, true, GL_NEAREST };
     renderer.textureIDs.push_back(testJumpPrep.ID);
     Game::main.animationMap.emplace("testJumpPrep", &testJumpPrep);
 
-    Animation2D testJumpUp{ "assets/animations/test/testJumpUp.png", true, 1, 1, 5.0f, { 1 }, GL_NEAREST };
+    Animation2D testJumpUp{ "assets/animations/test/testJumpUp.png", true, 1, 1, 5.0f, { 1 }, true, GL_NEAREST };
     renderer.textureIDs.push_back(testJumpUp.ID);
     Game::main.animationMap.emplace("testJumpUp", &testJumpUp);
 
-    Animation2D testJumpDown{ "assets/animations/test/testJumpDown.png", true, 2, 2, 1.0f, { 2, 2 }, GL_NEAREST };
+    Animation2D testJumpDown{ "assets/animations/test/testJumpDown.png", true, 2, 2, 1.0f, { 2, 2 }, true, GL_NEAREST };
     renderer.textureIDs.push_back(testJumpDown.ID);
     Game::main.animationMap.emplace("testJumpDown", &testJumpDown);
+
+    Animation2D testDeath{ "assets/animations/test/testDying.png", true, 4, 4, 1.0f, { 1, 4, 4, 4 }, false, GL_NEAREST };
+    renderer.textureIDs.push_back(testDeath.ID);
+    Game::main.animationMap.emplace("testDeath", &testDeath);
 
     #pragma endregion
 

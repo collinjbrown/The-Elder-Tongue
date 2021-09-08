@@ -689,65 +689,73 @@ public:
 				MovementComponent* move = (MovementComponent*)m->entity->componentIDMap[movementComponentID];
 				PhysicsComponent* phys = (PhysicsComponent*)m->entity->componentIDMap[physicsComponentID];
 				ColliderComponent* col = (ColliderComponent*)m->entity->componentIDMap[colliderComponentID];
+				HealthComponent* health = (HealthComponent*)m->entity->componentIDMap[healthComponentID];
 				
-				if (move->jumping && col->onPlatform)
+				if (!health->dead)
 				{
-					move->jumping = false;
+					if (move->jumping && col->onPlatform)
+					{
+						move->jumping = false;
+					}
+
+					if (move->preparingToJump)
+					{
+						CalculateProjection(phys, m, move);
+					}
+
+					if (glfwGetMouseButton(Game::main.window, GLFW_MOUSE_BUTTON_2) == GLFW_PRESS && move->canMove && !move->preparingToJump && col->onPlatform && abs(phys->velocityX) < 0.5f)
+					{
+						move->canMove = false;
+						move->preparingToJump = true;
+					}
+					else if (glfwGetMouseButton(Game::main.window, GLFW_MOUSE_BUTTON_2) != GLFW_PRESS && move->preparingToJump)
+					{
+						move->canMove = true;
+						move->jumping = true;
+						move->preparingToJump = false;
+
+						float leapXVel, leapYVel;
+
+						if (Game::main.mouseX < phys->pos->x)
+						{
+							leapXVel = max(-400 * move->maxJumpHeight, (Game::main.mouseX - phys->pos->x) * move->maxJumpHeight);
+						}
+						else
+						{
+							leapXVel = min(400 * move->maxJumpHeight, (Game::main.mouseX - phys->pos->x) * move->maxJumpHeight);
+						}
+
+						if (Game::main.mouseY < phys->pos->y)
+						{
+							leapYVel = max(-400 * move->maxJumpHeight, (Game::main.mouseY - phys->pos->y) * move->maxJumpHeight);
+						}
+						else
+						{
+							leapYVel = min(400 * move->maxJumpHeight, (Game::main.mouseY - phys->pos->y) * move->maxJumpHeight);
+						}
+
+						phys->velocityX += leapXVel;
+						phys->velocityY += leapYVel;
+					}
+
+					if (glfwGetKey(Game::main.window, GLFW_KEY_D) == GLFW_PRESS && move->canMove && !move->jumping && !move->preparingToJump && col->onPlatform)
+					{
+						if (phys->velocityX < move->maxSpeed)
+						{
+							phys->velocityX += move->acceleration * deltaTime;
+						}
+					}
+					else if (glfwGetKey(Game::main.window, GLFW_KEY_A) == GLFW_PRESS && move->canMove && !move->jumping && !move->preparingToJump && col->onPlatform)
+					{
+						if (phys->velocityX > -move->maxSpeed)
+						{
+							phys->velocityX -= move->acceleration * deltaTime;
+						}
+					}
 				}
-
-				if (move->preparingToJump)
+				else
 				{
-					CalculateProjection(phys, m, move);
-				}
-
-				if (glfwGetMouseButton(Game::main.window, GLFW_MOUSE_BUTTON_2) == GLFW_PRESS && move->canMove && !move->preparingToJump && col->onPlatform && abs(phys->velocityX) < 0.5f)
-				{
-					move->canMove = false;
-					move->preparingToJump = true;
-				}
-				else if (glfwGetMouseButton(Game::main.window, GLFW_MOUSE_BUTTON_2) != GLFW_PRESS && move->preparingToJump)
-				{
-					move->canMove = true;
-					move->jumping = true;
-					move->preparingToJump = false;
-
-					float leapXVel, leapYVel;
-
-					if (Game::main.mouseX < phys->pos->x)
-					{
-						leapXVel = max(-400 * move->maxJumpHeight, (Game::main.mouseX - phys->pos->x) * move->maxJumpHeight);
-					}
-					else
-					{
-						leapXVel = min(400 * move->maxJumpHeight, (Game::main.mouseX - phys->pos->x) * move->maxJumpHeight);
-					}
-
-					if (Game::main.mouseY < phys->pos->y)
-					{
-						leapYVel = max(-400 * move->maxJumpHeight, (Game::main.mouseY - phys->pos->y) * move->maxJumpHeight);
-					}
-					else
-					{
-						leapYVel = min(400 * move->maxJumpHeight, (Game::main.mouseY - phys->pos->y) * move->maxJumpHeight);
-					}
-
-					phys->velocityX += leapXVel;
-					phys->velocityY += leapYVel;
-				}
-
-				if (glfwGetKey(Game::main.window, GLFW_KEY_D) == GLFW_PRESS && move->canMove && !move->jumping && !move->preparingToJump && col->onPlatform)
-				{
-					if (phys->velocityX < move->maxSpeed)
-					{
-						phys->velocityX += move->acceleration * deltaTime;
-					}
-				}
-				else if (glfwGetKey(Game::main.window, GLFW_KEY_A) == GLFW_PRESS && move->canMove && !move->jumping && !move->preparingToJump && col->onPlatform)
-				{
-					if (phys->velocityX > -move->maxSpeed)
-					{
-						phys->velocityX -= move->acceleration * deltaTime;
-					}
+					// You're dead, pal.
 				}
 			}
 		}
@@ -871,50 +879,67 @@ public:
 				PhysicsComponent* p = (PhysicsComponent*)d->entity->componentIDMap[physicsComponentID];
 				ColliderComponent* col = (ColliderComponent*)d->entity->componentIDMap[colliderComponentID];
 				MovementComponent* move = (MovementComponent*)d->entity->componentIDMap[movementComponentID];
+				HealthComponent* health = (HealthComponent*)d->entity->componentIDMap[healthComponentID];
+				DuelistComponent* duel = (DuelistComponent*)d->entity->componentIDMap[duelistComponentID];
 
-				if (p->velocityX < 0)
+				std::string s = "";
+
+				if (duel->hasSword && duel->isDrawn)
 				{
-					c->animator->flipped = true;
-				}
-				else if (p->velocityX > 0)
-				{
-					c->animator->flipped = false;
+					s = "sword_";
 				}
 
-				if (d->entity->componentIDMap[inputComponentID] != nullptr)
+
+				if (!health->dead)
 				{
-					if (move->preparingToJump && Game::main.mouseX < p->pos->x)
+					if (p->velocityX < 0)
 					{
 						c->animator->flipped = true;
 					}
-					else if (move->preparingToJump && Game::main.mouseX > p->pos->x)
+					else if (p->velocityX > 0)
 					{
 						c->animator->flipped = false;
 					}
-				}
 
-				if (abs(p->velocityY) > 10.0f && !col->onPlatform)
-				{
-					if (c->animator->activeAnimation != "jumpUp" && p->velocityY > 0)
+					if (d->entity->componentIDMap[inputComponentID] != nullptr)
 					{
-						c->animator->SetAnimation("jumpUp");
+						if (move->preparingToJump && Game::main.mouseX < p->pos->x)
+						{
+							c->animator->flipped = true;
+						}
+						else if (move->preparingToJump && Game::main.mouseX > p->pos->x)
+						{
+							c->animator->flipped = false;
+						}
 					}
-					else if (c->animator->activeAnimation != "jumpDown" && p->velocityY < 0)
+
+					if (abs(p->velocityY) > 10.0f && !col->onPlatform)
 					{
-						c->animator->SetAnimation("jumpDown");
+						if (c->animator->activeAnimation != "jumpUp" && p->velocityY > 0)
+						{
+							c->animator->SetAnimation(s + "jumpUp");
+						}
+						else if (c->animator->activeAnimation != "jumpDown" && p->velocityY < 0)
+						{
+							c->animator->SetAnimation(s + "jumpDown");
+						}
+					}
+					else if (move->preparingToJump && c->animator->activeAnimation != "jumpPrep")
+					{
+						c->animator->SetAnimation(s + "jumpPrep");
+					}
+					else if (abs(p->velocityX) > 0.5f && col->onPlatform && move->canMove && c->animator->activeAnimation != "walk")
+					{
+						c->animator->SetAnimation(s + "walk");
+					}
+					else if (abs(p->velocityX) < 0.5f && move->canMove && c->animator->activeAnimation != "idle")
+					{
+						c->animator->SetAnimation(s + "idle");
 					}
 				}
-				else if (move->preparingToJump && c->animator->activeAnimation != "jumpPrep")
+				else if (c->animator->activeAnimation != "dead")
 				{
-					c->animator->SetAnimation("jumpPrep");
-				}
-				else if (abs(p->velocityX) > 0.5f && col->onPlatform && move->canMove && c->animator->activeAnimation != "walk")
-				{
-					c->animator->SetAnimation("walk");
-				}
-				else if (abs(p->velocityX) < 0.5f && move->canMove && c->animator->activeAnimation != "idle")
-				{
-					c->animator->SetAnimation("idle");
+					c->animator->SetAnimation(s + "dead");
 				}
 			}
 		}
@@ -977,13 +1002,17 @@ public:
 					}
 					else
 					{
-						cellX = a->activeX = 0;
+						if (activeAnimation->loop ||
+							a->activeY > 0)
+						{
+							cellX = a->activeX = 0;
+						}
 
 						if (a->activeY - 1 >= 0)
 						{
 							cellY = a->activeY -= 1;
 						}
-						else
+						else if (activeAnimation->loop)
 						{
 							cellX = a->activeX = 0;
 							cellY = a->activeY = activeAnimation->rows - 1;
@@ -1011,5 +1040,53 @@ public:
 	}
 };
 
+class HealthSystem
+{
+public:
+	vector<HealthComponent*> healths;
+
+	void Update(float deltaTime)
+	{
+		for (int i = 0; i < healths.size(); i++)
+		{
+			HealthComponent* h = healths[i];
+
+			h->bleeding -= h->coalgulationRate * deltaTime;
+
+			if (h->bleeding > 0)
+			{
+				h->blood -= h->bleeding * deltaTime;
+			}
+			else
+			{
+				h->bleeding = 0;
+			}
+
+			if (h->blood <= 0)
+			{
+				// You're dying.
+				h->fatigue -= 10 * deltaTime;
+				h->health -= 10 * deltaTime;
+			}
+
+			if (h->fatigue <= 0)
+			{
+				// You're unconscious.
+				// We'll have to sort out how this should work later.
+			}
+
+			if (h->health <= 0)
+			{
+				// You're dead.
+				h->dead = true;
+			}
+		}
+	}
+
+	void AddComponent(Component* component)
+	{
+		healths.push_back((HealthComponent*)component);
+	}
+};
 
 #endif
