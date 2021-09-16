@@ -76,9 +76,13 @@ public:
 		ComponentBlock* colliderBlock = new ComponentBlock(colliderSystem, colliderComponentID);
 		componentBlocks.push_back(colliderBlock);
 
-		InputSystem* movementSystem = new InputSystem();
-		ComponentBlock* movementBlock = new ComponentBlock(movementSystem, inputComponentID);
-		componentBlocks.push_back(movementBlock);
+		InputSystem* inputSystem = new InputSystem();
+		ComponentBlock* inputBlock = new ComponentBlock(inputSystem, inputComponentID);
+		componentBlocks.push_back(inputBlock);
+
+		DuellingSystem* duelistSystem = new DuellingSystem();
+		ComponentBlock* duelistBlock = new ComponentBlock(duelistSystem, duelistComponentID);
+		componentBlocks.push_back(duelistBlock);
 
 		CameraFollowSystem* camfollowSystem = new CameraFollowSystem();
 		ComponentBlock* camfollowBlock = new ComponentBlock(camfollowSystem, cameraFollowComponentID);
@@ -94,27 +98,31 @@ public:
 			#pragma region Player Instantiation
 			Entity* player = CreateEntity("The Player");
 			Animation2D* anim1 = Game::main.animationMap["baseIdle"];
-			Animation2D* anim2 = Game::main.animationMap["baseWalk"];
-			Animation2D* anim3 = Game::main.animationMap["baseJumpPrep"];
-			Animation2D* anim4 = Game::main.animationMap["baseJumpUp"];
-			Animation2D* anim5 = Game::main.animationMap["baseJumpDown"];
-			Animation2D* anim6 = Game::main.animationMap["baseDeath"];
 
 			ECS::main.RegisterComponent(new PositionComponent(player, true, false, 0, 100, 0.0f), player);
 			ECS::main.RegisterComponent(new PhysicsComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 200.0f, 1000.0f), player);
 			ECS::main.RegisterComponent(new ColliderComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], false, 1.0f, 0.2f, 1.0f, 25.0f, 55.0f, 0.0f, 0.0f), player);
-			ECS::main.RegisterComponent(new MovementComponent(player, true, 1000.0f, 500.0f, 2.5f, true), player);
+			ECS::main.RegisterComponent(new MovementComponent(player, true, 500.0f, 250.0f, 2.5f, 100.0f, true), player);
 			ECS::main.RegisterComponent(new InputComponent(player, true, true, 5000), player);
 			ECS::main.RegisterComponent(new CameraFollowComponent(player, true, 10.0f), player);
-			ECS::main.RegisterComponent(new HealthComponent(player, true, 1000.0f, 1000.0f, 1000.0f, 0.0f, 1.0f, false), player);
+			ECS::main.RegisterComponent(new HealthComponent(player, true, 1000.0f, 1000.0f, 1000.0f, 0.0f, 10.0f, false), player);
+			ECS::main.RegisterComponent(new DuelistComponent(player, true, true, true), player);
 			ECS::main.RegisterComponent(new AnimationComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], anim1, "idle"), player);
 			AnimationComponent* a = (AnimationComponent*)player->componentIDMap[animationComponentID];
 			ECS::main.RegisterComponent(new DragonriderAnimationControllerComponent(player, true, a), player);
-			a->AddAnimation("walk", anim2);
-			a->AddAnimation("jumpPrep", anim3);
-			a->AddAnimation("jumpUp", anim4);
-			a->AddAnimation("jumpDown", anim5);
-			a->AddAnimation("dead", anim6);
+			a->AddAnimation("walk", Game::main.animationMap["baseWalk"]);
+			a->AddAnimation("jumpPrep", Game::main.animationMap["baseJumpPrep"]);
+			a->AddAnimation("jumpUp", Game::main.animationMap["baseJumpUp"]);
+			a->AddAnimation("jumpDown", Game::main.animationMap["baseJumpDown"]);
+			a->AddAnimation("dead", Game::main.animationMap["baseDeath"]);
+
+			a->AddAnimation("sword_idle", Game::main.animationMap["sword_baseIdle"]);
+			a->AddAnimation("sword_walk", Game::main.animationMap["sword_baseWalk"]);
+			a->AddAnimation("sword_jumpPrep", Game::main.animationMap["sword_baseJumpPrep"]);
+			a->AddAnimation("sword_jumpUp", Game::main.animationMap["sword_baseJumpUp"]);
+			a->AddAnimation("sword_jumpDown", Game::main.animationMap["sword_baseJumpDown"]);
+			a->AddAnimation("sword_dead", Game::main.animationMap["baseDeath"]);
+			a->AddAnimation("sword_stab", Game::main.animationMap["sword_baseStab"]);
 			#pragma endregion
 
 			#pragma region Test Character Instantiation
@@ -129,8 +137,9 @@ public:
 			ECS::main.RegisterComponent(new PositionComponent(character, true, false, 100, 100, 0.0f), character);
 			ECS::main.RegisterComponent(new PhysicsComponent(character, true, (PositionComponent*)character->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 200.0f, 1000.0f), character);
 			ECS::main.RegisterComponent(new ColliderComponent(character, true, (PositionComponent*)character->componentIDMap[positionComponentID], false, 1.0f, 0.2f, 1.0f, 25.0f, 55.0f, 0.0f, 0.0f), character);
-			ECS::main.RegisterComponent(new MovementComponent(character, true, 1000.0f, 500.0f, 2.5f, true), character);
+			ECS::main.RegisterComponent(new MovementComponent(character, true, 1000.0f, 500.0f, 2.5f, 1.0f, true), character);
 			ECS::main.RegisterComponent(new AnimationComponent(character, true, (PositionComponent*)character->componentIDMap[positionComponentID], anim7, "idle"), character);
+			ECS::main.RegisterComponent(new DuelistComponent(character, true, false, false), character);
 			ECS::main.RegisterComponent(new HealthComponent(character, true, 1000.0f, 1000.0f, 1000.0f, 0.0f, 1.0f, false), character);
 			AnimationComponent* a2 = (AnimationComponent*)character->componentIDMap[animationComponentID];
 			ECS::main.RegisterComponent(new DragonriderAnimationControllerComponent(character, true, a2), character);

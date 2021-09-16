@@ -202,12 +202,13 @@ public:
 	float acceleration;
 	float maxSpeed;
 	float maxJumpHeight;
+	float stabDepth;
 
 	bool jumping;
 	bool preparingToJump;
 	bool canMove;
 
-	MovementComponent(Entity* entity, bool active, float acceleration, float maxSpeed, float maxJumpHeight, bool canMove)
+	MovementComponent(Entity* entity, bool active, float acceleration, float maxSpeed, float maxJumpHeight, float stabDepth, bool canMove)
 	{
 		this->ID = movementComponentID;
 		this->entity = entity;
@@ -219,6 +220,7 @@ public:
 		this->canMove = canMove;
 		this->jumping = false;
 		this->preparingToJump = false;
+		this->stabDepth = stabDepth;
 	}
 };
 
@@ -350,6 +352,9 @@ class DuelistComponent : public Component
 public:
 	bool hasSword;
 	bool isDrawn;
+	bool isAttacking;
+
+	float lastTick;
 
 	DuelistComponent(Entity* entity, bool active, bool hasSword, bool isDrawn)
 	{
@@ -359,6 +364,8 @@ public:
 
 		this->hasSword = hasSword;
 		this->isDrawn = isDrawn;
+		this->isAttacking = false;
+		lastTick = 0;
 	}
 };
 

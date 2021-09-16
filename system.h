@@ -690,6 +690,7 @@ public:
 				PhysicsComponent* phys = (PhysicsComponent*)m->entity->componentIDMap[physicsComponentID];
 				ColliderComponent* col = (ColliderComponent*)m->entity->componentIDMap[colliderComponentID];
 				HealthComponent* health = (HealthComponent*)m->entity->componentIDMap[healthComponentID];
+				DuelistComponent* duel = (DuelistComponent*)m->entity->componentIDMap[duelistComponentID];
 				
 				if (!health->dead)
 				{
@@ -698,7 +699,24 @@ public:
 						move->jumping = false;
 					}
 
-					if (move->preparingToJump)
+					if (glfwGetMouseButton(Game::main.window, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS && !duel->isAttacking && duel->hasSword && duel->isDrawn && col->onPlatform && abs(phys->velocityX) < 10.0f)
+					{
+						phys->velocityX = 0;
+
+						if (Game::main.mouseX < phys->pos->x)
+						{
+							phys->velocityX -= move->stabDepth;
+							duel->isAttacking = true;
+							move->canMove = false;
+						}
+						else
+						{
+							phys->velocityX += move->stabDepth;
+							duel->isAttacking = true;
+							move->canMove = false;
+						}
+					}
+					else if (move->preparingToJump)
 					{
 						CalculateProjection(phys, m, move);
 					}
@@ -889,7 +907,6 @@ public:
 					s = "sword_";
 				}
 
-
 				if (!health->dead)
 				{
 					if (p->velocityX < 0)
@@ -913,31 +930,38 @@ public:
 						}
 					}
 
-					if (abs(p->velocityY) > 10.0f && !col->onPlatform)
+					if (duel->isAttacking)
 					{
-						if (c->animator->activeAnimation != "jumpUp" && p->velocityY > 0)
+						if (c->animator->activeAnimation != s + "stab")
+						{
+							c->animator->SetAnimation(s + "stab");
+						}
+					}
+					else if (abs(p->velocityY) > 10.0f && !col->onPlatform)
+					{
+						if (c->animator->activeAnimation != s + "jumpUp" && p->velocityY > 0)
 						{
 							c->animator->SetAnimation(s + "jumpUp");
 						}
-						else if (c->animator->activeAnimation != "jumpDown" && p->velocityY < 0)
+						else if (c->animator->activeAnimation != s + "jumpDown" && p->velocityY < 0)
 						{
 							c->animator->SetAnimation(s + "jumpDown");
 						}
 					}
-					else if (move->preparingToJump && c->animator->activeAnimation != "jumpPrep")
+					else if (move->preparingToJump && c->animator->activeAnimation != s + "jumpPrep")
 					{
 						c->animator->SetAnimation(s + "jumpPrep");
 					}
-					else if (abs(p->velocityX) > 0.5f && col->onPlatform && move->canMove && c->animator->activeAnimation != "walk")
+					else if (abs(p->velocityX) > 0.5f && col->onPlatform && move->canMove && c->animator->activeAnimation != s + "walk")
 					{
 						c->animator->SetAnimation(s + "walk");
 					}
-					else if (abs(p->velocityX) < 0.5f && move->canMove && c->animator->activeAnimation != "idle")
+					else if (abs(p->velocityX) < 0.5f && move->canMove && c->animator->activeAnimation != s + "idle")
 					{
 						c->animator->SetAnimation(s + "idle");
 					}
 				}
-				else if (c->animator->activeAnimation != "dead")
+				else if (c->animator->activeAnimation != s + "dead")
 				{
 					c->animator->SetAnimation(s + "dead");
 				}
@@ -1040,7 +1064,7 @@ public:
 	}
 };
 
-class HealthSystem
+class HealthSystem : public System
 {
 public:
 	vector<HealthComponent*> healths;
@@ -1086,6 +1110,54 @@ public:
 	void AddComponent(Component* component)
 	{
 		healths.push_back((HealthComponent*)component);
+	}
+};
+
+class DuellingSystem : public System
+{
+public:
+	vector<DuelistComponent*> duels;
+
+	void Update(float deltaTime)
+	{
+		for (int i = 0; i < duels.size(); i++)
+		{
+			DuelistComponent* d = duels[i];
+
+			if (d->active)
+			{
+				if (d->isAttacking)
+				{
+					d->lastTick += deltaTime;
+					PhysicsComponent* p = (PhysicsComponent*)d->entity->componentIDMap[physicsComponentID];
+					MovementComponent* m = (MovementComponent*)d->entity->componentIDMap[movementComponentID];
+
+					if (!d->hasSword || !d->isDrawn)
+					{
+						if (!m->jumping && !m->preparingToJump && abs(p->velocityX) < 0.5f && abs(p->velocityY) < 0.5f)
+						{
+							d->isAttacking = false;
+							m->canMove = true;
+						}
+					}
+
+					if (d->lastTick > 0.5f)
+					{
+						if (!m->jumping && !m->preparingToJump && abs(p->velocityX) < 0.5f && abs(p->velocityY) < 0.5f)
+						{
+							d->lastTick = 0;
+							d->isAttacking = false;
+							m->canMove = true;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	void AddComponent(Component* component)
+	{
+		duels.push_back((DuelistComponent*)component);
 	}
 };
 

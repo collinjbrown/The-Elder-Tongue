@@ -132,6 +132,30 @@ int main(void)
     Game::main.animationMap.emplace("baseDeath", &baseDeath);
 
 
+    Animation2D swordBaseIdle{ "assets/animations/base/sword_baseIdle.png", true, 2, 2, 1.0f, { 2, 2 }, true, GL_NEAREST };
+    renderer.textureIDs.push_back(swordBaseIdle.ID);
+    Game::main.animationMap.emplace("sword_baseIdle", &swordBaseIdle);
+
+    Animation2D swordBaseWalk{ "assets/animations/base/sword_baseWalk.png", true, 3, 3, 0.1f, { 2, 3, 3 }, true, GL_NEAREST };
+    renderer.textureIDs.push_back(swordBaseWalk.ID);
+    Game::main.animationMap.emplace("sword_baseWalk", &swordBaseWalk);
+
+    Animation2D swordBaseJumpPrep{ "assets/animations/base/sword_baseJumpPrep.png", true, 2, 2, 0.5f, { 2, 2 }, true, GL_NEAREST };
+    renderer.textureIDs.push_back(swordBaseJumpPrep.ID);
+    Game::main.animationMap.emplace("sword_baseJumpPrep", &swordBaseJumpPrep);
+
+    Animation2D swordBaseJumpUp{ "assets/animations/base/sword_baseJumpUp.png", true, 2, 2, 0.1f, { 2, 2 }, true, GL_NEAREST };
+    renderer.textureIDs.push_back(swordBaseJumpUp.ID);
+    Game::main.animationMap.emplace("sword_baseJumpUp", &swordBaseJumpUp);
+
+    Animation2D swordBaseJumpDown{ "assets/animations/base/sword_baseJumpDown.png", true, 2, 2, 0.1f, { 2, 2 }, true, GL_NEAREST };
+    renderer.textureIDs.push_back(swordBaseJumpDown.ID);
+    Game::main.animationMap.emplace("sword_baseJumpDown", &swordBaseJumpDown);
+
+    Animation2D swordBaseStab{ "assets/animations/base/sword_baseStab.png", true, 2, 2, 0.05f, { 2, 2 }, false, GL_NEAREST };
+    renderer.textureIDs.push_back(swordBaseStab.ID);
+    Game::main.animationMap.emplace("sword_baseStab", &swordBaseStab);
+
     #pragma endregion
 
     #pragma region Test Character Animations
