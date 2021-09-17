@@ -72,7 +72,16 @@ public:
 				{
 					if (col != nullptr)
 					{
-						if (!col->onPlatform)
+						if (col->entity->componentIDMap[movementComponentID] != nullptr)
+						{
+							MovementComponent* move = (MovementComponent*)col->entity->componentIDMap[movementComponentID];
+
+							if (!col->onPlatform && !move->climbing)
+							{
+								p->velocityY -= p->gravityMod * deltaTime;
+							}
+						}
+						else if (!col->onPlatform)
 						{
 							p->velocityY -= p->gravityMod * deltaTime;
 						}
@@ -157,6 +166,24 @@ class ColliderSystem : public System
 
 			if (cA->active)
 			{
+				bool keepVelocityClimbing = true;
+
+				if (cA->entity->componentIDMap[movementComponentID] != nullptr)
+				{
+					MovementComponent* moveA = (MovementComponent*)cA->entity->componentIDMap[movementComponentID];
+					
+					if (moveA->climbing)
+					{
+						keepVelocityClimbing = true;
+					}
+					else
+					{
+						keepVelocityClimbing = false;
+					}
+
+					moveA->climbing = false;
+				}
+
 				PositionComponent* posA = cA->pos;
 				PhysicsComponent* physA = (PhysicsComponent*)cA->entity->componentIDMap[physicsComponentID];
 
@@ -174,6 +201,7 @@ class ColliderSystem : public System
 					if (cB->entity->Get_ID() != cA->entity->Get_ID())
 					{
 						PositionComponent* posB = (PositionComponent*)cB->entity->componentIDMap[positionComponentID];
+						PhysicsComponent* physB = (PhysicsComponent*)cB->entity->componentIDMap[physicsComponentID];
 
 						// Two static objects shouldn't be able to collide because they won't be able to resolve that collision.
 						if (!posA->stat || !posB->stat)
@@ -221,8 +249,6 @@ class ColliderSystem : public System
 										cA->platform && bBot > aTop - platformLeeway ||
 										cB->platform && aBot > bTop - platformLeeway)
 									{
-										PhysicsComponent* physB = (PhysicsComponent*)cB->entity->componentIDMap[physicsComponentID];
-
 										/*float tentativeBDX = (physB->velocityX - physB->drag) * deltaTime;
 										float tentativeBDY = ((physB->velocityY - physB->drag) + (physB->gravityMod * deltaTime)) * deltaTime;*/
 
@@ -244,6 +270,21 @@ class ColliderSystem : public System
 											{
 												cA->onPlatform = true;
 											}
+										}
+									}
+									else if (cB->climbable && cA->entity->componentIDMap[movementComponentID] != nullptr)
+									{
+										MovementComponent* moveA = (MovementComponent*)cA->entity->componentIDMap[movementComponentID];
+
+										if (moveA->canClimb && moveA->shouldClimb && TestCollision(cA, posA, physA, cB, posB, physB))
+										{
+											if (!keepVelocityClimbing)
+											{
+												// If you just started climbing, stop all other velocity.
+												physA->velocityX = 0;
+												physA->velocityY = 0;
+											}
+											moveA->climbing = true;
 										}
 									}
 								} // Bin gar keine Russin, stamm’ aus Litauen, echt deutsch.
@@ -345,6 +386,105 @@ class ColliderSystem : public System
 
 		// Game::main.renderer->prepareQuad(aTopRight, aBottomRight, aBottomLeft, aTopLeft, glm::vec4(0.0f, 0.0f, 0.0f, 0.5f), Game::main.textureMap["blank"]->ID);
 		return false;
+	}
+
+	bool TestCollision(ColliderComponent* colA, PositionComponent* posA, PhysicsComponent* physA, ColliderComponent* colB, PositionComponent* posB, PhysicsComponent* physB)
+	{
+		float aCX = colA->offsetX;
+		float aCY = colA->offsetY;
+
+		float aLX = -(colA->width / 2.0f) + colA->offsetX;
+		float aBY = -(colA->height / 2.0f) + colA->offsetY;
+
+		float aRX = (colA->width / 2.0f) + colA->offsetX;
+		float aTY = (colA->height / 2.0f) + colA->offsetY;
+
+
+		float bCX = colB->offsetX;
+		float bCY = colB->offsetY;
+
+		float bLX = -(colB->width / 2.0f) + colB->offsetX;
+		float bBY = -(colB->height / 2.0f) + colB->offsetY;
+
+		float bRX = (colB->width / 2.0f) + colB->offsetX;
+		float bTY = (colB->height / 2.0f) + colB->offsetY;
+
+		glm::vec2 aCenter = glm::vec2(posA->x, posA->y) + posA->Rotate(glm::vec2(aCX, aCY));
+		glm::vec2 aTopLeft = glm::vec2(posA->x, posA->y) + posA->Rotate(glm::vec2(aLX, aTY));
+		glm::vec2 aBottomLeft = glm::vec2(posA->x, posA->y) + posA->Rotate(glm::vec2(aLX, aBY));
+		glm::vec2 aTopRight = glm::vec2(posA->x, posA->y) + posA->Rotate(glm::vec2(aRX, aTY));
+		glm::vec2 aBottomRight = glm::vec2(posA->x, posA->y) + posA->Rotate(glm::vec2(aRX, aBY));
+
+		std::array<glm::vec2, 4> colliderOne = { aTopLeft, aTopRight, aBottomRight, aBottomLeft };
+
+		glm::vec2 bCenter = glm::vec2(posB->x, posB->y) + posB->Rotate(glm::vec2(bCX, bCY));
+		glm::vec2 bTopLeft = glm::vec2(posB->x, posB->y) + posB->Rotate(glm::vec2(bLX, bTY));
+		glm::vec2 bBottomLeft = glm::vec2(posB->x, posB->y) + posB->Rotate(glm::vec2(bLX, bBY));
+		glm::vec2 bTopRight = glm::vec2(posB->x, posB->y) + posB->Rotate(glm::vec2(bRX, bTY));
+		glm::vec2 bBottomRight = glm::vec2(posB->x, posB->y) + posB->Rotate(glm::vec2(bRX, bBY));
+
+		std::array<glm::vec2, 4> colliderTwo = { bTopLeft, bTopRight, bBottomRight, bBottomLeft };
+
+		float totalMass = colA->mass + colB->mass;
+		bool collided = false;
+
+		// Game::main.renderer->prepareQuad(aTopRight, aBottomRight, aBottomLeft, aTopLeft, glm::vec4(1.0f, 0.0f, 0.0f, 0.5f), Game::main.textureMap["blank"]->ID);
+
+		for (int s = 0; s < 2; s++)
+		{
+			if (s == 0)
+			{
+				// Diagonals
+				for (int p = 0; p < colliderOne.size(); p++)
+				{
+					glm::vec2 lineA = aCenter;
+					glm::vec2 lineB = colliderOne[p];
+
+					// Edges
+					for (int q = 0; q < colliderTwo.size(); q++)
+					{
+						glm::vec2 edgeA = colliderTwo[q];
+						glm::vec2 edgeB = colliderTwo[(q + 1) % colliderTwo.size()];
+
+						float h = (edgeB.x - edgeA.x) * (lineA.y - lineB.y) - (lineA.x - lineB.x) * (edgeB.y - edgeA.y);
+						float t1 = ((edgeA.y - edgeB.y) * (lineA.x - edgeA.x) + (edgeB.x - edgeA.x) * (lineA.y - edgeA.y)) / h;
+						float t2 = ((lineA.y - lineB.y) * (lineA.x - edgeA.x) + (lineB.x - lineA.x) * (lineA.y - edgeA.y)) / h;
+
+						if (t1 >= 0.0f && t1 < 1.0f && t2 >= 0.0f && t2 < 1.0f)
+						{
+							collided = true;
+						}
+					}
+				}
+			}
+			else
+			{
+				// Diagonals
+				for (int p = 0; p < colliderTwo.size(); p++)
+				{
+					glm::vec2 lineA = bCenter;
+					glm::vec2 lineB = colliderTwo[p];
+
+					// Edges
+					for (int q = 0; q < colliderOne.size(); q++)
+					{
+						glm::vec2 edgeA = colliderOne[q];
+						glm::vec2 edgeB = colliderOne[(q + 1) % colliderOne.size()];
+
+						float h = (edgeB.x - edgeA.x) * (lineA.y - lineB.y) - (lineA.x - lineB.x) * (edgeB.y - edgeA.y);
+						float t1 = ((edgeA.y - edgeB.y) * (lineA.x - edgeA.x) + (edgeB.x - edgeA.x) * (lineA.y - edgeA.y)) / h;
+						float t2 = ((lineA.y - lineB.y) * (lineA.x - edgeA.x) + (lineB.x - lineA.x) * (lineA.y - edgeA.y)) / h;
+
+						if (t1 >= 0.0f && t1 < 1.0f && t2 >= 0.0f && t2 < 1.0f)
+						{
+							collided = true;
+						}
+					}
+				}
+			}
+		}
+
+		return collided;
 	}
 
 	bool TestAndResolveCollision(ColliderComponent* colA, PositionComponent* posA, PhysicsComponent* physA, ColliderComponent* colB, PositionComponent* posB, PhysicsComponent* physB)
@@ -692,15 +832,42 @@ public:
 				HealthComponent* health = (HealthComponent*)m->entity->componentIDMap[healthComponentID];
 				DuelistComponent* duel = (DuelistComponent*)m->entity->componentIDMap[duelistComponentID];
 				
+				m->lastTick += deltaTime;
+
 				if (!health->dead)
 				{
-					if (move->jumping && col->onPlatform)
+					if (move->jumping && col->onPlatform ||
+						move->jumping && move->climbing)
 					{
 						move->jumping = false;
 					}
 
-					if (glfwGetMouseButton(Game::main.window, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS && !duel->isAttacking && duel->hasSword && duel->isDrawn && col->onPlatform && abs(phys->velocityX) < 10.0f)
+					if (glfwGetKey(Game::main.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS && move->canClimb)
 					{
+						move->shouldClimb = true;
+					}
+					else
+					{
+						move->shouldClimb = false;
+					}
+
+					if (glfwGetKey(Game::main.window, GLFW_KEY_T) == GLFW_PRESS && duel->hasSword && !duel->isAttacking && m->lastTick > 0.5f)
+					{
+						m->lastTick = 0.0f;
+
+						if (duel->isDrawn)
+						{
+							duel->isDrawn = false;
+						}
+						else
+						{
+							duel->isDrawn = true;
+						}
+					}
+
+					if (glfwGetMouseButton(Game::main.window, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS && !duel->isAttacking && duel->hasSword && duel->isDrawn && abs(phys->velocityX) < 10.0f && col->onPlatform)
+					{
+						m->lastTick = 0.0f;
 						phys->velocityX = 0;
 
 						if (Game::main.mouseX < phys->pos->x)
@@ -721,7 +888,7 @@ public:
 						CalculateProjection(phys, m, move);
 					}
 
-					if (glfwGetMouseButton(Game::main.window, GLFW_MOUSE_BUTTON_2) == GLFW_PRESS && move->canMove && !move->preparingToJump && col->onPlatform && abs(phys->velocityX) < 0.5f)
+					if (glfwGetMouseButton(Game::main.window, GLFW_MOUSE_BUTTON_2) == GLFW_PRESS && move->canMove && !move->preparingToJump && abs(phys->velocityX) < 0.5f && col->onPlatform)
 					{
 						move->canMove = false;
 						move->preparingToJump = true;
@@ -731,6 +898,8 @@ public:
 						move->canMove = true;
 						move->jumping = true;
 						move->preparingToJump = false;
+
+						move->shouldClimb = false;
 
 						float leapXVel, leapYVel;
 
@@ -756,14 +925,31 @@ public:
 						phys->velocityY += leapYVel;
 					}
 
-					if (glfwGetKey(Game::main.window, GLFW_KEY_D) == GLFW_PRESS && move->canMove && !move->jumping && !move->preparingToJump && col->onPlatform)
+					if (glfwGetKey(Game::main.window, GLFW_KEY_W) == GLFW_PRESS && move->canMove && !move->jumping && !move->preparingToJump && move->climbing)
+					{
+						if (phys->velocityY < move->maxSpeed)
+						{
+							phys->velocityY += move->acceleration * deltaTime;
+						}
+					}
+					else if (glfwGetKey(Game::main.window, GLFW_KEY_S) == GLFW_PRESS && move->canMove && !move->jumping && !move->preparingToJump && move->climbing)
+					{
+						if (phys->velocityY > -move->maxSpeed)
+						{
+							phys->velocityY -= move->acceleration * deltaTime;
+						}
+					}
+
+					if (glfwGetKey(Game::main.window, GLFW_KEY_D) == GLFW_PRESS && move->canMove && !move->jumping && !move->preparingToJump && col->onPlatform ||
+						glfwGetKey(Game::main.window, GLFW_KEY_D) == GLFW_PRESS && move->canMove && !move->jumping && !move->preparingToJump && move->climbing)
 					{
 						if (phys->velocityX < move->maxSpeed)
 						{
 							phys->velocityX += move->acceleration * deltaTime;
 						}
 					}
-					else if (glfwGetKey(Game::main.window, GLFW_KEY_A) == GLFW_PRESS && move->canMove && !move->jumping && !move->preparingToJump && col->onPlatform)
+					else if (glfwGetKey(Game::main.window, GLFW_KEY_A) == GLFW_PRESS && move->canMove && !move->jumping && !move->preparingToJump && col->onPlatform ||
+							glfwGetKey(Game::main.window, GLFW_KEY_A) == GLFW_PRESS && move->canMove && !move->jumping && !move->preparingToJump && move->climbing)
 					{
 						if (phys->velocityX > -move->maxSpeed)
 						{

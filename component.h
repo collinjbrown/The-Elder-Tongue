@@ -137,7 +137,6 @@ public:
 	}
 };
 
-
 class ColliderComponent : public Component
 {
 public:
@@ -145,6 +144,7 @@ public:
 	bool onPlatform;	// Every frame that you collide with a platform,
 						// this is set to true so that I don't have to
 						// raycast to check if you're on a platform.
+	bool climbable;
 
 	float mass;
 	float bounce;
@@ -158,7 +158,7 @@ public:
 
 	PositionComponent* pos;
 
-	ColliderComponent(Entity* entity, bool active, PositionComponent* pos, bool platform, float mass, float bounce, float friction, float width, float height, float offsetX, float offsetY)
+	ColliderComponent(Entity* entity, bool active, PositionComponent* pos, bool platform, bool climbable, float mass, float bounce, float friction, float width, float height, float offsetX, float offsetY)
 	{
 		ID = colliderComponentID;
 		this->active = active;
@@ -166,6 +166,9 @@ public:
 		this->pos = pos;
 
 		this->platform = platform;
+		this->onPlatform = false;
+		this->climbable = climbable;
+
 		this->mass = mass;
 		this->bounce = bounce;
 		this->friction = friction;
@@ -183,6 +186,7 @@ class InputComponent : public Component
 public:
 	bool acceptInput;
 	int projectionDepth;
+	float lastTick;
 
 	InputComponent(Entity* entity, bool active, bool acceptInput, float projectionDepth)
 	{
@@ -192,9 +196,9 @@ public:
 
 		this->acceptInput = acceptInput;
 		this->projectionDepth = projectionDepth;
+		this->lastTick = 0.0f;
 	}
 };
-
 
 class MovementComponent : public Component
 {
@@ -206,9 +210,14 @@ public:
 
 	bool jumping;
 	bool preparingToJump;
+
 	bool canMove;
 
-	MovementComponent(Entity* entity, bool active, float acceleration, float maxSpeed, float maxJumpHeight, float stabDepth, bool canMove)
+	bool canClimb;
+	bool shouldClimb;
+	bool climbing;
+
+	MovementComponent(Entity* entity, bool active, float acceleration, float maxSpeed, float maxJumpHeight, float stabDepth, bool canMove, bool canClimb, bool shouldClimb)
 	{
 		this->ID = movementComponentID;
 		this->entity = entity;
@@ -221,6 +230,10 @@ public:
 		this->jumping = false;
 		this->preparingToJump = false;
 		this->stabDepth = stabDepth;
+
+		this->canClimb = canClimb;
+		this->shouldClimb = shouldClimb;
+		this->climbing = false;
 	}
 };
 
@@ -286,14 +299,12 @@ public:
 	}
 };
 
-
 class AnimationControllerComponent : public Component
 {
 public:
 	AnimationComponent* animator;
 	int subID;
 };
-
 
 class DragonriderAnimationControllerComponent : public AnimationControllerComponent
 {
