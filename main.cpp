@@ -156,6 +156,10 @@ int main(void)
     renderer.textureIDs.push_back(swordBaseStab.ID);
     Game::main.animationMap.emplace("sword_baseStab", &swordBaseStab);
 
+    Animation2D swordBaseAerialOne{ "assets/animations/base/sword_baseAerialOne.png", true, 2, 3, 0.05f, { 2, 2, 2 }, false, GL_NEAREST };
+    renderer.textureIDs.push_back(swordBaseAerialOne.ID);
+    Game::main.animationMap.emplace("sword_baseAerialOne", &swordBaseAerialOne);
+
     #pragma endregion
 
     #pragma region Test Character Animations

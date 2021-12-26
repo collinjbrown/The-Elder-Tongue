@@ -80,6 +80,26 @@ public:
 							{
 								p->velocityY -= p->gravityMod * deltaTime;
 							}
+							else if (move->climbing)
+							{
+								if (p->velocityX > 0)
+								{
+									p->velocityX -= p->drag * deltaTime;
+								}
+								else if (p->velocityX < 0)
+								{
+									p->velocityX += p->drag * deltaTime;
+								}
+
+								if (p->velocityY > 0)
+								{
+									p->velocityY -= p->drag * deltaTime;
+								}
+								else if (p->velocityY < 0)
+								{
+									p->velocityY += p->drag * deltaTime;
+								}
+							}
 						}
 						else if (!col->onPlatform)
 						{
@@ -281,8 +301,8 @@ class ColliderSystem : public System
 											if (!keepVelocityClimbing)
 											{
 												// If you just started climbing, stop all other velocity.
-												physA->velocityX = 0;
-												physA->velocityY = 0;
+												physA->velocityX = physA->drag * deltaTime * 10;
+												physA->velocityY = physA->drag * deltaTime * 10;
 											}
 											moveA->climbing = true;
 										}
@@ -865,22 +885,37 @@ public:
 						}
 					}
 
-					if (glfwGetMouseButton(Game::main.window, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS && !duel->isAttacking && duel->hasSword && duel->isDrawn && abs(phys->velocityX) < 10.0f && col->onPlatform)
+					if (glfwGetMouseButton(Game::main.window, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS && !duel->isAttacking && duel->hasSword && duel->isDrawn && !move->preparingToJump)
 					{
 						m->lastTick = 0.0f;
-						phys->velocityX = 0;
 
 						if (Game::main.mouseX < phys->pos->x)
 						{
-							phys->velocityX -= move->stabDepth;
-							duel->isAttacking = true;
-							move->canMove = false;
+							if (abs(phys->velocityX) < 0.5f)
+							{
+								phys->velocityX -= move->stabDepth;
+								duel->isAttacking = true;
+								move->canMove = false;
+							}
+							else if (move->jumping)
+							{
+								duel->isAttacking = true;
+								move->canMove = false;
+							}
 						}
 						else
 						{
-							phys->velocityX += move->stabDepth;
-							duel->isAttacking = true;
-							move->canMove = false;
+							if (abs(phys->velocityX) < 0.5f)
+							{
+								phys->velocityX += move->stabDepth;
+								duel->isAttacking = true;
+								move->canMove = false;
+							}
+							else if (move->jumping)
+							{
+								duel->isAttacking = true;
+								move->canMove = false;
+							}
 						}
 					}
 					else if (move->preparingToJump)
@@ -888,7 +923,8 @@ public:
 						CalculateProjection(phys, m, move);
 					}
 
-					if (glfwGetMouseButton(Game::main.window, GLFW_MOUSE_BUTTON_2) == GLFW_PRESS && move->canMove && !move->preparingToJump && abs(phys->velocityX) < 0.5f && col->onPlatform)
+					if (glfwGetMouseButton(Game::main.window, GLFW_MOUSE_BUTTON_2) == GLFW_PRESS && move->canMove && !move->preparingToJump && abs(phys->velocityX) < 0.5f && col->onPlatform ||
+						glfwGetMouseButton(Game::main.window, GLFW_MOUSE_BUTTON_2) == GLFW_PRESS && move->canMove && !move->preparingToJump && abs(phys->velocityX) < 0.5f && move->climbing)
 					{
 						move->canMove = false;
 						move->preparingToJump = true;
@@ -1118,9 +1154,13 @@ public:
 
 					if (duel->isAttacking)
 					{
-						if (c->animator->activeAnimation != s + "stab")
+						if (c->animator->activeAnimation != s + "stab" && !move->jumping)
 						{
 							c->animator->SetAnimation(s + "stab");
+						}
+						else if (c->animator->activeAnimation != s + "aerialOne" && move->jumping)
+						{
+							c->animator->SetAnimation(s + "aerialOne");
 						}
 					}
 					else if (abs(p->velocityY) > 10.0f && !col->onPlatform)
@@ -1320,7 +1360,8 @@ public:
 
 					if (!d->hasSword || !d->isDrawn)
 					{
-						if (!m->jumping && !m->preparingToJump && abs(p->velocityX) < 0.5f && abs(p->velocityY) < 0.5f)
+						// if (!m->jumping && !m->preparingToJump && abs(p->velocityX) < 0.5f && abs(p->velocityY) < 0.5f)
+						if (!m->preparingToJump && !m->climbing)
 						{
 							d->isAttacking = false;
 							m->canMove = true;
@@ -1329,7 +1370,8 @@ public:
 
 					if (d->lastTick > 0.5f)
 					{
-						if (!m->jumping && !m->preparingToJump && abs(p->velocityX) < 0.5f && abs(p->velocityY) < 0.5f)
+						// if (!m->jumping && !m->preparingToJump && abs(p->velocityX) < 0.5f && abs(p->velocityY) < 0.5f)
+						if (!m->preparingToJump && !m->climbing)
 						{
 							d->lastTick = 0;
 							d->isAttacking = false;

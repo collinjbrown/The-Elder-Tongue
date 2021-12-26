@@ -123,6 +123,7 @@ public:
 			a->AddAnimation("sword_jumpDown", Game::main.animationMap["sword_baseJumpDown"]);
 			a->AddAnimation("sword_dead", Game::main.animationMap["baseDeath"]);
 			a->AddAnimation("sword_stab", Game::main.animationMap["sword_baseStab"]);
+			a->AddAnimation("sword_aerialOne", Game::main.animationMap["sword_baseAerialOne"]);
 			#pragma endregion
 
 			#pragma region Test Character Instantiation
