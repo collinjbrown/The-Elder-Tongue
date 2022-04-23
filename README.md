@@ -1,2 +1,2 @@
-# The Elder Tongue
+# The Moonlight Tongue
  A Metroidvania game about...
