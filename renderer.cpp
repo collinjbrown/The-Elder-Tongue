@@ -197,11 +197,11 @@ void Renderer::prepareQuad(PositionComponent* pos, float width, float height,
     
     // Figure out how cells should be handled.
     // ---------------------------------------
-    float cellXMod = 1.0f / rows;
-    float cellYMod = 1.0f / cols;
+    float cellXMod = 1.0f / cols;
+    float cellYMod = 1.0f / rows;
 
-    float uvX0 =  cellX* cellXMod;
-    float uvY0 = cellY* cellYMod;
+    float uvX0 =  cellX * cellXMod;
+    float uvY0 = cellY * cellYMod;
     float uvX1 =  uvX0 + cellXMod;
     float uvY1 = uvY0 + cellYMod;
 
