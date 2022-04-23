@@ -1,8 +1,8 @@
-# Install script for directory: C:/Users/CJBro/Desktop/Coding/RPGs/The Elder Tongue
+# Install script for directory: C:/Users/CJBro/Desktop/Coding/RPGs/The Moonlight Tongue
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "C:/Users/CJBro/Desktop/Coding/RPGs/The Elder Tongue/out/install/x64-Debug (default)")
+  set(CMAKE_INSTALL_PREFIX "C:/Users/CJBro/Desktop/Coding/RPGs/The Moonlight Tongue/out/install/x64-Debug (default)")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -34,9 +34,9 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  include("C:/Users/CJBro/Desktop/Coding/RPGs/The Elder Tongue/out/build/x64-Debug (default)/libs/glfw-3.3.4/cmake_install.cmake")
-  include("C:/Users/CJBro/Desktop/Coding/RPGs/The Elder Tongue/out/build/x64-Debug (default)/libs/glad/cmake_install.cmake")
-  include("C:/Users/CJBro/Desktop/Coding/RPGs/The Elder Tongue/out/build/x64-Debug (default)/libs/glm-0.9.9.8/cmake_install.cmake")
+  include("C:/Users/CJBro/Desktop/Coding/RPGs/The Moonlight Tongue/out/build/x64-Debug (default)/libs/glfw-3.3.4/cmake_install.cmake")
+  include("C:/Users/CJBro/Desktop/Coding/RPGs/The Moonlight Tongue/out/build/x64-Debug (default)/libs/glad/cmake_install.cmake")
+  include("C:/Users/CJBro/Desktop/Coding/RPGs/The Moonlight Tongue/out/build/x64-Debug (default)/libs/glm-0.9.9.8/cmake_install.cmake")
 
 endif()
 
@@ -48,5 +48,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "C:/Users/CJBro/Desktop/Coding/RPGs/The Elder Tongue/out/build/x64-Debug (default)/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "C:/Users/CJBro/Desktop/Coding/RPGs/The Moonlight Tongue/out/build/x64-Debug (default)/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

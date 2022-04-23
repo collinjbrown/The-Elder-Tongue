@@ -55,7 +55,7 @@ int main(void)
     glfwWindowHintString(GLFW_X11_CLASS_NAME, "OpenGL");
     glfwWindowHintString(GLFW_X11_INSTANCE_NAME, "OpenGL");
 
-    window = glfwCreateWindow(windowWidth, windowHeight, "The Elder Tongue", NULL, NULL);
+    window = glfwCreateWindow(windowWidth, windowHeight, "The Moonlight Tongue", NULL, NULL);
     if (!window)
     {
         glfwTerminate();

@@ -1,8 +1,0 @@
-prefix=C:/Users/CJBro/Desktop/Coding/RPGs/The Elder Tongue/out/install/x64-Debug (default)
-includedir=${prefix}/include
-
-Name: EnTT
-Description: Gaming meets modern C++
-Url: https://github.com/skypjack/entt
-Version: 3.9.0
-Cflags: -I${includedir}
