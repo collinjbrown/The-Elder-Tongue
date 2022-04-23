@@ -103,7 +103,7 @@ void _glfwInputWindowMaximize(_GLFWwindow* window, GLFWbool maximized)
 }
 
 // Notifies shared code that a window framebuffer has been resized
-// The size is specified in pixels
+// The size is specified in pixelEffects
 //
 void _glfwInputFramebufferSize(_GLFWwindow* window, int width, int height)
 {

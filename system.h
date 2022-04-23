@@ -528,33 +528,19 @@ class ColliderSystem : public System
 		float bTY = (colB->height / 2.0f) + colB->offsetY;
 		bool collided = false;
 
-		for (int run = 0; run < 2; run++)
+		for (float it = 0.9f; it > -0.1f; it -= 0.1f)
 		{
-			glm::vec2 aCenter = glm::vec2(posA->x, posA->y) + posA->Rotate(glm::vec2(aCX, aCY));
-			glm::vec2 aTopLeft = glm::vec2(posA->x, posA->y) + posA->Rotate(glm::vec2(aLX, aTY));
-			glm::vec2 aBottomLeft = glm::vec2(posA->x, posA->y) + posA->Rotate(glm::vec2(aLX, aBY));
-			glm::vec2 aTopRight = glm::vec2(posA->x, posA->y) + posA->Rotate(glm::vec2(aRX, aTY));
-			glm::vec2 aBottomRight = glm::vec2(posA->x, posA->y) + posA->Rotate(glm::vec2(aRX, aBY));
+			glm::vec2 aCenter = (glm::vec2(posA->x, posA->y) + glm::vec2(physA->velocityX * it * deltaTime, physA->velocityY * it * deltaTime)) + posA->Rotate(glm::vec2(aCX, aCY));
+			glm::vec2 aTopLeft = (glm::vec2(posA->x, posA->y) + glm::vec2(physA->velocityX * it * deltaTime, physA->velocityY * it * deltaTime)) + posA->Rotate(glm::vec2(aLX, aTY));
+			glm::vec2 aBottomLeft = (glm::vec2(posA->x, posA->y) + glm::vec2(physA->velocityX * it * deltaTime, physA->velocityY * it * deltaTime)) + posA->Rotate(glm::vec2(aLX, aBY));
+			glm::vec2 aTopRight = (glm::vec2(posA->x, posA->y) + glm::vec2(physA->velocityX * it * deltaTime, physA->velocityY * it * deltaTime)) + posA->Rotate(glm::vec2(aRX, aTY));
+			glm::vec2 aBottomRight = (glm::vec2(posA->x, posA->y) + glm::vec2(physA->velocityX * it * deltaTime, physA->velocityY * it * deltaTime)) + posA->Rotate(glm::vec2(aRX, aBY));
 
-			glm::vec2 bCenter = glm::vec2(posB->x, posB->y) + posB->Rotate(glm::vec2(bCX, bCY));
-			glm::vec2 bTopLeft = glm::vec2(posB->x, posB->y) + posB->Rotate(glm::vec2(bLX, bTY));
-			glm::vec2 bBottomLeft = glm::vec2(posB->x, posB->y) + posB->Rotate(glm::vec2(bLX, bBY));
-			glm::vec2 bTopRight = glm::vec2(posB->x, posB->y) + posB->Rotate(glm::vec2(bRX, bTY));
-			glm::vec2 bBottomRight = glm::vec2(posB->x, posB->y) + posB->Rotate(glm::vec2(bRX, bBY));
-
-			if (run == 0) {
-				aCenter += glm::vec2(physA->velocityX * (deltaTime / 2.0f), physA->velocityY * (deltaTime / 2.0f));
-				aTopLeft += glm::vec2(physA->velocityX * (deltaTime / 2.0f), physA->velocityY * (deltaTime / 2.0f));
-				aBottomLeft += glm::vec2(physA->velocityX * (deltaTime / 2.0f), physA->velocityY * (deltaTime / 2.0f));
-				aTopRight += glm::vec2(physA->velocityX * (deltaTime / 2.0f), physA->velocityY * (deltaTime / 2.0f));
-				aBottomRight += glm::vec2(physA->velocityX * (deltaTime / 2.0f), physA->velocityY * (deltaTime / 2.0f));
-
-				bCenter += glm::vec2(physB->velocityX * (deltaTime / 2.0f), physB->velocityY * (deltaTime / 2.0f));
-				bTopLeft += glm::vec2(physB->velocityX * (deltaTime / 2.0f), physB->velocityY * (deltaTime / 2.0f));
-				bBottomLeft += glm::vec2(physB->velocityX * (deltaTime / 2.0f), physB->velocityY * (deltaTime / 2.0f));
-				bTopRight += glm::vec2(physB->velocityX * (deltaTime / 2.0f), physB->velocityY * (deltaTime / 2.0f));
-				bBottomRight += glm::vec2(physB->velocityX * (deltaTime / 2.0f), physB->velocityY * (deltaTime / 2.0f));
-			}
+			glm::vec2 bCenter = (glm::vec2(posB->x, posB->y) + glm::vec2(physB->velocityX * it * deltaTime, physB->velocityY * it * deltaTime)) + posB->Rotate(glm::vec2(bCX, bCY));
+			glm::vec2 bTopLeft = (glm::vec2(posB->x, posB->y) + glm::vec2(physB->velocityX * it * deltaTime, physB->velocityY * it * deltaTime)) + posB->Rotate(glm::vec2(bLX, bTY));
+			glm::vec2 bBottomLeft = (glm::vec2(posB->x, posB->y) + glm::vec2(physB->velocityX * it * deltaTime, physB->velocityY * it * deltaTime)) + posB->Rotate(glm::vec2(bLX, bBY));
+			glm::vec2 bTopRight = (glm::vec2(posB->x, posB->y) + glm::vec2(physB->velocityX * it * deltaTime, physB->velocityY * it * deltaTime)) + posB->Rotate(glm::vec2(bRX, bTY));
+			glm::vec2 bBottomRight = (glm::vec2(posB->x, posB->y) + glm::vec2(physB->velocityX * it * deltaTime, physB->velocityY * it * deltaTime)) + posB->Rotate(glm::vec2(bRX, bBY));
 
 			std::array<glm::vec2, 4> colliderOne = { aTopLeft, aTopRight, aBottomRight, aBottomLeft };
 

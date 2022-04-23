@@ -140,17 +140,17 @@ RECENT REVISION HISTORY:
 //    stbi_image_free(data)
 //
 // Standard parameters:
-//    int *x                 -- outputs image width in pixels
-//    int *y                 -- outputs image height in pixels
+//    int *x                 -- outputs image width in pixelEffects
+//    int *y                 -- outputs image height in pixelEffects
 //    int *channels_in_file  -- outputs # of image components in image file
 //    int desired_channels   -- if non-zero, # of image components requested in result
 //
 // The return value from an image loader is an 'unsigned char *' which points
 // to the pixel data, or NULL on an allocation failure or if the image is
-// corrupt or invalid. The pixel data consists of *y scanlines of *x pixels,
+// corrupt or invalid. The pixel data consists of *y scanlines of *x pixelEffects,
 // with each pixel consisting of N interleaved 8-bit components; the first
 // pixel pointed to is top-left-most in the image. There is no padding between
-// image scanlines or between pixels, regardless of format. The number of
+// image scanlines or between pixelEffects, regardless of format. The number of
 // components N is 'desired_channels' if desired_channels is non-zero, or
 // *channels_in_file otherwise. If desired_channels is non-zero,
 // *channels_in_file has the number of components that _would_ have been
@@ -2882,7 +2882,7 @@ static void stbi__jpeg_reset(stbi__jpeg* j)
     j->todo = j->restart_interval ? j->restart_interval : 0x7fffffff;
     j->eob_run = 0;
     // no more than 1<<31 MCUs if no restart_interal? that's plenty safe,
-    // since we don't even allow 1<<30 pixels
+    // since we don't even allow 1<<30 pixelEffects
 }
 
 static int stbi__parse_entropy_coded_data(stbi__jpeg* z)
@@ -2895,7 +2895,7 @@ static int stbi__parse_entropy_coded_data(stbi__jpeg* z)
             int n = z->order[0];
             // non-interleaved data, we just need to process one block at a time,
             // in trivial scanline order
-            // number of blocks to do just depends on how many actual "pixels" this
+            // number of blocks to do just depends on how many actual "pixelEffects" this
             // component has, independent of interleaved MCU blocking and such
             int w = (z->img_comp[n].x + 7) >> 3;
             int h = (z->img_comp[n].y + 7) >> 3;
@@ -2954,7 +2954,7 @@ static int stbi__parse_entropy_coded_data(stbi__jpeg* z)
             int n = z->order[0];
             // non-interleaved data, we just need to process one block at a time,
             // in trivial scanline order
-            // number of blocks to do just depends on how many actual "pixels" this
+            // number of blocks to do just depends on how many actual "pixelEffects" this
             // component has, independent of interleaved MCU blocking and such
             int w = (z->img_comp[n].x + 7) >> 3;
             int h = (z->img_comp[n].y + 7) >> 3;
@@ -3257,7 +3257,7 @@ static int stbi__process_frame_header(stbi__jpeg* z, int scan)
     z->img_mcu_y = (s->img_y + z->img_mcu_h - 1) / z->img_mcu_h;
 
     for (i = 0; i < s->img_n; ++i) {
-        // number of effective pixels (e.g. for non-interleaved MCU)
+        // number of effective pixelEffects (e.g. for non-interleaved MCU)
         z->img_comp[i].x = (s->img_x * z->img_comp[i].h + h_max - 1) / h_max;
         z->img_comp[i].y = (s->img_y * z->img_comp[i].v + v_max - 1) / v_max;
         // to simplify generation, we'll allocate enough memory to decode
@@ -3459,7 +3459,7 @@ static stbi_uc* stbi__resample_row_hv_2_simd(stbi_uc* out, stbi_uc* in_near, stb
     }
 
     t1 = 3 * in_near[0] + in_far[0];
-    // process groups of 8 pixels for as long as we can.
+    // process groups of 8 pixelEffects for as long as we can.
     // note we can't handle the last pixel in a row in this loop
     // because we need to handle the filter boundary conditions.
     for (; i < ((w - 1) & ~7); i += 8) {
@@ -3479,15 +3479,15 @@ static stbi_uc* stbi__resample_row_hv_2_simd(stbi_uc* out, stbi_uc* in_near, stb
         // row. "prev" is current row shifted right by 1 pixel; we need to
         // insert the previous pixel value (from t1).
         // "next" is current row shifted left by 1 pixel, with first pixel
-        // of next block of 8 pixels added in.
+        // of next block of 8 pixelEffects added in.
         __m128i prv0 = _mm_slli_si128(curr, 2);
         __m128i nxt0 = _mm_srli_si128(curr, 2);
         __m128i prev = _mm_insert_epi16(prv0, t1, 0);
         __m128i next = _mm_insert_epi16(nxt0, 3 * in_near[i + 8] + in_far[i + 8], 7);
 
         // horizontal filter, polyphase implementation since it's convenient:
-        // even pixels = 3*cur + prev = cur*4 + (prev - cur)
-        // odd  pixels = 3*cur + next = cur*4 + (next - cur)
+        // even pixelEffects = 3*cur + prev = cur*4 + (prev - cur)
+        // odd  pixelEffects = 3*cur + next = cur*4 + (next - cur)
         // note the shared term.
         __m128i bias = _mm_set1_epi16(8);
         __m128i curs = _mm_slli_epi16(curr, 2);
@@ -3497,7 +3497,7 @@ static stbi_uc* stbi__resample_row_hv_2_simd(stbi_uc* out, stbi_uc* in_near, stb
         __m128i even = _mm_add_epi16(prvd, curb);
         __m128i odd = _mm_add_epi16(nxtd, curb);
 
-        // interleave even and odd pixels, then undo scaling.
+        // interleave even and odd pixelEffects, then undo scaling.
         __m128i int0 = _mm_unpacklo_epi16(even, odd);
         __m128i int1 = _mm_unpackhi_epi16(even, odd);
         __m128i de0 = _mm_srli_epi16(int0, 4);
@@ -3519,15 +3519,15 @@ static stbi_uc* stbi__resample_row_hv_2_simd(stbi_uc* out, stbi_uc* in_near, stb
         // row. "prev" is current row shifted right by 1 pixel; we need to
         // insert the previous pixel value (from t1).
         // "next" is current row shifted left by 1 pixel, with first pixel
-        // of next block of 8 pixels added in.
+        // of next block of 8 pixelEffects added in.
         int16x8_t prv0 = vextq_s16(curr, curr, 7);
         int16x8_t nxt0 = vextq_s16(curr, curr, 1);
         int16x8_t prev = vsetq_lane_s16(t1, prv0, 0);
         int16x8_t next = vsetq_lane_s16(3 * in_near[i + 8] + in_far[i + 8], nxt0, 7);
 
         // horizontal filter, polyphase implementation since it's convenient:
-        // even pixels = 3*cur + prev = cur*4 + (prev - cur)
-        // odd  pixels = 3*cur + next = cur*4 + (next - cur)
+        // even pixelEffects = 3*cur + prev = cur*4 + (prev - cur)
+        // odd  pixelEffects = 3*cur + next = cur*4 + (next - cur)
         // note the shared term.
         int16x8_t curs = vshlq_n_s16(curr, 2);
         int16x8_t prvd = vsubq_s16(prev, curr);
@@ -3771,7 +3771,7 @@ typedef struct
     resample_row_func resample;
     stbi_uc* line0, * line1;
     int hs, vs;   // expansion factor in each axis
-    int w_lores; // horizontal pixels pre-expansion
+    int w_lores; // horizontal pixelEffects pre-expansion
     int ystep;   // how far through vertical expansion we are
     int ypos;    // which pre-expansion row we're on
 } stbi__resample;
@@ -4694,7 +4694,7 @@ static int stbi__create_png_image_raw(stbi__png* a, stbi_uc* raw, stbi__uint32 r
             }
 #undef STBI__CASE
 
-            // the loop above sets the high byte of the pixels' alpha, but for
+            // the loop above sets the high byte of the pixelEffects' alpha, but for
             // 16 bit png files we also need the low byte set. we'll do that here.
             if (depth == 16) {
                 cur = a->out + stride * j; // start at the beginning of the row again
@@ -4705,7 +4705,7 @@ static int stbi__create_png_image_raw(stbi__png* a, stbi_uc* raw, stbi__uint32 r
         }
     }
 
-    // we make a separate pass to expand bits to pixels; for performance,
+    // we make a separate pass to expand bits to pixelEffects; for performance,
     // this could run two scanlines behind the above code, so it won't
     // intefere with filtering but will still be in the cache.
     if (depth < 8) {
@@ -5114,7 +5114,7 @@ static int stbi__parse_png_file(stbi__png* z, int scan, int req_comp)
             if (z->idata == NULL) return stbi__err("no IDAT", "Corrupt PNG");
             // initial guess for decoded data size to avoid unnecessary reallocs
             bpl = (s->img_x * z->depth + 7) / 8; // bytes per line, per component
-            raw_len = bpl * s->img_y * s->img_n /* pixels */ + s->img_y /* filter mode per row */;
+            raw_len = bpl * s->img_y * s->img_n /* pixelEffects */ + s->img_y /* filter mode per row */;
             z->expanded = (stbi_uc*)stbi_zlib_decode_malloc_guesssize_headerflag((char*)z->idata, ioff, raw_len, (int*)&raw_len, !is_iphone);
             if (z->expanded == NULL) return 0; // zlib should set error
             STBI_FREE(z->idata); z->idata = NULL;
@@ -6575,7 +6575,7 @@ static void stbi__out_gif_code(stbi__gif* g, stbi__uint16 code)
     g->history[idx / 4] = 1;
 
     c = &g->color_table[g->codes[code].suffix * 4];
-    if (c[3] > 128) { // don't render transparent pixels;
+    if (c[3] > 128) { // don't render transparent pixelEffects;
         p[0] = c[2];
         p[1] = c[1];
         p[2] = c[0];
@@ -6695,7 +6695,7 @@ static stbi_uc* stbi__gif_load_next(stbi__context* s, stbi__gif* g, int* comp, i
     int pcount;
     STBI_NOTUSED(req_comp);
 
-    // on first frame, any non-written pixels get the background colour (non-transparent)
+    // on first frame, any non-written pixelEffects get the background colour (non-transparent)
     first_frame = 0;
     if (g->out == 0) {
         if (!stbi__gif_header(s, g, comp, 0)) return 0; // stbi__g_failure_reason set by stbi__gif_header
@@ -6709,11 +6709,11 @@ static stbi_uc* stbi__gif_load_next(stbi__context* s, stbi__gif* g, int* comp, i
             return stbi__errpuc("outofmem", "Out of memory");
 
         // image is treated as "transparent" at the start - ie, nothing overwrites the current background;
-        // background colour is only used for pixels that are not rendered first frame, after that "background"
+        // background colour is only used for pixelEffects that are not rendered first frame, after that "background"
         // color refers to the color that was there the previous frame.
         memset(g->out, 0x00, 4 * pcount);
         memset(g->background, 0x00, 4 * pcount); // state of the background (starts transparent)
-        memset(g->history, 0x00, pcount);        // pixels that were affected previous frame
+        memset(g->history, 0x00, pcount);        // pixelEffects that were affected previous frame
         first_frame = 1;
     }
     else {
@@ -6742,7 +6742,7 @@ static stbi_uc* stbi__gif_load_next(stbi__context* s, stbi__gif* g, int* comp, i
         }
         else {
             // This is a non-disposal case eithe way, so just
-            // leave the pixels as is, and they will become the new background
+            // leave the pixelEffects as is, and they will become the new background
             // 1: do not dispose
             // 0:  not specified.
         }
@@ -6752,7 +6752,7 @@ static stbi_uc* stbi__gif_load_next(stbi__context* s, stbi__gif* g, int* comp, i
     }
 
     // clear my history;
-    memset(g->history, 0x00, g->w * g->h);        // pixels that were affected previous frame
+    memset(g->history, 0x00, g->w * g->h);        // pixelEffects that were affected previous frame
 
     for (;;) {
         int tag = stbi__get8(s);
@@ -6778,7 +6778,7 @@ static stbi_uc* stbi__gif_load_next(stbi__context* s, stbi__gif* g, int* comp, i
             g->cur_y = g->start_y;
 
             // if the width of the specified rectangle is 0, that means
-            // we may not see *any* pixels or the image is malformed;
+            // we may not see *any* pixelEffects or the image is malformed;
             // to make sure this is caught, move the current y down to
             // max_y (which is what out_gif_code checks).
             if (w == 0)
@@ -7781,7 +7781,7 @@ STBIDEF int stbi_is_16_bit_from_callbacks(stbi_io_callbacks const* c, void* user
       1.18  (2008-08-02)
               fix a threading bug (local mutable static)
       1.17    support interlaced PNG
-      1.16    major bugfix - stbi__convert_format converted one too many pixels
+      1.16    major bugfix - stbi__convert_format converted one too many pixelEffects
       1.15    initialize some fields for thread safety
       1.14    fix threadsafe conversion bug
               header-file-only version (#define STBI_HEADER_FILE_ONLY before including)
