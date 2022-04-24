@@ -183,6 +183,7 @@ class ColliderSystem : public System
 		{
 			ColliderComponent* cA = colls[i];
 			cA->onPlatform = false;
+			cA->collidedLastTick = false;
 
 			if (cA->active)
 			{
@@ -277,18 +278,21 @@ class ColliderSystem : public System
 										// This does not yet (really) solve for tunneling.
 										if (TestAndResolveCollision(cA, posA, physA, cB, posB, physB, deltaTime))
 										{
-											if (cA->platform)
+											cA->collidedLastTick = true;
+											cB->collidedLastTick = true;
+
+											if (cA->platform && bBot > aTop - platformLeeway)
 											{
 												cB->onPlatform = true;
 											}
-											else if (cB->platform)
+											else if (cB->platform && aBot > bTop - platformLeeway)
 											{
 												cA->onPlatform = true;
 											}
 										}
-										else if (cB->platform)
+										else if (cB->platform && aBot > bTop - platformLeeway)
 										{
-											if (RaycastDown(1, 10, cA, posA, cB, posB))
+											if (RaycastDown(1, 0.1f, cA, posA, cB, posB))
 											{
 												cA->onPlatform = true;
 											}
@@ -336,9 +340,9 @@ class ColliderSystem : public System
 
 		glm::vec2 aCenter = glm::vec2(posA->x, posA->y);
 		glm::vec2 aTopLeft = glm::vec2(posA->x, posA->y) + posA->Rotate(glm::vec2(nR, r - ryC));
-		glm::vec2 aBottomLeft = glm::vec2(posA->x, posA->y) + posA->Rotate(glm::vec2(nR, nR - size - ryC));
+		glm::vec2 aBottomLeft = glm::vec2(posA->x, posA->y - distance) + posA->Rotate(glm::vec2(nR, nR - size - ryC));
 		glm::vec2 aTopRight = glm::vec2(posA->x, posA->y) + posA->Rotate(glm::vec2(r, r - ryC));
-		glm::vec2 aBottomRight = glm::vec2(posA->x, posA->y) + posA->Rotate(glm::vec2(r, nR - size - ryC));
+		glm::vec2 aBottomRight = glm::vec2(posA->x, posA->y - distance) + posA->Rotate(glm::vec2(r, nR - size - ryC));
 
 		std::array<glm::vec2, 4> colliderOne = { aTopLeft, aTopRight, aBottomRight, aBottomLeft };
 
@@ -929,7 +933,7 @@ public:
 							}
 						}
 					}
-					
+
 					/*if (move->preparingToJump && m->projectionTime >= m->projectionDelay && abs(phys->velocityX) < 0.5f)
 					{
 						m->projecting = true;
@@ -955,17 +959,24 @@ public:
 					{
 						m->releasedJump = true;
 					}
-					
+
 					if (glfwGetKey(Game::main.window, GLFW_KEY_SPACE) == GLFW_PRESS && move->canMove && col->onPlatform && m->releasedJump
 						|| glfwGetKey(Game::main.window, GLFW_KEY_SPACE) == GLFW_PRESS && move->canMove && m->releasedJump && m->coyoteTime < m->maxCoyoteTime
-						|| glfwGetKey(Game::main.window, GLFW_KEY_SPACE) == GLFW_PRESS && move->canMove && m->releasedJump && m->jumps < m->maxJumps)
+						|| glfwGetKey(Game::main.window, GLFW_KEY_SPACE) == GLFW_PRESS && move->canMove && m->releasedJump && !col->onPlatform && m->maxJumps > 1 && m->jumps < m->maxJumps)
 					{
+						if (!col->onPlatform && m->jumps == 0 && m->coyoteTime > m->maxCoyoteTime)
+						{
+							m->jumps += 2;
+						}
+						else
+						{
+							m->jumps++;
+						}
+
 						if (phys->velocityY < 0)
 						{
 							phys->velocityY = 0;
 						}
-
-						m->jumps++;
 
 						m->releasedJump = false;
 						m->coyoteTime = m->maxCoyoteTime;
@@ -1034,10 +1045,13 @@ public:
 						}
 					}
 
+					
+
 					if (glfwGetKey(Game::main.window, GLFW_KEY_D) == GLFW_PRESS && move->canMove)
 					{
 						if (phys->velocityX < move->maxSpeed)
 						{
+
 							phys->velocityX += move->acceleration * deltaTime;
 						}
 					}
@@ -1045,9 +1059,11 @@ public:
 					{
 						if (phys->velocityX > -move->maxSpeed)
 						{
+
 							phys->velocityX -= move->acceleration * deltaTime;
 						}
 					}
+
 				}
 				else
 				{
@@ -1234,11 +1250,16 @@ public:
 					{
 						c->animator->SetAnimation(s + "jumpPrep");
 					}
-					else if (abs(p->velocityX) > 0.5f && col->onPlatform && move->canMove && c->animator->activeAnimation != s + "walk")
+					else if (abs(p->velocityX) > 25.0f && col->onPlatform && move->canMove && c->animator->activeAnimation != s + "walk")
 					{
 						c->animator->SetAnimation(s + "walk");
 					}
-					else if (abs(p->velocityX) < 0.5f && !move->preparingToJump && move->canMove && c->animator->activeAnimation != s + "idle")
+					else if (abs(p->velocityX) < 0.5f && col->onPlatform && move->canClimb && c->animator->activeAnimation == s + "walk" && glfwGetKey(Game::main.window, GLFW_KEY_A) == GLFW_PRESS
+						|| abs(p->velocityX) < 0.5f && col->onPlatform && move->canClimb && c->animator->activeAnimation == s + "walk" && glfwGetKey(Game::main.window, GLFW_KEY_D) == GLFW_PRESS)
+					{
+						// Wowzer
+					}
+					else if (abs(p->velocityX) < 0.5f && col->onPlatform && !move->preparingToJump && move->canMove && c->animator->activeAnimation != s + "idle")
 					{
 						c->animator->SetAnimation(s + "idle");
 					}

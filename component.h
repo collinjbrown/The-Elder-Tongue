@@ -147,6 +147,7 @@ public:
 	bool onPlatform;	// Every frame that you collide with a platform,
 						// this is set to true so that I don't have to
 						// raycast to check if you're on a platform.
+	bool collidedLastTick;
 	bool climbable;
 
 	float mass;
@@ -170,6 +171,7 @@ public:
 
 		this->platform = platform;
 		this->onPlatform = false;
+		this->collidedLastTick = false;
 		this->climbable = climbable;
 
 		this->mass = mass;
@@ -233,12 +235,14 @@ public:
 	bool preparingToJump;
 
 	bool canMove;
+	float lastMoveAttempt;
+	float moveAttemptDelay;
 
 	bool canClimb;
 	bool shouldClimb;
 	bool climbing;
 
-	MovementComponent(Entity* entity, bool active, float acceleration, float maxSpeed, float maxJumpHeight, float stabDepth, bool canMove, bool canClimb, bool shouldClimb)
+	MovementComponent(Entity* entity, bool active, float acceleration, float maxSpeed, float maxJumpHeight, float stabDepth, float moveAttemptDelay, bool canMove, bool canClimb, bool shouldClimb)
 	{
 		this->ID = movementComponentID;
 		this->entity = entity;

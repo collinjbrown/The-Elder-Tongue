@@ -56,9 +56,29 @@ public:
 		// I think we're going to have to initiate every component block
 		// at the beginning of the game. This might be long.
 
+		InputSystem* inputSystem = new InputSystem();
+		ComponentBlock* inputBlock = new ComponentBlock(inputSystem, inputComponentID);
+		componentBlocks.push_back(inputBlock);
+
 		PhysicsSystem* physicsSystem = new PhysicsSystem();
 		ComponentBlock* physicsBlock = new ComponentBlock(physicsSystem, physicsComponentID);
 		componentBlocks.push_back(physicsBlock);
+
+		ColliderSystem* colliderSystem = new ColliderSystem();
+		ComponentBlock* colliderBlock = new ComponentBlock(colliderSystem, colliderComponentID);
+		componentBlocks.push_back(colliderBlock);
+
+		DuellingSystem* duelistSystem = new DuellingSystem();
+		ComponentBlock* duelistBlock = new ComponentBlock(duelistSystem, duelistComponentID);
+		componentBlocks.push_back(duelistBlock);
+
+		StaticRenderingSystem* renderingSystem = new StaticRenderingSystem();
+		ComponentBlock* renderingBlock = new ComponentBlock(renderingSystem, spriteComponentID);
+		componentBlocks.push_back(renderingBlock);
+
+		CameraFollowSystem* camfollowSystem = new CameraFollowSystem();
+		ComponentBlock* camfollowBlock = new ComponentBlock(camfollowSystem, cameraFollowComponentID);
+		componentBlocks.push_back(camfollowBlock);
 
 		AnimationControllerSystem* animationControllerSystem = new AnimationControllerSystem();
 		ComponentBlock* animationControllerBlock = new ComponentBlock(animationControllerSystem, animationControllerComponentID);
@@ -67,26 +87,6 @@ public:
 		AnimationSystem* animationSystem = new AnimationSystem();
 		ComponentBlock* animationBlock = new ComponentBlock(animationSystem, animationComponentID);
 		componentBlocks.push_back(animationBlock);
-
-		StaticRenderingSystem* renderingSystem = new StaticRenderingSystem();
-		ComponentBlock* renderingBlock = new ComponentBlock(renderingSystem, spriteComponentID);
-		componentBlocks.push_back(renderingBlock);
-
-		ColliderSystem* colliderSystem = new ColliderSystem();
-		ComponentBlock* colliderBlock = new ComponentBlock(colliderSystem, colliderComponentID);
-		componentBlocks.push_back(colliderBlock);
-
-		InputSystem* inputSystem = new InputSystem();
-		ComponentBlock* inputBlock = new ComponentBlock(inputSystem, inputComponentID);
-		componentBlocks.push_back(inputBlock);
-
-		DuellingSystem* duelistSystem = new DuellingSystem();
-		ComponentBlock* duelistBlock = new ComponentBlock(duelistSystem, duelistComponentID);
-		componentBlocks.push_back(duelistBlock);
-
-		CameraFollowSystem* camfollowSystem = new CameraFollowSystem();
-		ComponentBlock* camfollowBlock = new ComponentBlock(camfollowSystem, cameraFollowComponentID);
-		componentBlocks.push_back(camfollowBlock);
 	}
 
 	void Update(float deltaTime)
@@ -102,8 +102,8 @@ public:
 			ECS::main.RegisterComponent(new PositionComponent(player, true, false, 0, 100, 0.0f), player);
 			ECS::main.RegisterComponent(new PhysicsComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 1000.0f, 2000.0f), player);
 			ECS::main.RegisterComponent(new ColliderComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], false, false, 1.0f, 0.2f, 1.0f, 25.0f, 55.0f, 0.0f, 0.0f), player);
-			ECS::main.RegisterComponent(new MovementComponent(player, true, 2000.0f, 500.0f, 2.5f, 100.0f, true, true, false), player);
-			ECS::main.RegisterComponent(new InputComponent(player, true, true, 0.5f, 5000, 0.75f, 2), player);
+			ECS::main.RegisterComponent(new MovementComponent(player, true, 2000.0f, 500.0f, 2.5f, 100.0f, 0.1f, true, true, false), player);
+			ECS::main.RegisterComponent(new InputComponent(player, true, true, 0.5f, 5000, 0.5f, 2), player);
 			ECS::main.RegisterComponent(new CameraFollowComponent(player, true, 10.0f), player);
 			ECS::main.RegisterComponent(new HealthComponent(player, true, 1000.0f, 1000.0f, 1000.0f, 0.0f, 10.0f, false), player);
 			ECS::main.RegisterComponent(new DuelistComponent(player, true, true, true), player);
@@ -138,7 +138,7 @@ public:
 			ECS::main.RegisterComponent(new PositionComponent(character, true, false, 100, 100, 0.0f), character);
 			ECS::main.RegisterComponent(new PhysicsComponent(character, true, (PositionComponent*)character->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 200.0f, 1000.0f), character);
 			ECS::main.RegisterComponent(new ColliderComponent(character, true, (PositionComponent*)character->componentIDMap[positionComponentID], false, false, 1.0f, 0.2f, 1.0f, 25.0f, 55.0f, 0.0f, 0.0f), character);
-			ECS::main.RegisterComponent(new MovementComponent(character, true, 1000.0f, 500.0f, 2.5f, 1.0f, true, true, false), character);
+			ECS::main.RegisterComponent(new MovementComponent(character, true, 1000.0f, 500.0f, 2.5f, 1.0f, 0.25f, true, true, false), character);
 			ECS::main.RegisterComponent(new AnimationComponent(character, true, (PositionComponent*)character->componentIDMap[positionComponentID], anim7, "idle"), character);
 			ECS::main.RegisterComponent(new DuelistComponent(character, true, false, false), character);
 			ECS::main.RegisterComponent(new HealthComponent(character, true, 1000.0f, 1000.0f, 1000.0f, 0.0f, 1.0f, false), character);
