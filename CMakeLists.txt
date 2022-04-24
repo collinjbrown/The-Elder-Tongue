@@ -38,6 +38,12 @@ set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 
+add_custom_target(copy_assets
+    COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_LIST_DIR}/copy-assets.cmake
+)
+
+add_dependencies(the-moonlight-tongue copy_assets)
+
 add_subdirectory(libs/glfw-3.3.4)
 add_subdirectory(libs/glad)
 add_subdirectory(libs/glm-0.9.9.8)
