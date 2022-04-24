@@ -195,10 +195,14 @@ public:
 	int projectionDepth;
 
 	bool releasedJump;
+	float coyoteTime;
+	float maxCoyoteTime;
+	int jumps;
+	int maxJumps;
 
 	float lastTick;
 
-	InputComponent(Entity* entity, bool active, bool acceptInput, float projectionDelay, float projectionDepth)
+	InputComponent(Entity* entity, bool active, bool acceptInput, float projectionDelay, float projectionDepth, float maxCoyoteTime, int maxJumps)
 	{
 		this->ID = inputComponentID;
 		this->active = active;
@@ -211,6 +215,9 @@ public:
 		this->projectionTime = 0.0f;
 		this->projecting = false;
 		this->releasedJump = true;
+		this->coyoteTime = 0.0f;
+		this->maxCoyoteTime = maxCoyoteTime;
+		this->maxJumps = maxJumps;
 	}
 };
 

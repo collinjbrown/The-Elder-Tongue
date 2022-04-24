@@ -266,8 +266,10 @@ class ColliderSystem : public System
 									float platformLeeway = 2.0f;
 
 									if (!cA->platform && !cB->platform ||
-										cA->platform && bBot > aTop - platformLeeway ||
-										cB->platform && aBot > bTop - platformLeeway)
+										cA->platform && !cA->climbable ||
+										cB->platform && !cB->climbable ||
+										cA->platform && cA->climbable && bBot > aTop - platformLeeway ||
+										cB->platform && cB->climbable && aBot > bTop - platformLeeway)
 									{
 										/*float tentativeBDX = (physB->velocityX - physB->drag) * deltaTime;
 										float tentativeBDY = ((physB->velocityY - physB->drag) + (physB->gravityMod * deltaTime)) * deltaTime;*/
@@ -867,6 +869,8 @@ public:
 						move->jumping && move->climbing)
 					{
 						move->jumping = false;
+						m->jumps = 0;
+						m->coyoteTime = 0.0f;
 					}
 
 					if (glfwGetKey(Game::main.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS && move->canClimb)
@@ -942,15 +946,29 @@ public:
 						move->preparingToJump = true;
 					}*/
 
+					if (m->coyoteTime < m->maxCoyoteTime && !col->onPlatform)
+					{
+						m->coyoteTime += deltaTime;
+					}
+
 					if (glfwGetKey(Game::main.window, GLFW_KEY_SPACE) != GLFW_PRESS && !m->releasedJump)
 					{
 						m->releasedJump = true;
-
 					}
 					
-					if (glfwGetKey(Game::main.window, GLFW_KEY_SPACE) == GLFW_PRESS && move->canMove && col->onPlatform && m->releasedJump)
+					if (glfwGetKey(Game::main.window, GLFW_KEY_SPACE) == GLFW_PRESS && move->canMove && col->onPlatform && m->releasedJump
+						|| glfwGetKey(Game::main.window, GLFW_KEY_SPACE) == GLFW_PRESS && move->canMove && m->releasedJump && m->coyoteTime < m->maxCoyoteTime
+						|| glfwGetKey(Game::main.window, GLFW_KEY_SPACE) == GLFW_PRESS && move->canMove && m->releasedJump && m->jumps < m->maxJumps)
 					{
+						if (phys->velocityY < 0)
+						{
+							phys->velocityY = 0;
+						}
+
+						m->jumps++;
+
 						m->releasedJump = false;
+						m->coyoteTime = m->maxCoyoteTime;
 
 						m->projectionTime = 0;
 						move->canMove = true;
