@@ -1023,7 +1023,7 @@ public:
 
 					if (!m->releasedJump && move->jumping && phys->velocityY > 0)
 					{
-						phys->gravityMod = phys->baseGravityMod * 0.75f;
+						phys->gravityMod = phys->baseGravityMod * 0.6f;
 					}
 					else
 					{
