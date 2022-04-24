@@ -98,6 +98,7 @@ public:
 
 	float drag;					// How much velocity one loses each turn.
 	float gravityMod;			// How much gravity should one experience.
+	float baseGravityMod;
 
 	PositionComponent* pos;
 
@@ -113,6 +114,7 @@ public:
 		this->rotVelocity = vR;
 		this->drag = drag;
 		this->gravityMod = gravityMod;
+		this->baseGravityMod = gravityMod;
 	}
 };
 
@@ -186,18 +188,29 @@ class InputComponent : public Component
 {
 public:
 	bool acceptInput;
+
+	bool projecting;
+	float projectionTime;
+	float projectionDelay;
 	int projectionDepth;
+
+	bool releasedJump;
+
 	float lastTick;
 
-	InputComponent(Entity* entity, bool active, bool acceptInput, float projectionDepth)
+	InputComponent(Entity* entity, bool active, bool acceptInput, float projectionDelay, float projectionDepth)
 	{
 		this->ID = inputComponentID;
 		this->active = active;
 		this->entity = entity;
 
 		this->acceptInput = acceptInput;
+		this->projectionDelay = projectionDelay;
 		this->projectionDepth = projectionDepth;
 		this->lastTick = 0.0f;
+		this->projectionTime = 0.0f;
+		this->projecting = false;
+		this->releasedJump = true;
 	}
 };
 

@@ -858,6 +858,11 @@ public:
 
 				if (!health->dead)
 				{
+					if (move->jumping && col->onPlatform && phys->velocityY > 0)
+					{
+						col->onPlatform = false;
+					}
+
 					if (move->jumping && col->onPlatform ||
 						move->jumping && move->climbing)
 					{
@@ -920,57 +925,90 @@ public:
 							}
 						}
 					}
-					else if (move->preparingToJump)
+					
+					/*if (move->preparingToJump && m->projectionTime >= m->projectionDelay && abs(phys->velocityX) < 0.5f)
 					{
+						m->projecting = true;
 						CalculateProjection(phys, m, move);
 					}
+					else if (move->preparingToJump && m->projectionTime < m->projectionDelay)
+					{
+						m->projectionTime += deltaTime;
+					}*/
 
-					if (glfwGetMouseButton(Game::main.window, GLFW_MOUSE_BUTTON_2) == GLFW_PRESS && move->canMove && !move->preparingToJump && abs(phys->velocityX) < 0.5f && col->onPlatform ||
-						glfwGetMouseButton(Game::main.window, GLFW_MOUSE_BUTTON_2) == GLFW_PRESS && move->canMove && !move->preparingToJump && abs(phys->velocityX) < 0.5f && move->climbing)
+					/*if (glfwGetKey(Game::main.window, GLFW_KEY_SPACE) == GLFW_PRESS && move->canMove && !move->preparingToJump && col->onPlatform ||
+						glfwGetKey(Game::main.window, GLFW_KEY_SPACE) == GLFW_PRESS && move->canMove && !move->preparingToJump && move->climbing)
 					{
-						move->canMove = false;
 						move->preparingToJump = true;
-					}
-					else if (glfwGetMouseButton(Game::main.window, GLFW_MOUSE_BUTTON_2) != GLFW_PRESS && move->preparingToJump)
+					}*/
+
+					if (glfwGetKey(Game::main.window, GLFW_KEY_SPACE) != GLFW_PRESS && !m->releasedJump)
 					{
+						m->releasedJump = true;
+
+					}
+					
+					if (glfwGetKey(Game::main.window, GLFW_KEY_SPACE) == GLFW_PRESS && move->canMove && col->onPlatform && m->releasedJump)
+					{
+						m->releasedJump = false;
+
+						m->projectionTime = 0;
 						move->canMove = true;
 						move->jumping = true;
 						move->preparingToJump = false;
 
 						move->shouldClimb = false;
+						phys->velocityY += 250 * move->maxJumpHeight;
 
-						float leapXVel, leapYVel;
-
-						if (Game::main.mouseX < phys->pos->x)
+						/*if (!m->projecting)
 						{
-							leapXVel = max(-400 * move->maxJumpHeight, (Game::main.mouseX - phys->pos->x) * move->maxJumpHeight);
+							phys->velocityY += 200 * move->maxJumpHeight;
 						}
 						else
 						{
-							leapXVel = min(400 * move->maxJumpHeight, (Game::main.mouseX - phys->pos->x) * move->maxJumpHeight);
-						}
+							m->projecting = false;
+							float leapXVel, leapYVel;
 
-						if (Game::main.mouseY < phys->pos->y)
-						{
-							leapYVel = max(-400 * move->maxJumpHeight, (Game::main.mouseY - phys->pos->y) * move->maxJumpHeight);
-						}
-						else
-						{
-							leapYVel = min(400 * move->maxJumpHeight, (Game::main.mouseY - phys->pos->y) * move->maxJumpHeight);
-						}
+							if (Game::main.mouseX < phys->pos->x)
+							{
+								leapXVel = max(-400 * move->maxJumpHeight, (Game::main.mouseX - phys->pos->x) * move->maxJumpHeight);
+							}
+							else
+							{
+								leapXVel = min(400 * move->maxJumpHeight, (Game::main.mouseX - phys->pos->x) * move->maxJumpHeight);
+							}
 
-						phys->velocityX += leapXVel;
-						phys->velocityY += leapYVel;
+							if (Game::main.mouseY < phys->pos->y)
+							{
+								leapYVel = max(-400 * move->maxJumpHeight, (Game::main.mouseY - phys->pos->y) * move->maxJumpHeight);
+							}
+							else
+							{
+								leapYVel = min(400 * move->maxJumpHeight, (Game::main.mouseY - phys->pos->y) * move->maxJumpHeight);
+							}
+
+							phys->velocityX += leapXVel;
+							phys->velocityY += leapYVel;
+						}*/
 					}
 
-					if (glfwGetKey(Game::main.window, GLFW_KEY_W) == GLFW_PRESS && move->canMove && !move->jumping && !move->preparingToJump && move->climbing)
+					if (!m->releasedJump && move->jumping && phys->velocityY > 0)
+					{
+						phys->gravityMod = phys->baseGravityMod * 0.75f;
+					}
+					else
+					{
+						phys->gravityMod = phys->baseGravityMod;
+					}
+
+					if (glfwGetKey(Game::main.window, GLFW_KEY_W) == GLFW_PRESS && move->canMove && move->climbing)
 					{
 						if (phys->velocityY < move->maxSpeed)
 						{
 							phys->velocityY += move->acceleration * deltaTime;
 						}
 					}
-					else if (glfwGetKey(Game::main.window, GLFW_KEY_S) == GLFW_PRESS && move->canMove && !move->jumping && !move->preparingToJump && move->climbing)
+					else if (glfwGetKey(Game::main.window, GLFW_KEY_S) == GLFW_PRESS && move->canMove && move->climbing)
 					{
 						if (phys->velocityY > -move->maxSpeed)
 						{
@@ -978,16 +1016,14 @@ public:
 						}
 					}
 
-					if (glfwGetKey(Game::main.window, GLFW_KEY_D) == GLFW_PRESS && move->canMove && !move->jumping && !move->preparingToJump && col->onPlatform ||
-						glfwGetKey(Game::main.window, GLFW_KEY_D) == GLFW_PRESS && move->canMove && !move->jumping && !move->preparingToJump && move->climbing)
+					if (glfwGetKey(Game::main.window, GLFW_KEY_D) == GLFW_PRESS && move->canMove)
 					{
 						if (phys->velocityX < move->maxSpeed)
 						{
 							phys->velocityX += move->acceleration * deltaTime;
 						}
 					}
-					else if (glfwGetKey(Game::main.window, GLFW_KEY_A) == GLFW_PRESS && move->canMove && !move->jumping && !move->preparingToJump && col->onPlatform ||
-							glfwGetKey(Game::main.window, GLFW_KEY_A) == GLFW_PRESS && move->canMove && !move->jumping && !move->preparingToJump && move->climbing)
+					else if (glfwGetKey(Game::main.window, GLFW_KEY_A) == GLFW_PRESS && move->canMove)
 					{
 						if (phys->velocityX > -move->maxSpeed)
 						{
@@ -1176,7 +1212,7 @@ public:
 							c->animator->SetAnimation(s + "jumpDown");
 						}
 					}
-					else if (move->preparingToJump && c->animator->activeAnimation != s + "jumpPrep")
+					else if (move->preparingToJump && abs(p->velocityX) < 0.5f && c->animator->activeAnimation != s + "jumpPrep")
 					{
 						c->animator->SetAnimation(s + "jumpPrep");
 					}
@@ -1184,7 +1220,7 @@ public:
 					{
 						c->animator->SetAnimation(s + "walk");
 					}
-					else if (abs(p->velocityX) < 0.5f && move->canMove && c->animator->activeAnimation != s + "idle")
+					else if (abs(p->velocityX) < 0.5f && !move->preparingToJump && move->canMove && c->animator->activeAnimation != s + "idle")
 					{
 						c->animator->SetAnimation(s + "idle");
 					}
