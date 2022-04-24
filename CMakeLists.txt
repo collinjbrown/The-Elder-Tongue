@@ -14,6 +14,7 @@ set(BASE_SRCS
     check_error.cpp
     check_error.h
     component.h
+    particleengine.h
     ecs.h
     entity.h
     game.cpp

@@ -17,10 +17,12 @@
 #include "texture_2D.h"
 #include "renderer.h"
 #include "entity.h"
+#include "particleengine.h"
 #include "ecs.h"
 
 Game Game::main;
 ECS ECS::main;
+ParticleEngine ParticleEngine::main;
 
 // This is the hub which handles updates and setup.
 // In an attempt to keep this from getting cluttered, we're keeping some information
@@ -80,7 +82,9 @@ int main(void)
 
     #pragma region World Setup
 
+    srand(time(NULL));
     ECS::main.Init();
+    ParticleEngine::main.Init(0.05f);
 
     #pragma endregion
 
@@ -104,6 +108,10 @@ int main(void)
     Texture2D blank{ "assets/sprites/blank.png", true, GL_NEAREST };
     renderer.textureIDs.push_back(blank.ID);
     Game::main.textureMap.emplace("blank", &blank);
+
+    Texture2D blankPixel{ "assets/sprites/blank.png", true, GL_NEAREST };
+    renderer.textureIDs.push_back(blankPixel.ID);
+    Game::main.textureMap.emplace("blank_pixel", &blankPixel);
 
     #pragma region Player Animations
 
@@ -349,6 +357,7 @@ int main(void)
         if (focus && !windowMoved)
         {
             ECS::main.Update(deltaTime);
+            ParticleEngine::main.Update(deltaTime);
         }
 
         #pragma endregion;

@@ -21,7 +21,7 @@ static int cameraFollowComponentID = 8;
 static int movementComponentID = 9;
 static int healthComponentID = 10;
 static int duelistComponentID = 11;
-static int pixelEffectsComponentID = 12;
+static int particleEffectsComponentID = 12;
 
 static int dragonriderAnimControllerSubID = 1;
 

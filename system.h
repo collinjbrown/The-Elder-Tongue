@@ -832,6 +832,7 @@ public:
 				DuelistComponent* duel = (DuelistComponent*)m->entity->componentIDMap[duelistComponentID];
 				
 				m->lastTick += deltaTime;
+				
 
 				if (!health->dead)
 				{
@@ -948,6 +949,8 @@ public:
 						{
 							phys->velocityY = 0;
 						}
+						
+						ParticleEngine::main.AddParticles(50, phys->pos->x, phys->pos->y, aether, rand() % 20 + 1);
 
 						m->releasedJump = false;
 						m->coyoteTime = m->maxCoyoteTime;
@@ -1015,8 +1018,6 @@ public:
 							phys->velocityY -= move->acceleration * deltaTime;
 						}
 					}
-
-					
 
 					if (glfwGetKey(Game::main.window, GLFW_KEY_D) == GLFW_PRESS && move->canMove)
 					{
