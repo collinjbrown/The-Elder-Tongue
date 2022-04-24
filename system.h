@@ -1235,7 +1235,7 @@ public:
 							c->animator->SetAnimation(s + "aerialOne");
 						}
 					}
-					else if (abs(p->velocityY) > 10.0f && !col->onPlatform)
+					else if (abs(p->velocityY) > 100.0f && !col->onPlatform)
 					{
 						if (c->animator->activeAnimation != s + "jumpUp" && p->velocityY > 0)
 						{
@@ -1253,11 +1253,6 @@ public:
 					else if (abs(p->velocityX) > 25.0f && col->onPlatform && move->canMove && c->animator->activeAnimation != s + "walk")
 					{
 						c->animator->SetAnimation(s + "walk");
-					}
-					else if (abs(p->velocityX) < 0.5f && col->onPlatform && move->canClimb && c->animator->activeAnimation == s + "walk" && glfwGetKey(Game::main.window, GLFW_KEY_A) == GLFW_PRESS
-						|| abs(p->velocityX) < 0.5f && col->onPlatform && move->canClimb && c->animator->activeAnimation == s + "walk" && glfwGetKey(Game::main.window, GLFW_KEY_D) == GLFW_PRESS)
-					{
-						// Wowzer
 					}
 					else if (abs(p->velocityX) < 0.5f && col->onPlatform && !move->preparingToJump && move->canMove && c->animator->activeAnimation != s + "idle")
 					{
