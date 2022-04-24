@@ -597,11 +597,11 @@ class ColliderSystem : public System
 							glm::vec2 right = Normalize(collEdge);
 							glm::vec2 up = { right.y, right.x };
 
-							glm::vec2 aDispNormal = up;
-							glm::vec2 bDispNormal = -up;
+							//glm::vec2 aDispNormal = up;
+							//glm::vec2 bDispNormal = -up;
 
-							// glm::vec2 aDispNormal = Normalize(glm::vec2(displacement.x, displacement.y));
-							//glm::vec2 bDispNormal = -aDispNormal;
+							glm::vec2 aDispNormal = Normalize(glm::vec2(displacement.x, displacement.y));
+							glm::vec2 bDispNormal = -aDispNormal;
 
 							// We want to apply "bounce" to perpendicular velocity
 							// and apply "friction" to parallel velocity.
@@ -623,41 +623,24 @@ class ColliderSystem : public System
 								physB->velocityY = bNewVelocity.y;
 							}
 
-							/*if (physA->velocityX > 0)
+							/*if (colA->platform)
 							{
-								physA->velocityX -= colB->friction * aDispNormal.y * (1 - (colA->mass / totalMass));
-							}
-							else if (physA->velocityX < 0)
-							{
-								physA->velocityX += colB->friction * aDispNormal.y * (1 - (colA->mass / totalMass));
+								glm::vec2 midTopA = (aTopLeft * aTopRight) / 2.0f;
+								glm::vec2 midBotB = (bBottomLeft * bBottomRight) / 2.0f;
+								glm::vec2 upA = Normalize(midTopA - aCenter);
 
-							}
-
-							if (physA->velocityY > 0)
-							{
-								physA->velocityY -= colB->friction * aDispNormal.x * (1 - (colA->mass / totalMass));
-							}
-							else if (physA->velocityY < 0)
-							{
-								physA->velocityY += colB->friction * aDispNormal.x * (1 - (colA->mass / totalMass));
-							}
-
-							if (physB->velocityX > 0)
-							{
-								physB->velocityX -= colA->friction * bDispNormal.y * (1 - (colA->mass / totalMass));
-							}
-							else if (physB->velocityX < 0)
-							{
-								physB->velocityX += colA->friction * bDispNormal.y * (1 - (colA->mass / totalMass));
-							}
-
-							if (physB->velocityY > 0)
-							{
-								physB->velocityY -= colA->friction * bDispNormal.x * (1 - (colA->mass / totalMass));
-							}
-							else if (physB->velocityY < 0)
-							{
-								physB->velocityY += colA->friction * bDispNormal.x * (1 - (colA->mass / totalMass));
+								if (midBotB.y * upA.y < midTopA.y * upA.y && physB->velocityX >= 0 && aCenter.x > bCenter.x
+									|| midBotB.y * upA.y < midTopA.y * upA.y && physB->velocityX <= 0 && aCenter.x < bCenter.x)
+								{
+									std::cout << "Fuck \n";
+									posB->x += displacement.x * upA.x * -1;
+									posB->y += displacement.y * upA.y * -1;
+								}
+								else
+								{
+									posB->x += displacement.x * 1;
+									posB->y += displacement.y * 1;
+								}
 							}*/
 
 							if (!posA->stat && !posB->stat)
@@ -720,11 +703,11 @@ class ColliderSystem : public System
 							glm::vec2 right = Normalize(collEdge);
 							glm::vec2 up = { right.y, right.x };
 
-							glm::vec2 aDispNormal = -up;
-							glm::vec2 bDispNormal = up;
+							//glm::vec2 aDispNormal = -up;
+							//glm::vec2 bDispNormal = up;
 
-							// glm::vec2 aDispNormal = Normalize(glm::vec2(displacement.x, displacement.y));
-							// glm::vec2 bDispNormal = -aDispNormal;
+							 glm::vec2 aDispNormal = Normalize(glm::vec2(displacement.x, displacement.y));
+							 glm::vec2 bDispNormal = -aDispNormal;
 
 							// We want to apply "bounce" to perpendicular velocity
 							// and apply "friction" to parallel velocity.
@@ -745,42 +728,25 @@ class ColliderSystem : public System
 								physB->velocityX = bNewVelocity.x;
 								physB->velocityY = bNewVelocity.y;
 							}
+							
+							/*if (colB->platform)
+							{
+								glm::vec2 midTopB = (bTopLeft * bTopRight) / 2.0f;
+								glm::vec2 midBotA = (aBottomLeft * aBottomRight) / 2.0f;
+								glm::vec2 upB = Normalize(midTopB - bCenter);
 
-							/*if (physA->velocityX > 0)
-							{
-								physA->velocityX -= colB->friction * aDispNormal.y * (1 - (colA->mass / totalMass));
-							}
-							else if (physA->velocityX < 0)
-							{
-								physA->velocityX += colB->friction * aDispNormal.y * (1 - (colA->mass / totalMass));
-
-							}
-
-							if (physA->velocityY > 0)
-							{
-								physA->velocityY -= colB->friction * aDispNormal.x * (1 - (colA->mass / totalMass));
-							}
-							else if (physA->velocityY < 0)
-							{
-								physA->velocityY += colB->friction * aDispNormal.x * (1 - (colA->mass / totalMass));
-							}
-
-							if (physB->velocityX > 0)
-							{
-								physB->velocityX -= colA->friction * bDispNormal.y * (1 - (colA->mass / totalMass));
-							}
-							else if (physB->velocityX < 0)
-							{
-								physB->velocityX += colA->friction * bDispNormal.y * (1 - (colA->mass / totalMass));
-							}
-
-							if (physB->velocityY > 0)
-							{
-								physB->velocityY -= colA->friction * bDispNormal.x * (1 - (colA->mass / totalMass));
-							}
-							else if (physB->velocityY < 0)
-							{
-								physB->velocityY += colA->friction * bDispNormal.x * (1 - (colA->mass / totalMass));
+								if (midBotA.y * upB.y < midTopB.y * upB.y && physA->velocityX >= 0 && aCenter.x < bCenter.x
+									|| midBotA.y * upB.y < midTopB.y * upB.y && physA->velocityX <= 0 && aCenter.x > bCenter.x)
+								{
+									std::cout << "Fuck \n";
+									posA->x += displacement.x * upB.x * -1;
+									posA->y += displacement.y * upB.y * -1;
+								}
+								else
+								{
+									posA->x += displacement.x * 1;
+									posA->y += displacement.y * 1;
+								}
 							}*/
 
 							if (!posA->stat && !posB->stat)
