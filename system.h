@@ -745,7 +745,6 @@ class ColliderSystem : public System
 								if (midBotA.y - oldVelocity > midTopB.y && glm::length2(aCenter - bTopLeft) > 0.5f && abs(physA->velocityX) < abs(physA->velocityY) - 50.0f ||
 									midBotA.y - oldVelocity > midTopB.y && glm::length2(aCenter - bTopRight) > 0.5f && abs(physA->velocityX) < abs(physA->velocityY) - 50.0f)
 								{
-									std::cout << "X: " + std::to_string(abs(physA->velocityX)) + " / Y: " + std::to_string(abs(physA->velocityY)) + "\n";
 									posA->x += displacement.x * upB.x * 1;
 									posA->y += displacement.y * upB.y * 1;
 								}
