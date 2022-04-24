@@ -100,9 +100,9 @@ public:
 			Animation2D* anim1 = Game::main.animationMap["baseIdle"];
 
 			ECS::main.RegisterComponent(new PositionComponent(player, true, false, 0, 100, 0.0f), player);
-			ECS::main.RegisterComponent(new PhysicsComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 200.0f, 2000.0f), player);
+			ECS::main.RegisterComponent(new PhysicsComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 1000.0f, 2000.0f), player);
 			ECS::main.RegisterComponent(new ColliderComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], false, false, 1.0f, 0.2f, 1.0f, 25.0f, 55.0f, 0.0f, 0.0f), player);
-			ECS::main.RegisterComponent(new MovementComponent(player, true, 1000.0f, 250.0f, 2.5f, 100.0f, true, true, false), player);
+			ECS::main.RegisterComponent(new MovementComponent(player, true, 2000.0f, 500.0f, 2.5f, 100.0f, true, true, false), player);
 			ECS::main.RegisterComponent(new InputComponent(player, true, true, 0.5f, 5000, 0.75f, 2), player);
 			ECS::main.RegisterComponent(new CameraFollowComponent(player, true, 10.0f), player);
 			ECS::main.RegisterComponent(new HealthComponent(player, true, 1000.0f, 1000.0f, 1000.0f, 0.0f, 10.0f, false), player);

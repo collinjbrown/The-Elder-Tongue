@@ -274,7 +274,7 @@ class ColliderSystem : public System
 										/*float tentativeBDX = (physB->velocityX - physB->drag) * deltaTime;
 										float tentativeBDY = ((physB->velocityY - physB->drag) + (physB->gravityMod * deltaTime)) * deltaTime;*/
 
-										// This does not yet solve for tunneling.
+										// This does not yet (really) solve for tunneling.
 										if (TestAndResolveCollision(cA, posA, physA, cB, posB, physB, deltaTime))
 										{
 											if (cA->platform)
