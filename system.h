@@ -950,7 +950,7 @@ public:
 							phys->velocityY = 0;
 						}
 						
-						ParticleEngine::main.AddParticles(50, phys->pos->x, phys->pos->y, aether, rand() % 20 + 1);
+						ParticleEngine::main.AddParticles(25, phys->pos->x, phys->pos->y, aether, rand() % 40 + 1);
 
 						m->releasedJump = false;
 						m->coyoteTime = m->maxCoyoteTime;
@@ -1023,6 +1023,10 @@ public:
 					{
 						if (phys->velocityX < move->maxSpeed)
 						{
+							if (abs(phys->velocityX) < 0.5f && col->onPlatform)
+							{
+								ParticleEngine::main.AddParticles(10, phys->pos->x, phys->pos->y - 30.0f, dust, rand() % 10 + 1);
+							}
 
 							phys->velocityX += move->acceleration * deltaTime;
 						}
@@ -1031,6 +1035,10 @@ public:
 					{
 						if (phys->velocityX > -move->maxSpeed)
 						{
+							if (abs(phys->velocityX) < 0.5f && col->onPlatform)
+							{
+								ParticleEngine::main.AddParticles(10, phys->pos->x, phys->pos->y - 30.0f, dust, rand() % 10 + 1);
+							}
 
 							phys->velocityX -= move->acceleration * deltaTime;
 						}

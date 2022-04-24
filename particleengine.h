@@ -1,7 +1,7 @@
 #ifndef PARTICLEENGINE_H
 #define PARTICLEENGINE_H
 
-enum Element { aether, fire };
+enum Element { aether, fire, dust };
 struct Particle
 {
 	float x;
@@ -74,38 +74,55 @@ public:
 
 				if (particle->element == fire)
 				{
-					color = glm::vec4(cr, 0.0f, 0.0f, 1.0f);
+					color = glm::vec4(1.0f, cr, 0.0f, 1.0f);
 
-					particle->y += 5.0f;
+					particle->y += 2.0f;
 
 					if (r > 75)
 					{
-						particle->x += 5.0f;
+						particle->x += 2.0f;
 					}
 					else if (r > 50)
 					{
-						particle->x -= 5.0f;
+						particle->x -= 2.0f;
 					}
 					else if (r < 10)
 					{
-						particle->y -= 5.0f;
+						particle->y -= 2.0f;
 					}
 				}
-				else
+				else if (particle->element == aether)
 				{
 					color = glm::vec4(0.0f, 0.8f, cr, 1.0f);
 
-					if (r > 90)
+					if (r > 70)
 					{
-						particle->x += 5.0f;
+						particle->x += 2.0f;
 					}
-					else if (r > 80)
+					else if (r > 40)
 					{
-						particle->x -= 5.0f;
+						particle->x -= 2.0f;
+					}
+					else if (r < 20)
+					{
+						particle->y += 2.0f;
+					}
+				}
+				else if (particle->element == dust)
+				{
+					color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+
+					if (r > 95)
+					{
+						particle->x += 2.0f;
+					}
+					else if (r > 90)
+					{
+						particle->x -= 2.0f;
 					}
 					else if (r < 70)
 					{
-						particle->y += 5.0f;
+						particle->y += 2.0f;
 					}
 				}
 
@@ -113,7 +130,7 @@ public:
 				{
 					particle->ticks += 1;
 					// Game::main.renderer->prepareQuad(glm::vec2(particle->x, particle->y), 1.0f, 1.0f, color, s->ID);
-					Game::main.renderer->prepareQuad(glm::vec2(particle->x, particle->y), s->width / 3.0f, s->height / 3.0f, color, s->ID);
+					Game::main.renderer->prepareQuad(glm::vec2(particle->x, particle->y), s->width / 4.0f, s->height / 4.0f, color, s->ID);
 				}
 				else
 				{
@@ -135,14 +152,18 @@ public:
 
 				if (particle->element == fire)
 				{
-					color = glm::vec4(cr, 0.0f, 0.0f, 1.0f);
+					color = glm::vec4(1.0f, cr, 0.0f, 1.0f);
 				}
-				else
+				else if (particle->element == aether)
 				{
 					color = glm::vec4(0.0f, 0.8f, cr, 1.0f);
 				}
+				else if (particle->element == dust)
+				{
+					color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+				}
 
-				Game::main.renderer->prepareQuad(glm::vec2(particle->x, particle->y), s->width / 3.0f, s->height / 3.0f, color, s->ID);
+				Game::main.renderer->prepareQuad(glm::vec2(particle->x, particle->y), s->width / 4.0f, s->height / 4.0f, color, s->ID);
 			}
 		}
 	}
