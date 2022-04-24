@@ -5,6 +5,7 @@
 #include "game.h"
 #include <vector>
 #include <array>
+#include "glm/gtx/norm.hpp"
 
 using namespace std;
 
@@ -625,8 +626,8 @@ class ColliderSystem : public System
 
 							/*if (colA->platform)
 							{
-								glm::vec2 midTopA = (aTopLeft * aTopRight) / 2.0f;
-								glm::vec2 midBotB = (bBottomLeft * bBottomRight) / 2.0f;
+								glm::vec2 midTopA = (aTopLeft + aTopRight) / 2.0f;
+								glm::vec2 midBotB = (bBottomLeft + bBottomRight) / 2.0f;
 								glm::vec2 upA = Normalize(midTopA - aCenter);
 
 								if (midBotB.y * upA.y < midTopA.y * upA.y && physB->velocityX >= 0 && aCenter.x > bCenter.x
@@ -642,8 +643,12 @@ class ColliderSystem : public System
 									posB->y += displacement.y * 1;
 								}
 							}*/
-
-							if (!posA->stat && !posB->stat)
+							
+							if (colB->platform)
+							{
+								// Baba Booey
+							}
+							else if (!posA->stat && !posB->stat)
 							{
 								posA->x += displacement.x * -1 * (1 - (colA->mass / totalMass));
 								posA->y += displacement.y * -1 * (1 - (colA->mass / totalMass));
@@ -700,6 +705,8 @@ class ColliderSystem : public System
 
 						if (displacement.x != 0 || displacement.y != 0)
 						{
+							float oldVelocity = physA->velocityY;
+
 							glm::vec2 right = Normalize(collEdge);
 							glm::vec2 up = { right.y, right.x };
 
@@ -718,38 +725,37 @@ class ColliderSystem : public System
 							if (colA->bounce != 0)
 							{
 								glm::vec2 aNewVelocity = (aVel + (Project(aVel, aDispNormal) * -2.0f) * colA->bounce) * (1 - (colA->mass / totalMass));
-								physA->velocityX = aNewVelocity.x;
+								// physA->velocityX = aNewVelocity.x;
 								physA->velocityY = aNewVelocity.y;
 							}
 
 							if (colB->bounce != 0)
 							{
 								glm::vec2 bNewVelocity = (bVel + (Project(bVel, bDispNormal) * -2.0f) * colB->bounce) * (1 - (colB->mass / totalMass));
-								physB->velocityX = bNewVelocity.x;
+								// physB->velocityX = bNewVelocity.x;
 								physB->velocityY = bNewVelocity.y;
 							}
 							
-							/*if (colB->platform)
+							if (colB->platform)
 							{
-								glm::vec2 midTopB = (bTopLeft * bTopRight) / 2.0f;
-								glm::vec2 midBotA = (aBottomLeft * aBottomRight) / 2.0f;
+								glm::vec2 midTopB = (bTopLeft + bTopRight) / 2.0f;
+								glm::vec2 midBotA = (aBottomLeft + aBottomRight) / 2.0f;
 								glm::vec2 upB = Normalize(midTopB - bCenter);
 
-								if (midBotA.y * upB.y < midTopB.y * upB.y && physA->velocityX >= 0 && aCenter.x < bCenter.x
-									|| midBotA.y * upB.y < midTopB.y * upB.y && physA->velocityX <= 0 && aCenter.x > bCenter.x)
+								if (midBotA.y - oldVelocity > midTopB.y && glm::length2(aCenter - bTopLeft) > 0.5f && abs(physA->velocityX) < abs(physA->velocityY) - 50.0f ||
+									midBotA.y - oldVelocity > midTopB.y && glm::length2(aCenter - bTopRight) > 0.5f && abs(physA->velocityX) < abs(physA->velocityY) - 50.0f)
 								{
-									std::cout << "Fuck \n";
-									posA->x += displacement.x * upB.x * -1;
-									posA->y += displacement.y * upB.y * -1;
+									std::cout << "X: " + std::to_string(abs(physA->velocityX)) + " / Y: " + std::to_string(abs(physA->velocityY)) + "\n";
+									posA->x += displacement.x * upB.x * 1;
+									posA->y += displacement.y * upB.y * 1;
 								}
 								else
 								{
 									posA->x += displacement.x * 1;
 									posA->y += displacement.y * 1;
 								}
-							}*/
-
-							if (!posA->stat && !posB->stat)
+							}
+							else if (!posA->stat && !posB->stat)
 							{
 								posA->x += displacement.x * 1 * (1 - (colA->mass / totalMass));
 								posA->y += displacement.y * 1 * (1 - (colA->mass / totalMass));
@@ -1169,11 +1175,11 @@ public:
 
 				if (!health->dead)
 				{
-					if (p->velocityX < 0)
+					if (p->velocityX < -10.0f)
 					{
 						c->animator->flipped = true;
 					}
-					else if (p->velocityX > 0)
+					else if (p->velocityX > 10.0f)
 					{
 						c->animator->flipped = false;
 					}
