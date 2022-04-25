@@ -16,6 +16,7 @@ set(BASE_SRCS
     component.h
     particleengine.h
     ecs.h
+    ecs.cpp
     entity.h
     game.cpp
     game.h

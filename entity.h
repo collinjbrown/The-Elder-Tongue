@@ -3,7 +3,6 @@
 
 #include <vector>
 #include <unordered_map>
-#include "component.h"
 
 // Entities are the basic objects in the game.
 // While it would be perhaps faster to implement a
@@ -22,6 +21,8 @@
 // This also helps because lots of components will want to access
 // these without having to dig through other components.
 
+class Component;
+
 class Entity
 {
 private:
@@ -34,17 +35,13 @@ public:
     std::unordered_map<int, Component*> componentIDMap;
     std::vector<Component*> components;
 
-    int         Get_ID() { return ID; }
-    std::string Get_Name() { return name; }
+    int         Get_ID();
+    std::string Get_Name();
 
-    void        Set_ID(int newID) { ID = newID; }
-    void        Set_Name(std::string newName) { name = newName; }
+    void        Set_ID(int newID);
+    void        Set_Name(std::string newName);
 
-    Entity(int ID, std::string name)
-    {
-        this->ID = ID;
-        this->name = name;
-    };
+    Entity(int ID, std::string name);
 
     Entity() {};
 };

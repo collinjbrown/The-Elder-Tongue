@@ -1,6 +1,10 @@
 #ifndef PARTICLEENGINE_H
 #define PARTICLEENGINE_H
 
+#include <vector>
+#include "game.h"
+#include "texture_2D.h"
+
 enum Element { aether, fire, dust };
 struct Particle
 {

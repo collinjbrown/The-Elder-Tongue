@@ -16,6 +16,7 @@ class Game
 {
 public:
 	static Game main;
+
 	map<string, Texture2D*> textureMap;
 	map<string, Animation2D*> animationMap;
 	GLFWwindow* window;

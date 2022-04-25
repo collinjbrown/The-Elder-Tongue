@@ -21,9 +21,11 @@ static int cameraFollowComponentID = 8;
 static int movementComponentID = 9;
 static int healthComponentID = 10;
 static int duelistComponentID = 11;
-static int particleEffectsComponentID = 12;
+static int damageComponentID = 12;
 
 static int dragonriderAnimControllerSubID = 1;
+
+enum EntityClass { player, enemy, object };
 
 class Component
 {
@@ -47,45 +49,11 @@ public:
 	// This is the only component that should have any logic in it.
 	// I'm making an exception here for simplicity's sake.
 
-	glm::vec2 Rotate(glm::vec2 point)
-	{
-		glm::vec3 forward = glm::vec3();
-		glm::vec3 up = glm::vec3();
-		glm::vec3 right = glm::vec3();
+	glm::vec2 Rotate(glm::vec2 point);
 
-		if (rotation != 0)
-		{
-			float radians = rotation * (M_PI / 180.0f);
+	glm::vec2 RelativeLocation(glm::vec2 p, glm::vec2 up, glm::vec2 right);
 
-			forward = glm::vec3(0, 0, 1);
-			right = glm::vec3(cos(radians), sin(radians), 0);
-			up = glm::cross(forward, right);
-		}
-		else
-		{
-			up = glm::vec3(0, 1, 0);
-			right = glm::vec3(1, 0, 0);
-		}
-
-		return RelativeLocation(point, up, right);
-	}
-
-	glm::vec2 RelativeLocation(glm::vec2 p, glm::vec2 up, glm::vec2 right)
-	{
-		return glm::vec2((p.x * right.x) + (p.y * up.x), (p.x * right.y) + (p.y * up.y));
-	}
-
-	PositionComponent(Entity* entity, bool active, bool stat, float x, float y, float rotation)
-	{
-		ID = positionComponentID;
-		this->active = active;
-		this->entity = entity;
-		this->stat = stat;
-		this->x = x;
-		this->y = y;
-		this->z = 0;
-		this->rotation = rotation;
-	}
+	PositionComponent(Entity* entity, bool active, bool stat, float x, float y, float rotation);
 };
 
 class PhysicsComponent : public Component
@@ -102,20 +70,7 @@ public:
 
 	PositionComponent* pos;
 
-	PhysicsComponent(Entity* entity, bool active, PositionComponent* pos, float vX, float vY, float vR, float drag, float gravityMod)
-	{
-		ID = physicsComponentID;
-		this->active = active;
-		this->entity = entity;
-		this->pos = pos;
-
-		this->velocityX = vX;
-		this->velocityY = vY;
-		this->rotVelocity = vR;
-		this->drag = drag;
-		this->gravityMod = gravityMod;
-		this->baseGravityMod = gravityMod;
-	}
+	PhysicsComponent(Entity* entity, bool active, PositionComponent* pos, float vX, float vY, float vR, float drag, float gravityMod);
 };
 
 class StaticSpriteComponent : public Component
@@ -127,17 +82,7 @@ public:
 	Texture2D* sprite;
 	PositionComponent* pos;
 
-	StaticSpriteComponent(Entity* entity, bool active, PositionComponent* pos, float width, float height, Texture2D* sprite)
-	{
-		ID = spriteComponentID;
-		this->active = active;
-		this->entity = entity;
-		this->pos = pos;
-
-		this->width = width;
-		this->height = height;
-		this->sprite = sprite;
-	}
+	StaticSpriteComponent(Entity* entity, bool active, PositionComponent* pos, float width, float height, Texture2D* sprite);
 };
 
 class ColliderComponent : public Component
@@ -149,6 +94,12 @@ public:
 						// raycast to check if you're on a platform.
 	bool collidedLastTick;
 	bool climbable;
+
+	bool trigger;
+	bool takesDamage;
+	bool doesDamage;
+
+	EntityClass entityClass;
 
 	float mass;
 	float bounce;
@@ -162,28 +113,7 @@ public:
 
 	PositionComponent* pos;
 
-	ColliderComponent(Entity* entity, bool active, PositionComponent* pos, bool platform, bool climbable, float mass, float bounce, float friction, float width, float height, float offsetX, float offsetY)
-	{
-		ID = colliderComponentID;
-		this->active = active;
-		this->entity = entity;
-		this->pos = pos;
-
-		this->platform = platform;
-		this->onPlatform = false;
-		this->collidedLastTick = false;
-		this->climbable = climbable;
-
-		this->mass = mass;
-		this->bounce = bounce;
-		this->friction = friction;
-
-		this->width = width;
-		this->height = height;
-		
-		this->offsetX = offsetX;
-		this->offsetY = offsetY;
-	}
+	ColliderComponent(Entity* entity, bool active, PositionComponent* pos, bool platform, bool climbable, bool trigger, bool takesDamage, bool doesDamage, EntityClass entityClass, float mass, float bounce, float friction, float width, float height, float offsetX, float offsetY);
 };
 
 class InputComponent : public Component
@@ -204,23 +134,7 @@ public:
 
 	float lastTick;
 
-	InputComponent(Entity* entity, bool active, bool acceptInput, float projectionDelay, float projectionDepth, float maxCoyoteTime, int maxJumps)
-	{
-		this->ID = inputComponentID;
-		this->active = active;
-		this->entity = entity;
-
-		this->acceptInput = acceptInput;
-		this->projectionDelay = projectionDelay;
-		this->projectionDepth = projectionDepth;
-		this->lastTick = 0.0f;
-		this->projectionTime = 0.0f;
-		this->projecting = false;
-		this->releasedJump = true;
-		this->coyoteTime = 0.0f;
-		this->maxCoyoteTime = maxCoyoteTime;
-		this->maxJumps = maxJumps;
-	}
+	InputComponent(Entity* entity, bool active, bool acceptInput, float projectionDelay, float projectionDepth, float maxCoyoteTime, int maxJumps);
 };
 
 class MovementComponent : public Component
@@ -242,24 +156,7 @@ public:
 	bool shouldClimb;
 	bool climbing;
 
-	MovementComponent(Entity* entity, bool active, float acceleration, float maxSpeed, float maxJumpHeight, float stabDepth, float moveAttemptDelay, bool canMove, bool canClimb, bool shouldClimb)
-	{
-		this->ID = movementComponentID;
-		this->entity = entity;
-		this->active = active;
-
-		this->acceleration = acceleration;
-		this->maxSpeed = maxSpeed;
-		this->maxJumpHeight = maxJumpHeight;
-		this->canMove = canMove;
-		this->jumping = false;
-		this->preparingToJump = false;
-		this->stabDepth = stabDepth;
-
-		this->canClimb = canClimb;
-		this->shouldClimb = shouldClimb;
-		this->climbing = false;
-	}
+	MovementComponent(Entity* entity, bool active, float acceleration, float maxSpeed, float maxJumpHeight, float stabDepth, float moveAttemptDelay, bool canMove, bool canClimb, bool shouldClimb);
 };
 
 class CameraFollowComponent : public Component
@@ -267,14 +164,7 @@ class CameraFollowComponent : public Component
 public:
 	float speed;
 
-	CameraFollowComponent(Entity* entity, bool active, float speed)
-	{
-		this->ID = cameraFollowComponentID;
-		this->active = active;
-		this->entity = entity;
-
-		this->speed = speed;
-	}
+	CameraFollowComponent(Entity* entity, bool active, float speed);
 };
 
 class AnimationComponent : public Component
@@ -291,37 +181,11 @@ public:
 
 	float lastTick;
 
-	void SetAnimation(std::string s)
-	{
-		if (animations[s] != NULL)
-		{
-			activeAnimation = s;
-			activeX = 0;
-			activeY = animations[s]->rows - 1;
-			lastTick = 0;
-		}
-	}
+	void SetAnimation(std::string s);
 
-	void AddAnimation(std::string s, Animation2D* anim)
-	{
-		animations.emplace(s, anim);
-	}
+	void AddAnimation(std::string s, Animation2D* anim);
 
-	AnimationComponent(Entity* entity, bool active, PositionComponent* pos, Animation2D* idleAnimation, std::string animationName)
-	{
-		this->ID = animationComponentID;
-		this->entity = entity;
-		this->active = active;
-
-		lastTick = 0;
-		activeX = 0;
-		activeY = 0;
-		flipped = false;
-
-		this->pos = pos;
-		activeAnimation = animationName;
-		animations.emplace(animationName, idleAnimation);
-	}
+	AnimationComponent(Entity* entity, bool active, PositionComponent* pos, Animation2D* idleAnimation, std::string animationName);
 };
 
 class AnimationControllerComponent : public Component
@@ -331,18 +195,10 @@ public:
 	int subID;
 };
 
-class DragonriderAnimationControllerComponent : public AnimationControllerComponent
+class PlayerAnimationControllerComponent : public AnimationControllerComponent
 {
 public:
-	DragonriderAnimationControllerComponent(Entity* entity, bool active, AnimationComponent* animator)
-	{
-		this->ID = animationControllerComponentID;
-		this->subID = dragonriderAnimControllerSubID;
-		this->entity = entity;
-		this->active = active;
-
-		this->animator = animator;
-	}
+	PlayerAnimationControllerComponent(Entity* entity, bool active, AnimationComponent* animator);
 };
 
 class HealthComponent : public Component
@@ -366,21 +222,7 @@ public:
 
 	bool dead;
 
-	HealthComponent(Entity* entity, bool active, float health, float fatigue, float blood, float bleeding, float coagulationRate, bool dead)
-	{
-		this->ID = healthComponentID;
-		this->entity = entity;
-		this->active = active;
-
-		this->health = health;
-		this->fatigue = fatigue;
-		this->blood = blood;
-
-		this->bleeding = bleeding;
-		this->coalgulationRate = coagulationRate;
-
-		this->dead = dead;
-	}
+	HealthComponent(Entity* entity, bool active, float health, float fatigue, float blood, float bleeding, float coagulationRate, bool dead);
 };
 
 class DuelistComponent : public Component
@@ -392,17 +234,25 @@ public:
 
 	float lastTick;
 
-	DuelistComponent(Entity* entity, bool active, bool hasSword, bool isDrawn)
-	{
-		this->ID = duelistComponentID;
-		this->entity = entity;
-		this->active = active;
+	DuelistComponent(Entity* entity, bool active, bool hasSword, bool isDrawn);
+};
 
-		this->hasSword = hasSword;
-		this->isDrawn = isDrawn;
-		this->isAttacking = false;
-		lastTick = 0;
-	}
+class DamageComponent : public Component
+{
+public:
+	bool hasLifetime;
+	float lifetime;
+	bool limitedUses;
+	int uses;
+	float damage;
+
+	// There's definitely a more elegant way to handle this,
+	// but I wonder if it would be worth it to implement it.
+	bool damagesPlayers;
+	bool damagesEnemies;
+	bool damagesObjects;
+
+	DamageComponent(Entity* entity, bool active, bool hasLifetime, float lifetime, bool limitedUses, int uses, float damage, bool damagesPlayers, bool damagesEnemies, bool damagesObjects);
 };
 
 #endif
