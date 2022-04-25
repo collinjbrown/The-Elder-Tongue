@@ -134,7 +134,10 @@ public:
 
 	float lastTick;
 
-	InputComponent(Entity* entity, bool active, bool acceptInput, float projectionDelay, float projectionDepth, float maxCoyoteTime, int maxJumps);
+	float lastProjectile;
+	float projectileDelay;
+
+	InputComponent(Entity* entity, bool active, bool acceptInput, float projectionDelay, float projectionDepth, float maxCoyoteTime, int maxJumps, float projectileDelay);
 };
 
 class MovementComponent : public Component
@@ -204,25 +207,11 @@ public:
 class HealthComponent : public Component
 {
 public:
-	// Rather than having health, the Elder Tongue
-	// focuses on fatigue and other such things;
-	// most humans die in one (direct) hit from a sword,
-	// unless they are protected by magic,
-	// but they will accrue debuffs as they collide with
-	// things and exert themselves.
-	// They may also bleed out over a longer period of time
-	// from smaller wounds they receive.
-
 	float health;
-	float fatigue;
-	float blood;
-
-	float bleeding;
-	float coalgulationRate;
 
 	bool dead;
 
-	HealthComponent(Entity* entity, bool active, float health, float fatigue, float blood, float bleeding, float coagulationRate, bool dead);
+	HealthComponent(Entity* entity, bool active, float health, bool dead);
 };
 
 class DuelistComponent : public Component

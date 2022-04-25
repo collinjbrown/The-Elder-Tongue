@@ -65,6 +65,10 @@ void ECS::Init()
 	ComponentBlock* colliderBlock = new ComponentBlock(colliderSystem, colliderComponentID);
 	componentBlocks.push_back(colliderBlock);
 
+	HealthSystem* healthSystem = new HealthSystem();
+	ComponentBlock* healthBlock = new ComponentBlock(healthSystem, healthComponentID);
+	componentBlocks.push_back(healthBlock);
+
 	DuellingSystem* duelistSystem = new DuellingSystem();
 	ComponentBlock* duelistBlock = new ComponentBlock(duelistSystem, duelistComponentID);
 	componentBlocks.push_back(duelistBlock);
@@ -100,9 +104,9 @@ void ECS::Update(float deltaTime)
 		ECS::main.RegisterComponent(new PhysicsComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 1000.0f, 2000.0f), player);
 		ECS::main.RegisterComponent(new ColliderComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], false, false, false, true, false, EntityClass::player, 1.0f, 0.2f, 1.0f, 25.0f, 55.0f, 0.0f, 0.0f), player);
 		ECS::main.RegisterComponent(new MovementComponent(player, true, 2000.0f, 500.0f, 2.5f, 100.0f, 0.1f, true, true, false), player);
-		ECS::main.RegisterComponent(new InputComponent(player, true, true, 0.5f, 5000, 0.5f, 2), player);
+		ECS::main.RegisterComponent(new InputComponent(player, true, true, 0.5f, 5000, 0.5f, 2, 0.5f), player);
 		ECS::main.RegisterComponent(new CameraFollowComponent(player, true, 10.0f), player);
-		ECS::main.RegisterComponent(new HealthComponent(player, true, 1000.0f, 1000.0f, 1000.0f, 0.0f, 10.0f, false), player);
+		ECS::main.RegisterComponent(new HealthComponent(player, true, 1000.0f, false), player);
 		ECS::main.RegisterComponent(new DuelistComponent(player, true, true, true), player);
 		ECS::main.RegisterComponent(new AnimationComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], anim1, "idle"), player);
 		AnimationComponent* a = (AnimationComponent*)player->componentIDMap[animationComponentID];
@@ -138,7 +142,7 @@ void ECS::Update(float deltaTime)
 		ECS::main.RegisterComponent(new MovementComponent(character, true, 1000.0f, 500.0f, 2.5f, 1.0f, 0.25f, true, true, false), character);
 		ECS::main.RegisterComponent(new AnimationComponent(character, true, (PositionComponent*)character->componentIDMap[positionComponentID], anim7, "idle"), character);
 		ECS::main.RegisterComponent(new DuelistComponent(character, true, false, false), character);
-		ECS::main.RegisterComponent(new HealthComponent(character, true, 1000.0f, 1000.0f, 1000.0f, 0.0f, 1.0f, false), character);
+		ECS::main.RegisterComponent(new HealthComponent(character, true, 100.0f, false), character);
 		AnimationComponent* a2 = (AnimationComponent*)character->componentIDMap[animationComponentID];
 		ECS::main.RegisterComponent(new PlayerAnimationControllerComponent(character, true, a2), character);
 		a2->AddAnimation("walk", anim8);
@@ -177,6 +181,32 @@ void ECS::Update(float deltaTime)
 	{
 		componentBlocks[i]->Update(deltaTime);
 	}
+
+	PurgeDeadEntities();
+}
+
+void ECS::AddDeadEntity(Entity* e)
+{
+	if (std::find(dyingEntities.begin(), dyingEntities.end(), e) == dyingEntities.end())
+	{
+		dyingEntities.push_back(e);
+	}
+}
+
+void ECS::PurgeDeadEntities()
+{
+	if (dyingEntities.size() > 0)
+	{
+		int n = dyingEntities.size();
+		std::cout << "Dead: " + std::to_string(n) + "\n";
+
+		for (int i = 0; i < n; i++)
+		{
+			DeleteEntity(dyingEntities[i]);
+		}
+
+		dyingEntities.clear();
+	}
 }
 
 Entity* ECS::CreateEntity(std::string name)
@@ -191,6 +221,8 @@ void ECS::DeleteEntity(Entity* e)
 	{
 		componentBlocks[i]->PurgeEntity(e);
 	}
+
+	delete e;
 }
 
 void ECS::RegisterComponent(Component* component, Entity* entity)
@@ -323,7 +355,7 @@ ColliderComponent::ColliderComponent(Entity* entity, bool active, PositionCompon
 
 #pragma region Input Component
 
-InputComponent::InputComponent(Entity* entity, bool active, bool acceptInput, float projectionDelay, float projectionDepth, float maxCoyoteTime, int maxJumps)
+InputComponent::InputComponent(Entity* entity, bool active, bool acceptInput, float projectionDelay, float projectionDepth, float maxCoyoteTime, int maxJumps, float projectileDelay)
 {
 	this->ID = inputComponentID;
 	this->active = active;
@@ -339,6 +371,9 @@ InputComponent::InputComponent(Entity* entity, bool active, bool acceptInput, fl
 	this->coyoteTime = 0.0f;
 	this->maxCoyoteTime = maxCoyoteTime;
 	this->maxJumps = maxJumps;
+
+	this->lastProjectile = 0.0f;
+	this->projectileDelay = projectileDelay;
 }
 
 #pragma endregion
@@ -431,18 +466,13 @@ PlayerAnimationControllerComponent::PlayerAnimationControllerComponent(Entity* e
 
 #pragma region Health Component
 
-HealthComponent::HealthComponent(Entity* entity, bool active, float health, float fatigue, float blood, float bleeding, float coagulationRate, bool dead)
+HealthComponent::HealthComponent(Entity* entity, bool active, float health, bool dead)
 {
 	this->ID = healthComponentID;
 	this->entity = entity;
 	this->active = active;
 
 	this->health = health;
-	this->fatigue = fatigue;
-	this->blood = blood;
-
-	this->bleeding = bleeding;
-	this->coalgulationRate = coagulationRate;
 
 	this->dead = dead;
 }
@@ -738,48 +768,64 @@ void ColliderSystem::Update(float deltaTime)
 								{
 									if (TestCollision(cA, posA, physA, cB, posB, physB))
 									{
-										if (cA->trigger && cA->doesDamage && cB->takesDamage)
+										if (cA->trigger && cA->doesDamage)
 										{
-											HealthComponent* bHealth = (HealthComponent*)cB->entity->componentIDMap[healthComponentID];
 											DamageComponent* aDamage = (DamageComponent*)cA->entity->componentIDMap[damageComponentID];
 
-											if (cB->entityClass == EntityClass::player && aDamage->damagesPlayers ||
-												cB->entityClass == EntityClass::enemy && aDamage->damagesEnemies ||
-												cB->entityClass == EntityClass::object && aDamage->damagesObjects)
+											if (cB->takesDamage)
 											{
-												bHealth->health -= aDamage->damage;
+												if (cB->entityClass == EntityClass::player && aDamage->damagesPlayers ||
+													cB->entityClass == EntityClass::enemy && aDamage->damagesEnemies ||
+													cB->entityClass == EntityClass::object && aDamage->damagesObjects)
+												{
+													HealthComponent* bHealth = (HealthComponent*)cB->entity->componentIDMap[healthComponentID];
+													bHealth->health -= aDamage->damage;
+													aDamage->uses -= 1;
+												}
+											}
+											else
+											{
 												aDamage->uses -= 1;
 											}
-										}
-										else if (cA->trigger && cA->doesDamage)
-										{
-											DamageComponent* aDamage = (DamageComponent*)cA->entity->componentIDMap[damageComponentID];
-											aDamage->uses -= 1;
-										}
 
-										if (cB->trigger && cB->doesDamage && cA->takesDamage)
-										{
-											HealthComponent* aHealth = (HealthComponent*)cA->entity->componentIDMap[healthComponentID];
-											DamageComponent* bDamage = (DamageComponent*)cB->entity->componentIDMap[damageComponentID];
-
-											if (cA->entityClass == EntityClass::player && bDamage->damagesPlayers ||
-												cA->entityClass == EntityClass::enemy && bDamage->damagesEnemies ||
-												cA->entityClass == EntityClass::object && bDamage->damagesObjects)
+											if (aDamage->uses <= 0)
 											{
-												aHealth->health -= bDamage->damage;
-												bDamage->uses -= 1;
+												cA->active = false;
+												ECS::main.AddDeadEntity(aDamage->entity);
 											}
 										}
-										else if (cB->trigger && cB->doesDamage)
+
+										if (cB->trigger && cB->doesDamage)
 										{
 											DamageComponent* bDamage = (DamageComponent*)cB->entity->componentIDMap[damageComponentID];
-											bDamage->uses -= 1;
+
+											if (cA->takesDamage)
+											{
+												if (cA->entityClass == EntityClass::player && bDamage->damagesPlayers ||
+													cA->entityClass == EntityClass::enemy && bDamage->damagesEnemies ||
+													cA->entityClass == EntityClass::object && bDamage->damagesObjects)
+												{
+													HealthComponent* aHealth = (HealthComponent*)cA->entity->componentIDMap[healthComponentID];
+													aHealth->health -= bDamage->damage;
+													bDamage->uses -= 1;
+													std::cout << "Oof: " + std::to_string(aHealth->health) + "\n";
+												}
+											}
+											else
+											{
+												bDamage->uses -= 1;
+											}
+
+											if (bDamage->uses <= 0)
+											{
+												cB->active = false;
+												ECS::main.AddDeadEntity(bDamage->entity);
+											}
 										}
 									}
 								}
 								else
 								{
-
 									// Test to see if one is a platform and the other is coming from the right direction.
 
 									float aBot = posA->y - (cA->height / 2.0f) + cA->offsetY;
@@ -1387,7 +1433,6 @@ void InputSystem::Update(float deltaTime)
 
 			m->lastTick += deltaTime;
 
-
 			if (!health->dead)
 			{
 				if (move->jumping && col->onPlatform && phys->velocityY > 0)
@@ -1401,6 +1446,24 @@ void InputSystem::Update(float deltaTime)
 					move->jumping = false;
 					m->jumps = 0;
 					m->coyoteTime = 0.0f;
+				}
+
+				if (glfwGetMouseButton(Game::main.window, GLFW_MOUSE_BUTTON_2) == GLFW_PRESS && m->lastProjectile >= m->projectileDelay)
+				{
+					m->lastProjectile = 0.0f;
+
+					Entity* projectile = ECS::main.CreateEntity("Bullet");
+					Texture2D* tex3 = Game::main.textureMap["blank"];
+
+					ECS::main.RegisterComponent(new PositionComponent(projectile, true, false, phys->pos->x, phys->pos->y, 0.0f), projectile);
+					ECS::main.RegisterComponent(new PhysicsComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], 1000.0f, 0.0f, 0.0f, 0.0f, 0.0f), projectile);
+					ECS::main.RegisterComponent(new ColliderComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], false, false, true, false, true, EntityClass::object, 1.0f, 0.0f, 0.0f, 5.0f, 5.0f, 0.0f, 0.0f), projectile);
+					ECS::main.RegisterComponent(new DamageComponent(projectile, true, true, 20.0f, true, 1, 10.0f, false, true, true), projectile);
+					ECS::main.RegisterComponent(new StaticSpriteComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], tex3->width / 2.0f, tex3->height / 2.0f, tex3), projectile);
+				}
+				else
+				{
+					m->lastProjectile += deltaTime;
 				}
 
 				if (glfwGetKey(Game::main.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS && move->canClimb)
@@ -1950,36 +2013,14 @@ void HealthSystem::Update(float deltaTime)
 	{
 		HealthComponent* h = healths[i];
 
-		h->bleeding -= h->coalgulationRate * deltaTime;
-
-		if (h->bleeding > 0)
-		{
-			h->blood -= h->bleeding * deltaTime;
-		}
-		else
-		{
-			h->bleeding = 0;
-		}
-
-		if (h->blood <= 0)
-		{
-			// You're dying.
-			h->fatigue -= 10 * deltaTime;
-			h->health -= 10 * deltaTime;
-		}
-
-		if (h->fatigue <= 0)
-		{
-			// You're unconscious.
-			// We'll have to sort out how this should work later.
-		}
-
-		if (h->health <= 0)
+		if (h->health <= 0.0f)
 		{
 			// You're dead.
 			h->dead = true;
+			std::cout << h->entity->Get_Name() + " has died.\n";
 
-			ECS::main.DeleteEntity(h->entity);
+			h->active = false;
+			ECS::main.AddDeadEntity(h->entity);
 		}
 	}
 }

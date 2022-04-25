@@ -34,6 +34,7 @@ private:
 public:
 	static ECS main;
 	vector<Entity*> entities;
+	vector<Entity*> dyingEntities;
 
 	vector<ComponentBlock*> componentBlocks;
 
@@ -42,6 +43,8 @@ public:
 	void Update(float deltaTime);
 	Entity* CreateEntity(std::string name);
 	void DeleteEntity(Entity* e);
+	void AddDeadEntity(Entity* e);
+	void PurgeDeadEntities();
 	void RegisterComponent(Component* component, Entity* entity);
 };
 
