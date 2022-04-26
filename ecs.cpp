@@ -154,7 +154,6 @@ void ECS::Update(float deltaTime)
 		Animation2D* anim12 = Game::main.animationMap["testDeath"];
 
 		Entity* character = CreateEntity("Test Character");
-
 		ECS::main.RegisterComponent(new PositionComponent(character, true, false, 100, 100, 0.0f), character);
 		ECS::main.RegisterComponent(new PhysicsComponent(character, true, (PositionComponent*)character->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 200.0f, 1000.0f), character);
 		ECS::main.RegisterComponent(new ColliderComponent(character, true, (PositionComponent*)character->componentIDMap[positionComponentID], false, false, false, true, false, EntityClass::enemy, 1.0f, 0.2f, 1.0f, 25.0f, 55.0f, 0.0f, 0.0f), character);
