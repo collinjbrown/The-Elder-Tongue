@@ -146,13 +146,14 @@ void ECS::Update(float deltaTime)
 		#pragma endregion
 
 		#pragma region Test Character Instantiation
-		Entity* character = CreateEntity("Test Character");
 		Animation2D* anim7 = Game::main.animationMap["testIdle"];
 		Animation2D* anim8 = Game::main.animationMap["testWalk"];
 		Animation2D* anim9 = Game::main.animationMap["testJumpPrep"];
 		Animation2D* anim10 = Game::main.animationMap["testJumpUp"];
 		Animation2D* anim11 = Game::main.animationMap["testJumpDown"];
 		Animation2D* anim12 = Game::main.animationMap["testDeath"];
+
+		Entity* character = CreateEntity("Test Character");
 
 		ECS::main.RegisterComponent(new PositionComponent(character, true, false, 100, 100, 0.0f), character);
 		ECS::main.RegisterComponent(new PhysicsComponent(character, true, (PositionComponent*)character->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 200.0f, 1000.0f), character);
