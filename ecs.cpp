@@ -1162,7 +1162,7 @@ bool ColliderSystem::TestAndResolveCollision(ColliderComponent* colA, PositionCo
 
 	float dT = (int)(deltaTime * 100 + 0.5);
 	dT = max(0.1f, 5.0f * ((float)dT / 100));
-	std::cout << std::to_string(deltaTime) + "/" + std::to_string(dT) + "\n";
+	// std::cout << std::to_string(deltaTime) + "/" + std::to_string(dT) + "\n";
 
 	if (dT != 0)
 	{
@@ -1372,15 +1372,17 @@ bool ColliderSystem::TestAndResolveCollision(ColliderComponent* colA, PositionCo
 								glm::vec2 midBotA = (aBottomLeft + aBottomRight) / 2.0f;
 								glm::vec2 upB = Normalize(midTopB - bCenter);
 
+								std::cout << std::to_string(abs(physA->velocityX)) + "/" + std::to_string(abs(physA->velocityY) - 50.0f);
+
 								if (midBotA.y - oldVelocity > midTopB.y && glm::length2(aCenter - bTopLeft) > 0.5f && abs(physA->velocityX) < abs(physA->velocityY) - 50.0f ||
 									midBotA.y - oldVelocity > midTopB.y && glm::length2(aCenter - bTopRight) > 0.5f && abs(physA->velocityX) < abs(physA->velocityY) - 50.0f)
 								{
-									std::cout << "Fuck\n";
 									posA->x += displacement.x * upB.x * 1;
 									posA->y += displacement.y * upB.y * 1;
 								}
 								else
 								{
+									std::cout << "Fuck\n";
 									posA->x += displacement.x * 1;
 									posA->y += displacement.y * 1;
 								}
