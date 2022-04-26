@@ -1161,12 +1161,12 @@ bool ColliderSystem::TestAndResolveCollision(ColliderComponent* colA, PositionCo
 	bool collided = false;
 
 	float dT = (int)(deltaTime * 100 + 0.5);
-	dT = (float)dT / 100;
-	std::cout << std::to_string(deltaTime) + "/" + std::to_string(dT * 5.0f) + "\n";
+	dT = max(0.1f, 5.0f * ((float)dT / 100));
+	std::cout << std::to_string(deltaTime) + "/" + std::to_string(dT) + "\n";
 
 	if (dT != 0)
 	{
-		for (float it = 0.9f; it > -0.1f; it -= dT * 5.0f)
+		for (float it = 0.9f; it > -0.1f; it -= dT)
 		{
 			glm::vec2 aCenter = (glm::vec2(posA->x, posA->y) + glm::vec2(physA->velocityX * it * deltaTime, physA->velocityY * it * deltaTime)) + posA->Rotate(glm::vec2(aCX, aCY));
 			glm::vec2 aTopLeft = (glm::vec2(posA->x, posA->y) + glm::vec2(physA->velocityX * it * deltaTime, physA->velocityY * it * deltaTime)) + posA->Rotate(glm::vec2(aLX, aTY));
