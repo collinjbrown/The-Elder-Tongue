@@ -110,9 +110,9 @@ int main(void)
     renderer.textureIDs.push_back(blank.ID);
     Game::main.textureMap.emplace("blank", &blank);
 
-    Texture2D blankPixel{ "assets/sprites/blank.png", true, GL_NEAREST };
-    renderer.textureIDs.push_back(blankPixel.ID);
-    Game::main.textureMap.emplace("blank_pixel", &blankPixel);
+    Texture2D aetherBullet{ "assets/sprites/bullets/aether_bullet.png", true, GL_NEAREST };
+    renderer.textureIDs.push_back(aetherBullet.ID);
+    Game::main.textureMap.emplace("aether_bullet", &aetherBullet);
 
     #pragma region Player Animations
 

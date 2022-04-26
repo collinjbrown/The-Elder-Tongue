@@ -70,7 +70,7 @@ public:
 			for (int p = 0; p < particles.size(); p++)
 			{
 				Particle* particle = particles[p];
-				Texture2D* s = Game::main.textureMap["blank_pixel"];
+				Texture2D* s = Game::main.textureMap["blank"];
 				glm::vec4 color;
 
 				int r = rand() % 100 + 1;
@@ -149,7 +149,7 @@ public:
 			for (int p = 0; p < particles.size(); p++)
 			{
 				Particle* particle = particles[p];
-				Texture2D* s = Game::main.textureMap["blank_pixel"];
+				Texture2D* s = Game::main.textureMap["blank"];
 				glm::vec4 color;
 
 				float cr = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
