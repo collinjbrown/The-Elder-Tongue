@@ -1160,242 +1160,249 @@ bool ColliderSystem::TestAndResolveCollision(ColliderComponent* colA, PositionCo
 	float bTY = (colB->height / 2.0f) + colB->offsetY;
 	bool collided = false;
 
-	for (float it = 0.9f; it > -0.1f; it -= 0.1f)
+	float dT = (int)(deltaTime * 100 + 0.5);
+	dT = (float)dT / 100;
+	std::cout << std::to_string(deltaTime) + "/" + std::to_string(dT * 5.0f) + "\n";
+
+	if (dT != 0)
 	{
-		glm::vec2 aCenter = (glm::vec2(posA->x, posA->y) + glm::vec2(physA->velocityX * it * deltaTime, physA->velocityY * it * deltaTime)) + posA->Rotate(glm::vec2(aCX, aCY));
-		glm::vec2 aTopLeft = (glm::vec2(posA->x, posA->y) + glm::vec2(physA->velocityX * it * deltaTime, physA->velocityY * it * deltaTime)) + posA->Rotate(glm::vec2(aLX, aTY));
-		glm::vec2 aBottomLeft = (glm::vec2(posA->x, posA->y) + glm::vec2(physA->velocityX * it * deltaTime, physA->velocityY * it * deltaTime)) + posA->Rotate(glm::vec2(aLX, aBY));
-		glm::vec2 aTopRight = (glm::vec2(posA->x, posA->y) + glm::vec2(physA->velocityX * it * deltaTime, physA->velocityY * it * deltaTime)) + posA->Rotate(glm::vec2(aRX, aTY));
-		glm::vec2 aBottomRight = (glm::vec2(posA->x, posA->y) + glm::vec2(physA->velocityX * it * deltaTime, physA->velocityY * it * deltaTime)) + posA->Rotate(glm::vec2(aRX, aBY));
-
-		glm::vec2 bCenter = (glm::vec2(posB->x, posB->y) + glm::vec2(physB->velocityX * it * deltaTime, physB->velocityY * it * deltaTime)) + posB->Rotate(glm::vec2(bCX, bCY));
-		glm::vec2 bTopLeft = (glm::vec2(posB->x, posB->y) + glm::vec2(physB->velocityX * it * deltaTime, physB->velocityY * it * deltaTime)) + posB->Rotate(glm::vec2(bLX, bTY));
-		glm::vec2 bBottomLeft = (glm::vec2(posB->x, posB->y) + glm::vec2(physB->velocityX * it * deltaTime, physB->velocityY * it * deltaTime)) + posB->Rotate(glm::vec2(bLX, bBY));
-		glm::vec2 bTopRight = (glm::vec2(posB->x, posB->y) + glm::vec2(physB->velocityX * it * deltaTime, physB->velocityY * it * deltaTime)) + posB->Rotate(glm::vec2(bRX, bTY));
-		glm::vec2 bBottomRight = (glm::vec2(posB->x, posB->y) + glm::vec2(physB->velocityX * it * deltaTime, physB->velocityY * it * deltaTime)) + posB->Rotate(glm::vec2(bRX, bBY));
-
-		std::array<glm::vec2, 4> colliderOne = { aTopLeft, aTopRight, aBottomRight, aBottomLeft };
-
-		std::array<glm::vec2, 4> colliderTwo = { bTopLeft, bTopRight, bBottomRight, bBottomLeft };
-
-		float totalMass = colA->mass + colB->mass;
-
-		// Game::main.renderer->prepareQuad(aTopRight, aBottomRight, aBottomLeft, aTopLeft, glm::vec4(1.0f, 0.0f, 0.0f, 0.5f), Game::main.textureMap["blank"]->ID);
-
-		for (int s = 0; s < 2; s++)
+		for (float it = 0.9f; it > -0.1f; it -= dT * 5.0f)
 		{
-			if (s == 0)
+			glm::vec2 aCenter = (glm::vec2(posA->x, posA->y) + glm::vec2(physA->velocityX * it * deltaTime, physA->velocityY * it * deltaTime)) + posA->Rotate(glm::vec2(aCX, aCY));
+			glm::vec2 aTopLeft = (glm::vec2(posA->x, posA->y) + glm::vec2(physA->velocityX * it * deltaTime, physA->velocityY * it * deltaTime)) + posA->Rotate(glm::vec2(aLX, aTY));
+			glm::vec2 aBottomLeft = (glm::vec2(posA->x, posA->y) + glm::vec2(physA->velocityX * it * deltaTime, physA->velocityY * it * deltaTime)) + posA->Rotate(glm::vec2(aLX, aBY));
+			glm::vec2 aTopRight = (glm::vec2(posA->x, posA->y) + glm::vec2(physA->velocityX * it * deltaTime, physA->velocityY * it * deltaTime)) + posA->Rotate(glm::vec2(aRX, aTY));
+			glm::vec2 aBottomRight = (glm::vec2(posA->x, posA->y) + glm::vec2(physA->velocityX * it * deltaTime, physA->velocityY * it * deltaTime)) + posA->Rotate(glm::vec2(aRX, aBY));
+
+			glm::vec2 bCenter = (glm::vec2(posB->x, posB->y) + glm::vec2(physB->velocityX * it * deltaTime, physB->velocityY * it * deltaTime)) + posB->Rotate(glm::vec2(bCX, bCY));
+			glm::vec2 bTopLeft = (glm::vec2(posB->x, posB->y) + glm::vec2(physB->velocityX * it * deltaTime, physB->velocityY * it * deltaTime)) + posB->Rotate(glm::vec2(bLX, bTY));
+			glm::vec2 bBottomLeft = (glm::vec2(posB->x, posB->y) + glm::vec2(physB->velocityX * it * deltaTime, physB->velocityY * it * deltaTime)) + posB->Rotate(glm::vec2(bLX, bBY));
+			glm::vec2 bTopRight = (glm::vec2(posB->x, posB->y) + glm::vec2(physB->velocityX * it * deltaTime, physB->velocityY * it * deltaTime)) + posB->Rotate(glm::vec2(bRX, bTY));
+			glm::vec2 bBottomRight = (glm::vec2(posB->x, posB->y) + glm::vec2(physB->velocityX * it * deltaTime, physB->velocityY * it * deltaTime)) + posB->Rotate(glm::vec2(bRX, bBY));
+
+			std::array<glm::vec2, 4> colliderOne = { aTopLeft, aTopRight, aBottomRight, aBottomLeft };
+
+			std::array<glm::vec2, 4> colliderTwo = { bTopLeft, bTopRight, bBottomRight, bBottomLeft };
+
+			float totalMass = colA->mass + colB->mass;
+
+			// Game::main.renderer->prepareQuad(aTopRight, aBottomRight, aBottomLeft, aTopLeft, glm::vec4(1.0f, 0.0f, 0.0f, 0.5f), Game::main.textureMap["blank"]->ID);
+
+			for (int s = 0; s < 2; s++)
 			{
-				// Diagonals
-				for (int p = 0; p < colliderOne.size(); p++)
+				if (s == 0)
 				{
-					glm::vec2 displacement = { 0, 0 };
-					glm::vec2 collEdge = { 0, 0 };
-
-					glm::vec2 lineA = aCenter;
-					glm::vec2 lineB = colliderOne[p];
-
-					// Edges
-					for (int q = 0; q < colliderTwo.size(); q++)
+					// Diagonals
+					for (int p = 0; p < colliderOne.size(); p++)
 					{
-						glm::vec2 edgeA = colliderTwo[q];
-						glm::vec2 edgeB = colliderTwo[(q + 1) % colliderTwo.size()];
+						glm::vec2 displacement = { 0, 0 };
+						glm::vec2 collEdge = { 0, 0 };
 
-						float h = (edgeB.x - edgeA.x) * (lineA.y - lineB.y) - (lineA.x - lineB.x) * (edgeB.y - edgeA.y);
-						float t1 = ((edgeA.y - edgeB.y) * (lineA.x - edgeA.x) + (edgeB.x - edgeA.x) * (lineA.y - edgeA.y)) / h;
-						float t2 = ((lineA.y - lineB.y) * (lineA.x - edgeA.x) + (lineB.x - lineA.x) * (lineA.y - edgeA.y)) / h;
+						glm::vec2 lineA = aCenter;
+						glm::vec2 lineB = colliderOne[p];
 
-						if (t1 >= 0.0f && t1 < 1.0f && t2 >= 0.0f && t2 < 1.0f)
+						// Edges
+						for (int q = 0; q < colliderTwo.size(); q++)
 						{
-							if (collEdge.x == 0 && collEdge.y == 0)
+							glm::vec2 edgeA = colliderTwo[q];
+							glm::vec2 edgeB = colliderTwo[(q + 1) % colliderTwo.size()];
+
+							float h = (edgeB.x - edgeA.x) * (lineA.y - lineB.y) - (lineA.x - lineB.x) * (edgeB.y - edgeA.y);
+							float t1 = ((edgeA.y - edgeB.y) * (lineA.x - edgeA.x) + (edgeB.x - edgeA.x) * (lineA.y - edgeA.y)) / h;
+							float t2 = ((lineA.y - lineB.y) * (lineA.x - edgeA.x) + (lineB.x - lineA.x) * (lineA.y - edgeA.y)) / h;
+
+							if (t1 >= 0.0f && t1 < 1.0f && t2 >= 0.0f && t2 < 1.0f)
 							{
-								collEdge = edgeB - edgeA;
+								if (collEdge.x == 0 && collEdge.y == 0)
+								{
+									collEdge = edgeB - edgeA;
+								}
+
+								collided = true;
+								displacement.x += (1.0f - t1) * (lineB.x - lineA.x);
+								displacement.y += (1.0f - t1) * (lineB.y - lineA.y);
+							}
+						}
+
+						if (displacement.x != 0 || displacement.y != 0)
+						{
+							glm::vec2 right = Normalize(collEdge);
+							glm::vec2 up = { right.y, right.x };
+
+							//glm::vec2 aDispNormal = up;
+							//glm::vec2 bDispNormal = -up;
+
+							glm::vec2 aDispNormal = Normalize(glm::vec2(displacement.x, displacement.y));
+							glm::vec2 bDispNormal = -aDispNormal;
+
+							// We want to apply "bounce" to perpendicular velocity
+							// and apply "friction" to parallel velocity.
+
+							glm::vec2 aVel = glm::vec2(physA->velocityX, physA->velocityY);
+							glm::vec2 bVel = glm::vec2(physB->velocityX, physB->velocityY);
+
+							if (colA->bounce != 0)
+							{
+								glm::vec2 aNewVelocity = (aVel + (Project(aVel, aDispNormal) * -2.0f) * colA->bounce) * (1 - (colA->mass / totalMass)) * deltaTime;
+								physA->velocityX = aNewVelocity.x;
+								physA->velocityY = aNewVelocity.y;
 							}
 
-							collided = true;
-							displacement.x += (1.0f - t1) * (lineB.x - lineA.x);
-							displacement.y += (1.0f - t1) * (lineB.y - lineA.y);
-						}
-					}
-
-					if (displacement.x != 0 || displacement.y != 0)
-					{
-						glm::vec2 right = Normalize(collEdge);
-						glm::vec2 up = { right.y, right.x };
-
-						//glm::vec2 aDispNormal = up;
-						//glm::vec2 bDispNormal = -up;
-
-						glm::vec2 aDispNormal = Normalize(glm::vec2(displacement.x, displacement.y));
-						glm::vec2 bDispNormal = -aDispNormal;
-
-						// We want to apply "bounce" to perpendicular velocity
-						// and apply "friction" to parallel velocity.
-
-						glm::vec2 aVel = glm::vec2(physA->velocityX, physA->velocityY);
-						glm::vec2 bVel = glm::vec2(physB->velocityX, physB->velocityY);
-
-						if (colA->bounce != 0)
-						{
-							glm::vec2 aNewVelocity = (aVel + (Project(aVel, aDispNormal) * -2.0f) * colA->bounce) * (1 - (colA->mass / totalMass)) * deltaTime;
-							physA->velocityX = aNewVelocity.x;
-							physA->velocityY = aNewVelocity.y;
-						}
-
-						if (colB->bounce != 0)
-						{
-							glm::vec2 bNewVelocity = (bVel + (Project(bVel, bDispNormal) * -2.0f) * colB->bounce) * (1 - (colB->mass / totalMass)) * deltaTime;
-							physB->velocityX = bNewVelocity.x;
-							physB->velocityY = bNewVelocity.y;
-						}
-
-						/*if (colA->platform)
-						{
-							glm::vec2 midTopA = (aTopLeft + aTopRight) / 2.0f;
-							glm::vec2 midBotB = (bBottomLeft + bBottomRight) / 2.0f;
-							glm::vec2 upA = Normalize(midTopA - aCenter);
-
-							if (midBotB.y * upA.y < midTopA.y * upA.y && physB->velocityX >= 0 && aCenter.x > bCenter.x
-								|| midBotB.y * upA.y < midTopA.y * upA.y && physB->velocityX <= 0 && aCenter.x < bCenter.x)
+							if (colB->bounce != 0)
 							{
-								posB->x += displacement.x * upA.x * -1;
-								posB->y += displacement.y * upA.y * -1;
+								glm::vec2 bNewVelocity = (bVel + (Project(bVel, bDispNormal) * -2.0f) * colB->bounce) * (1 - (colB->mass / totalMass)) * deltaTime;
+								physB->velocityX = bNewVelocity.x;
+								physB->velocityY = bNewVelocity.y;
 							}
-							else
+
+							/*if (colA->platform)
+							{
+								glm::vec2 midTopA = (aTopLeft + aTopRight) / 2.0f;
+								glm::vec2 midBotB = (bBottomLeft + bBottomRight) / 2.0f;
+								glm::vec2 upA = Normalize(midTopA - aCenter);
+
+								if (midBotB.y * upA.y < midTopA.y * upA.y && physB->velocityX >= 0 && aCenter.x > bCenter.x
+									|| midBotB.y * upA.y < midTopA.y * upA.y && physB->velocityX <= 0 && aCenter.x < bCenter.x)
+								{
+									posB->x += displacement.x * upA.x * -1;
+									posB->y += displacement.y * upA.y * -1;
+								}
+								else
+								{
+									posB->x += displacement.x * 1;
+									posB->y += displacement.y * 1;
+								}
+							}*/
+
+							if (colB->platform)
+							{
+								// Baba Booey
+							}
+							else if (!posA->stat && !posB->stat)
+							{
+								posA->x += displacement.x * -1 * (1 - (colA->mass / totalMass));
+								posA->y += displacement.y * -1 * (1 - (colA->mass / totalMass));
+
+								posB->x += displacement.x * 1 * (1 - (colB->mass / totalMass));
+								posB->y += displacement.y * 1 * (1 - (colB->mass / totalMass));
+							}
+							else if (posA->stat && !posB->stat)
 							{
 								posB->x += displacement.x * 1;
 								posB->y += displacement.y * 1;
 							}
-						}*/
-
-						if (colB->platform)
-						{
-							// Baba Booey
-						}
-						else if (!posA->stat && !posB->stat)
-						{
-							posA->x += displacement.x * -1 * (1 - (colA->mass / totalMass));
-							posA->y += displacement.y * -1 * (1 - (colA->mass / totalMass));
-
-							posB->x += displacement.x * 1 * (1 - (colB->mass / totalMass));
-							posB->y += displacement.y * 1 * (1 - (colB->mass / totalMass));
-						}
-						else if (posA->stat && !posB->stat)
-						{
-							posB->x += displacement.x * 1;
-							posB->y += displacement.y * 1;
-						}
-						else if (!posA->stat && posB->stat)
-						{
-							posA->x += displacement.x * -1;
-							posA->y += displacement.y * -1;
+							else if (!posA->stat && posB->stat)
+							{
+								posA->x += displacement.x * -1;
+								posA->y += displacement.y * -1;
+							}
 						}
 					}
 				}
-			}
-			else
-			{
-				// Diagonals
-				for (int p = 0; p < colliderTwo.size(); p++)
+				else
 				{
-					glm::vec2 displacement = { 0, 0 };
-					glm::vec2 collEdge = { 0, 0 };
-
-					glm::vec2 lineA = bCenter;
-					glm::vec2 lineB = colliderTwo[p];
-
-					// Edges
-					for (int q = 0; q < colliderOne.size(); q++)
+					// Diagonals
+					for (int p = 0; p < colliderTwo.size(); p++)
 					{
-						glm::vec2 edgeA = colliderOne[q];
-						glm::vec2 edgeB = colliderOne[(q + 1) % colliderOne.size()];
+						glm::vec2 displacement = { 0, 0 };
+						glm::vec2 collEdge = { 0, 0 };
 
-						float h = (edgeB.x - edgeA.x) * (lineA.y - lineB.y) - (lineA.x - lineB.x) * (edgeB.y - edgeA.y);
-						float t1 = ((edgeA.y - edgeB.y) * (lineA.x - edgeA.x) + (edgeB.x - edgeA.x) * (lineA.y - edgeA.y)) / h;
-						float t2 = ((lineA.y - lineB.y) * (lineA.x - edgeA.x) + (lineB.x - lineA.x) * (lineA.y - edgeA.y)) / h;
+						glm::vec2 lineA = bCenter;
+						glm::vec2 lineB = colliderTwo[p];
 
-						if (t1 >= 0.0f && t1 < 1.0f && t2 >= 0.0f && t2 < 1.0f)
+						// Edges
+						for (int q = 0; q < colliderOne.size(); q++)
 						{
-							if (collEdge.x == 0 && collEdge.y == 0)
+							glm::vec2 edgeA = colliderOne[q];
+							glm::vec2 edgeB = colliderOne[(q + 1) % colliderOne.size()];
+
+							float h = (edgeB.x - edgeA.x) * (lineA.y - lineB.y) - (lineA.x - lineB.x) * (edgeB.y - edgeA.y);
+							float t1 = ((edgeA.y - edgeB.y) * (lineA.x - edgeA.x) + (edgeB.x - edgeA.x) * (lineA.y - edgeA.y)) / h;
+							float t2 = ((lineA.y - lineB.y) * (lineA.x - edgeA.x) + (lineB.x - lineA.x) * (lineA.y - edgeA.y)) / h;
+
+							if (t1 >= 0.0f && t1 < 1.0f && t2 >= 0.0f && t2 < 1.0f)
 							{
-								collEdge = edgeB - edgeA;
+								if (collEdge.x == 0 && collEdge.y == 0)
+								{
+									collEdge = edgeB - edgeA;
+								}
+
+								collided = true;
+								displacement.x += (1.0f - t1) * (lineB.x - lineA.x);
+								displacement.y += (1.0f - t1) * (lineB.y - lineA.y);
+							}
+						}
+
+						if (displacement.x != 0 || displacement.y != 0)
+						{
+							float oldVelocity = physA->velocityY;
+
+							glm::vec2 right = Normalize(collEdge);
+							glm::vec2 up = { right.y, right.x };
+
+							//glm::vec2 aDispNormal = -up;
+							//glm::vec2 bDispNormal = up;
+
+							glm::vec2 aDispNormal = Normalize(glm::vec2(displacement.x, displacement.y));
+							glm::vec2 bDispNormal = -aDispNormal;
+
+							// We want to apply "bounce" to perpendicular velocity
+							// and apply "friction" to parallel velocity.
+
+							glm::vec2 aVel = glm::vec2(physA->velocityX, physA->velocityY);
+							glm::vec2 bVel = glm::vec2(physB->velocityX, physB->velocityY);
+
+							if (colA->bounce != 0)
+							{
+								glm::vec2 aNewVelocity = (aVel + (Project(aVel, aDispNormal) * -2.0f) * colA->bounce) * (1 - (colA->mass / totalMass)) * deltaTime;
+								// physA->velocityX = aNewVelocity.x;
+								physA->velocityY = aNewVelocity.y;
 							}
 
-							collided = true;
-							displacement.x += (1.0f - t1) * (lineB.x - lineA.x);
-							displacement.y += (1.0f - t1) * (lineB.y - lineA.y);
-						}
-					}
-
-					if (displacement.x != 0 || displacement.y != 0)
-					{
-						float oldVelocity = physA->velocityY;
-
-						glm::vec2 right = Normalize(collEdge);
-						glm::vec2 up = { right.y, right.x };
-
-						//glm::vec2 aDispNormal = -up;
-						//glm::vec2 bDispNormal = up;
-
-						glm::vec2 aDispNormal = Normalize(glm::vec2(displacement.x, displacement.y));
-						glm::vec2 bDispNormal = -aDispNormal;
-
-						// We want to apply "bounce" to perpendicular velocity
-						// and apply "friction" to parallel velocity.
-
-						glm::vec2 aVel = glm::vec2(physA->velocityX, physA->velocityY);
-						glm::vec2 bVel = glm::vec2(physB->velocityX, physB->velocityY);
-
-						if (colA->bounce != 0)
-						{
-							glm::vec2 aNewVelocity = (aVel + (Project(aVel, aDispNormal) * -2.0f) * colA->bounce) * (1 - (colA->mass / totalMass)) * deltaTime;
-							// physA->velocityX = aNewVelocity.x;
-							physA->velocityY = aNewVelocity.y;
-						}
-
-						if (colB->bounce != 0)
-						{
-							glm::vec2 bNewVelocity = (bVel + (Project(bVel, bDispNormal) * -2.0f) * colB->bounce) * (1 - (colB->mass / totalMass)) * deltaTime;
-							// physB->velocityX = bNewVelocity.x;
-							physB->velocityY = bNewVelocity.y;
-						}
-
-						if (colB->platform)
-						{
-							glm::vec2 midTopB = (bTopLeft + bTopRight) / 2.0f;
-							glm::vec2 midBotA = (aBottomLeft + aBottomRight) / 2.0f;
-							glm::vec2 upB = Normalize(midTopB - bCenter);
-
-							if (midBotA.y - oldVelocity > midTopB.y && glm::length2(aCenter - bTopLeft) > 0.5f && abs(physA->velocityX) < abs(physA->velocityY) - 50.0f ||
-								midBotA.y - oldVelocity > midTopB.y && glm::length2(aCenter - bTopRight) > 0.5f && abs(physA->velocityX) < abs(physA->velocityY) - 50.0f)
+							if (colB->bounce != 0)
 							{
-								std::cout << "Fuck\n";
-								posA->x += displacement.x * upB.x * 1;
-								posA->y += displacement.y * upB.y * 1;
+								glm::vec2 bNewVelocity = (bVel + (Project(bVel, bDispNormal) * -2.0f) * colB->bounce) * (1 - (colB->mass / totalMass)) * deltaTime;
+								// physB->velocityX = bNewVelocity.x;
+								physB->velocityY = bNewVelocity.y;
 							}
-							else
+
+							if (colB->platform)
+							{
+								glm::vec2 midTopB = (bTopLeft + bTopRight) / 2.0f;
+								glm::vec2 midBotA = (aBottomLeft + aBottomRight) / 2.0f;
+								glm::vec2 upB = Normalize(midTopB - bCenter);
+
+								if (midBotA.y - oldVelocity > midTopB.y && glm::length2(aCenter - bTopLeft) > 0.5f && abs(physA->velocityX) < abs(physA->velocityY) - 50.0f ||
+									midBotA.y - oldVelocity > midTopB.y && glm::length2(aCenter - bTopRight) > 0.5f && abs(physA->velocityX) < abs(physA->velocityY) - 50.0f)
+								{
+									std::cout << "Fuck\n";
+									posA->x += displacement.x * upB.x * 1;
+									posA->y += displacement.y * upB.y * 1;
+								}
+								else
+								{
+									posA->x += displacement.x * 1;
+									posA->y += displacement.y * 1;
+								}
+							}
+							else if (!posA->stat && !posB->stat)
+							{
+								posA->x += displacement.x * 1 * (1 - (colA->mass / totalMass));
+								posA->y += displacement.y * 1 * (1 - (colA->mass / totalMass));
+
+								posB->x += displacement.x * -1 * (1 - (colB->mass / totalMass));
+								posB->y += displacement.y * -1 * (1 - (colB->mass / totalMass));
+							}
+							else if (posA->stat && !posB->stat)
+							{
+								posB->x += displacement.x * -1;
+								posB->y += displacement.y * -1;
+							}
+							else if (!posA->stat && posB->stat)
 							{
 								posA->x += displacement.x * 1;
 								posA->y += displacement.y * 1;
 							}
-						}
-						else if (!posA->stat && !posB->stat)
-						{
-							posA->x += displacement.x * 1 * (1 - (colA->mass / totalMass));
-							posA->y += displacement.y * 1 * (1 - (colA->mass / totalMass));
-
-							posB->x += displacement.x * -1 * (1 - (colB->mass / totalMass));
-							posB->y += displacement.y * -1 * (1 - (colB->mass / totalMass));
-						}
-						else if (posA->stat && !posB->stat)
-						{
-							posB->x += displacement.x * -1;
-							posB->y += displacement.y * -1;
-						}
-						else if (!posA->stat && posB->stat)
-						{
-							posA->x += displacement.x * 1;
-							posA->y += displacement.y * 1;
 						}
 					}
 				}
