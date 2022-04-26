@@ -1372,18 +1372,16 @@ bool ColliderSystem::TestAndResolveCollision(ColliderComponent* colA, PositionCo
 								glm::vec2 midBotA = (aBottomLeft + aBottomRight) / 2.0f;
 								glm::vec2 upB = Normalize(midTopB - bCenter);
 
-								std::cout << std::to_string(abs(physA->velocityX)) + "/" + std::to_string(abs(physA->velocityY) - 50.0f);
+								std::cout << std::to_string(abs(physA->velocityX)) + "/" + std::to_string(abs(physA->velocityY));
 
-								if (midBotA.y - oldVelocity > midTopB.y && glm::length2(aCenter - bTopLeft) > 0.5f && abs(physA->velocityX) < abs(physA->velocityY) - 50.0f ||
-									midBotA.y - oldVelocity > midTopB.y && glm::length2(aCenter - bTopRight) > 0.5f && abs(physA->velocityX) < abs(physA->velocityY) - 50.0f)
+								if (glm::length2(aCenter - bTopLeft) > 0.5f ||
+									glm::length2(aCenter - bTopRight) > 0.5f)
 								{
-									std::cout << "Fits.\n";
 									posA->x += displacement.x * upB.x * 1;
 									posA->y += displacement.y * upB.y * 1;
 								}
 								else
 								{
-									std::cout << "Doesn't fit.\n";
 									posA->x += displacement.x * 1;
 									posA->y += displacement.y * 1;
 								}
