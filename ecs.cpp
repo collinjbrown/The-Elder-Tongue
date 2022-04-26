@@ -1922,7 +1922,7 @@ void AnimationControllerSystem::Update(float deltaTime)
 				{
 					c->animator->SetAnimation(s + "walk");
 				}
-				else if (abs(p->velocityX) < 0.5f && col->onPlatform && !move->preparingToJump && move->canMove && c->animator->activeAnimation != s + "idle")
+				else if (abs(p->velocityX) < 10.0f && !col->collidedLastTick && col->onPlatform && !move->preparingToJump && move->canMove && c->animator->activeAnimation != s + "idle")
 				{
 					c->animator->SetAnimation(s + "idle");
 				}
