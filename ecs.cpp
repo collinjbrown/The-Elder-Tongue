@@ -1258,7 +1258,6 @@ bool ColliderSystem::TestAndResolveCollision(ColliderComponent* colA, PositionCo
 							if (midBotB.y * upA.y < midTopA.y * upA.y && physB->velocityX >= 0 && aCenter.x > bCenter.x
 								|| midBotB.y * upA.y < midTopA.y * upA.y && physB->velocityX <= 0 && aCenter.x < bCenter.x)
 							{
-								std::cout << "Fuck \n";
 								posB->x += displacement.x * upA.x * -1;
 								posB->y += displacement.y * upA.y * -1;
 							}
@@ -1370,6 +1369,7 @@ bool ColliderSystem::TestAndResolveCollision(ColliderComponent* colA, PositionCo
 							if (midBotA.y - oldVelocity > midTopB.y && glm::length2(aCenter - bTopLeft) > 0.5f && abs(physA->velocityX) < abs(physA->velocityY) - 50.0f ||
 								midBotA.y - oldVelocity > midTopB.y && glm::length2(aCenter - bTopRight) > 0.5f && abs(physA->velocityX) < abs(physA->velocityY) - 50.0f)
 							{
+								std::cout << "Fuck\n";
 								posA->x += displacement.x * upB.x * 1;
 								posA->y += displacement.y * upB.y * 1;
 							}
