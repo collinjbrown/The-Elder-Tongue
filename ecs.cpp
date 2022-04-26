@@ -1372,7 +1372,7 @@ bool ColliderSystem::TestAndResolveCollision(ColliderComponent* colA, PositionCo
 								glm::vec2 midBotA = (aBottomLeft + aBottomRight) / 2.0f;
 								glm::vec2 upB = Normalize(midTopB - bCenter);
 
-								std::cout << std::to_string(abs(physA->velocityX)) + "/" + std::to_string(abs(physA->velocityY));
+								// std::cout << std::to_string(abs(physA->velocityX)) + "/" + std::to_string(abs(physA->velocityY));
 
 								if (glm::length2(aCenter - bTopLeft) > 0.5f ||
 									glm::length2(aCenter - bTopRight) > 0.5f)
