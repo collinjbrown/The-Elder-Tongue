@@ -1162,7 +1162,7 @@ bool ColliderSystem::TestAndResolveCollision(ColliderComponent* colA, PositionCo
 
 	float dT = (int)(deltaTime * 100 + 0.5);
 	dT = (float)dT / 100;
-	// std::cout << std::to_string(deltaTime) + "/" + std::to_string(dT * 5.0f) + "\n";
+	std::cout << std::to_string(deltaTime) + "/" + std::to_string(dT * 5.0f) + "\n";
 
 	if (dT != 0)
 	{
