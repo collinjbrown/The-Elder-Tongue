@@ -22,6 +22,7 @@ class PlayerAnimationControllerComponent;
 class HealthComponent;
 class DuelistComponent;
 class DamageComponent;
+class ParticleComponent;
 class Entity;
 
 class System
@@ -68,11 +69,7 @@ class ColliderSystem : public System
 
 	bool TestAndResolveCollision(ColliderComponent* colA, PositionComponent* posA, PhysicsComponent* physA, ColliderComponent* colB, PositionComponent* posB, PhysicsComponent* physB, float deltaTime);
 
-	float Norm(glm::vec2 a);
-
 	float Dot(glm::vec2 a, glm::vec2 b);
-
-	glm::vec2 Normalize(glm::vec2 a);
 
 	glm::vec2 Project(glm::vec2 v, glm::vec2 a);
 
@@ -151,6 +148,18 @@ class DuellingSystem : public System
 {
 public:
 	vector<DuelistComponent*> duels;
+
+	void Update(float deltaTime);
+
+	void AddComponent(Component* component);
+
+	void PurgeEntity(Entity* e);
+};
+
+class ParticleSystem : public System
+{
+public:
+	vector<ParticleComponent*> particles;
 
 	void Update(float deltaTime);
 

@@ -6,6 +6,20 @@
 #include "component.h"
 #include "entity.h"
 
+#pragma region Math
+
+float Norm(glm::vec2 a)
+{
+	return sqrt(a.x * a.x + a.y * a.y);
+}
+
+glm::vec2 Normalize(glm::vec2 a)
+{
+	return a * (1 / Norm(a));
+}
+
+#pragma endregion
+
 #pragma region Entities
 
 int Entity::Get_ID() { return ID; }
@@ -61,6 +75,10 @@ void ECS::Init()
 	ComponentBlock* physicsBlock = new ComponentBlock(physicsSystem, physicsComponentID);
 	componentBlocks.push_back(physicsBlock);
 
+	ParticleSystem* particleSystem = new ParticleSystem();
+	ComponentBlock* particleBlock = new ComponentBlock(particleSystem, particleComponentID);
+	componentBlocks.push_back(particleBlock);
+
 	ColliderSystem* colliderSystem = new ColliderSystem();
 	ComponentBlock* colliderBlock = new ComponentBlock(colliderSystem, colliderComponentID);
 	componentBlocks.push_back(colliderBlock);
@@ -104,7 +122,7 @@ void ECS::Update(float deltaTime)
 		ECS::main.RegisterComponent(new PhysicsComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 1000.0f, 2000.0f), player);
 		ECS::main.RegisterComponent(new ColliderComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], false, false, false, true, false, EntityClass::player, 1.0f, 0.2f, 1.0f, 25.0f, 55.0f, 0.0f, 0.0f), player);
 		ECS::main.RegisterComponent(new MovementComponent(player, true, 2000.0f, 500.0f, 2.5f, 100.0f, 0.1f, true, true, false), player);
-		ECS::main.RegisterComponent(new InputComponent(player, true, true, 0.5f, 5000, 0.5f, 2, 0.5f), player);
+		ECS::main.RegisterComponent(new InputComponent(player, true, true, 0.5f, 5000, 0.5f, 2, 0.5f, 2000.0f), player);
 		ECS::main.RegisterComponent(new CameraFollowComponent(player, true, 10.0f), player);
 		ECS::main.RegisterComponent(new HealthComponent(player, true, 1000.0f, false), player);
 		ECS::main.RegisterComponent(new DuelistComponent(player, true, true, true), player);
@@ -198,7 +216,6 @@ void ECS::PurgeDeadEntities()
 	if (dyingEntities.size() > 0)
 	{
 		int n = dyingEntities.size();
-		std::cout << "Dead: " + std::to_string(n) + "\n";
 
 		for (int i = 0; i < n; i++)
 		{
@@ -355,7 +372,7 @@ ColliderComponent::ColliderComponent(Entity* entity, bool active, PositionCompon
 
 #pragma region Input Component
 
-InputComponent::InputComponent(Entity* entity, bool active, bool acceptInput, float projectionDelay, float projectionDepth, float maxCoyoteTime, int maxJumps, float projectileDelay)
+InputComponent::InputComponent(Entity* entity, bool active, bool acceptInput, float projectionDelay, float projectionDepth, float maxCoyoteTime, int maxJumps, float projectileDelay, float projectileSpeed)
 {
 	this->ID = inputComponentID;
 	this->active = active;
@@ -370,10 +387,12 @@ InputComponent::InputComponent(Entity* entity, bool active, bool acceptInput, fl
 	this->releasedJump = true;
 	this->coyoteTime = 0.0f;
 	this->maxCoyoteTime = maxCoyoteTime;
+	this->jumps = 0;
 	this->maxJumps = maxJumps;
 
 	this->lastProjectile = 0.0f;
 	this->projectileDelay = projectileDelay;
+	this->projectileSpeed = projectileSpeed;
 }
 
 #pragma endregion
@@ -512,6 +531,30 @@ DamageComponent::DamageComponent(Entity* entity, bool active, bool hasLifetime, 
 	this->damagesPlayers = damagesPlayers;
 	this->damagesEnemies = damagesEnemies;
 	this->damagesObjects = damagesObjects;
+}
+
+#pragma endregion
+
+#pragma region Particle Component
+
+ParticleComponent::ParticleComponent(Entity* entity, bool active, float tickRate, float xOffset, float yOffset, int number, Element element, float minLifetime, float maxLifetime)
+{
+	this->ID = particleComponentID;
+	this->entity = entity;
+	this->active = active;
+
+	this->lastTick = 0.0f;
+	this->tickRate = tickRate;
+
+	this->xOffset = xOffset;
+	this->yOffset = yOffset;
+
+	this->number = number;
+
+	this->element = element;
+	
+	this->minLifetime = minLifetime;
+	this->maxLifetime = maxLifetime;
 }
 
 #pragma endregion
@@ -808,7 +851,6 @@ void ColliderSystem::Update(float deltaTime)
 													HealthComponent* aHealth = (HealthComponent*)cA->entity->componentIDMap[healthComponentID];
 													aHealth->health -= bDamage->damage;
 													bDamage->uses -= 1;
-													std::cout << "Oof: " + std::to_string(aHealth->health) + "\n";
 												}
 											}
 											else
@@ -1370,19 +1412,9 @@ bool ColliderSystem::TestAndResolveCollision(ColliderComponent* colA, PositionCo
 	return collided;
 }
 
-float ColliderSystem::Norm(glm::vec2 a)
-{
-	return sqrt(a.x * a.x + a.y * a.y);
-}
-
 float ColliderSystem::Dot(glm::vec2 a, glm::vec2 b)
 {
 	return a.x * b.x + a.y * b.y;
-}
-
-glm::vec2 ColliderSystem::Normalize(glm::vec2 a)
-{
-	return a * (1 / Norm(a));
 }
 
 glm::vec2 ColliderSystem::Project(glm::vec2 v, glm::vec2 a)
@@ -1450,30 +1482,45 @@ void InputSystem::Update(float deltaTime)
 
 				if (glfwGetMouseButton(Game::main.window, GLFW_MOUSE_BUTTON_2) == GLFW_PRESS && m->lastProjectile >= m->projectileDelay)
 				{
-					m->lastProjectile = 0.0f;
+					Texture2D* s = Game::main.textureMap["blank"];
 
-					Entity* projectile = ECS::main.CreateEntity("Bullet");
-					Texture2D* tex3 = Game::main.textureMap["blank"];
+					float screenLeft = (Game::main.camX - (Game::main.windowWidth * Game::main.zoom / 1.0f));
+					float screenRight = (Game::main.camX + (Game::main.windowWidth * Game::main.zoom / 1.0f));
+					float screenBottom = (Game::main.camY - (Game::main.windowHeight * Game::main.zoom / 1.0f));
+					float screenTop = (Game::main.camY + (Game::main.windowHeight * Game::main.zoom / 1.0f));
+					float screenElev = Game::main.camZ;
+					
+					glm::vec2 projPos = glm::vec2(phys->pos->x, phys->pos->y);
+					glm::vec2 projVel = Normalize(glm::vec2(Game::main.mouseX - projPos.x, Game::main.mouseY - projPos.y)) * m->projectileSpeed;
 
-					ECS::main.RegisterComponent(new PositionComponent(projectile, true, false, phys->pos->x, phys->pos->y, 0.0f), projectile);
-					ECS::main.RegisterComponent(new PhysicsComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], 1000.0f, 0.0f, 0.0f, 0.0f, 0.0f), projectile);
-					ECS::main.RegisterComponent(new ColliderComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], false, false, true, false, true, EntityClass::object, 1.0f, 0.0f, 0.0f, 5.0f, 5.0f, 0.0f, 0.0f), projectile);
-					ECS::main.RegisterComponent(new DamageComponent(projectile, true, true, 20.0f, true, 1, 10.0f, false, true, true), projectile);
-					ECS::main.RegisterComponent(new StaticSpriteComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], tex3->width / 2.0f, tex3->height / 2.0f, tex3), projectile);
+					if (projPos.x + (s->width / 2.0f) > screenLeft && projPos.x - (s->width / 2.0f) < screenRight &&
+						projPos.y + (s->height / 2.0f) > screenBottom && projPos.y - (s->height / 2.0f) < screenTop)
+					{
+						m->lastProjectile = 0.0f;
+
+						Entity* projectile = ECS::main.CreateEntity("Bullet");
+
+						ECS::main.RegisterComponent(new PositionComponent(projectile, true, false, phys->pos->x, phys->pos->y, 0.0f), projectile);
+						ECS::main.RegisterComponent(new PhysicsComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], projVel.x, projVel.y, 0.0f, 0.0f, 0.0f), projectile);
+						ECS::main.RegisterComponent(new ColliderComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], false, false, true, false, true, EntityClass::object, 1.0f, 0.0f, 0.0f, 5.0f, 5.0f, 0.0f, 0.0f), projectile);
+						ECS::main.RegisterComponent(new DamageComponent(projectile, true, true, 20.0f, true, 1, 10.0f, false, true, true), projectile);
+						ECS::main.RegisterComponent(new StaticSpriteComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], s->width / 2.0f, s->height / 2.0f, s), projectile);
+						ECS::main.RegisterComponent(new ParticleComponent(projectile, true, 0.01f, 0.0f, 0.0f, 10, Element::aether, 5.0f, 20.0f), projectile);
+					}
 				}
 				else
 				{
 					m->lastProjectile += deltaTime;
 				}
 
-				if (glfwGetKey(Game::main.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS && move->canClimb)
+				/*if (glfwGetKey(Game::main.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS && move->canClimb)
 				{
 					move->shouldClimb = true;
 				}
 				else
 				{
 					move->shouldClimb = false;
-				}
+				}*/
 
 				if (glfwGetKey(Game::main.window, GLFW_KEY_T) == GLFW_PRESS && duel->hasSword && !duel->isAttacking && m->lastTick > 0.5f)
 				{
@@ -1567,7 +1614,7 @@ void InputSystem::Update(float deltaTime)
 						phys->velocityY = 0;
 					}
 
-					ParticleEngine::main.AddParticles(25, phys->pos->x, phys->pos->y, aether, rand() % 40 + 1);
+					ParticleEngine::main.AddParticles(25, phys->pos->x, phys->pos->y, Element::aether, rand() % 40 + 1);
 
 					m->releasedJump = false;
 					m->coyoteTime = m->maxCoyoteTime;
@@ -1642,7 +1689,7 @@ void InputSystem::Update(float deltaTime)
 					{
 						if (abs(phys->velocityX) < 0.5f && col->onPlatform)
 						{
-							ParticleEngine::main.AddParticles(10, phys->pos->x, phys->pos->y - 30.0f, dust, rand() % 10 + 1);
+							ParticleEngine::main.AddParticles(10, phys->pos->x, phys->pos->y - 30.0f, Element::dust, rand() % 10 + 1);
 						}
 
 						phys->velocityX += move->acceleration * deltaTime;
@@ -1654,7 +1701,7 @@ void InputSystem::Update(float deltaTime)
 					{
 						if (abs(phys->velocityX) < 0.5f && col->onPlatform)
 						{
-							ParticleEngine::main.AddParticles(10, phys->pos->x, phys->pos->y - 30.0f, dust, rand() % 10 + 1);
+							ParticleEngine::main.AddParticles(10, phys->pos->x, phys->pos->y - 30.0f, Element::dust, rand() % 10 + 1);
 						}
 
 						phys->velocityX -= move->acceleration * deltaTime;
@@ -2017,7 +2064,6 @@ void HealthSystem::Update(float deltaTime)
 		{
 			// You're dead.
 			h->dead = true;
-			std::cout << h->entity->Get_Name() + " has died.\n";
 
 			h->active = false;
 			ECS::main.AddDeadEntity(h->entity);
@@ -2099,6 +2145,64 @@ void DuellingSystem::PurgeEntity(Entity* e)
 		{
 			DuelistComponent* s = duels[i];
 			duels.erase(std::remove(duels.begin(), duels.end(), s), duels.end());
+			delete s;
+		}
+	}
+}
+
+#pragma endregion
+
+#pragma region Particle System
+
+void ParticleSystem::Update(float deltaTime)
+{
+	float screenLeft = (Game::main.camX - (Game::main.windowWidth * Game::main.zoom / 1.0f));
+	float screenRight = (Game::main.camX + (Game::main.windowWidth * Game::main.zoom / 1.0f));
+	float screenBottom = (Game::main.camY - (Game::main.windowHeight * Game::main.zoom / 1.0f));
+	float screenTop = (Game::main.camY + (Game::main.windowHeight * Game::main.zoom / 1.0f));
+	float screenElev = Game::main.camZ;
+
+	for (int i = 0; i < particles.size(); i++)
+	{
+		ParticleComponent* p = particles[i];
+
+		if (p->active)
+		{
+			if (p->lastTick >= p->tickRate)
+			{
+				p->lastTick = 0.0f;
+				PositionComponent* pos = (PositionComponent*)p->entity->componentIDMap[positionComponentID];
+				glm::vec2 pPos = glm::vec2(pos->x + p->xOffset, pos->y + p->yOffset);
+
+				if (pPos.x > screenLeft && pPos.x < screenRight &&
+					pPos.y > screenBottom && pPos.y < screenTop)
+				{
+					float lifetime = p->minLifetime + static_cast<float>(rand()) * static_cast<float>(p->maxLifetime - p->minLifetime) / RAND_MAX;
+
+					ParticleEngine::main.AddParticles(p->number, pPos.x, pPos.y, p->element, lifetime);
+				}
+			}
+			else
+			{
+				p->lastTick += deltaTime;
+			}
+		}
+	}
+}
+
+void ParticleSystem::AddComponent(Component* component)
+{
+	particles.push_back((ParticleComponent*)component);
+}
+
+void ParticleSystem::PurgeEntity(Entity* e)
+{
+	for (int i = 0; i < particles.size(); i++)
+	{
+		if (particles[i]->entity == e)
+		{
+			ParticleComponent* s = particles[i];
+			particles.erase(std::remove(particles.begin(), particles.end(), s), particles.end());
 			delete s;
 		}
 	}

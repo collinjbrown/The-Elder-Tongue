@@ -5,7 +5,7 @@
 #include "game.h"
 #include "texture_2D.h"
 
-enum Element { aether, fire, dust };
+enum class Element { aether, fire, dust };
 struct Particle
 {
 	float x;
@@ -76,7 +76,7 @@ public:
 				int r = rand() % 100 + 1;
 				float cr = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
 
-				if (particle->element == fire)
+				if (particle->element == Element::fire)
 				{
 					color = glm::vec4(1.0f, cr, 0.0f, 1.0f);
 
@@ -95,7 +95,7 @@ public:
 						particle->y -= 2.0f;
 					}
 				}
-				else if (particle->element == aether)
+				else if (particle->element == Element::aether)
 				{
 					color = glm::vec4(0.0f, 0.8f, cr, 1.0f);
 
@@ -112,7 +112,7 @@ public:
 						particle->y += 2.0f;
 					}
 				}
-				else if (particle->element == dust)
+				else if (particle->element == Element::dust)
 				{
 					color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 
@@ -154,15 +154,15 @@ public:
 
 				float cr = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
 
-				if (particle->element == fire)
+				if (particle->element == Element::fire)
 				{
 					color = glm::vec4(1.0f, cr, 0.0f, 1.0f);
 				}
-				else if (particle->element == aether)
+				else if (particle->element == Element::aether)
 				{
 					color = glm::vec4(0.0f, 0.8f, cr, 1.0f);
 				}
-				else if (particle->element == dust)
+				else if (particle->element == Element::dust)
 				{
 					color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 				}

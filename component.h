@@ -4,6 +4,7 @@
 #define _USE_MATH_DEFINES
 
 #include "renderer.h"
+#include "particleengine.h"
 #include <math.h>
 #include <map>
 #include <vector>
@@ -22,6 +23,7 @@ static int movementComponentID = 9;
 static int healthComponentID = 10;
 static int duelistComponentID = 11;
 static int damageComponentID = 12;
+static int particleComponentID = 13;
 
 static int dragonriderAnimControllerSubID = 1;
 
@@ -136,8 +138,9 @@ public:
 
 	float lastProjectile;
 	float projectileDelay;
+	float projectileSpeed;
 
-	InputComponent(Entity* entity, bool active, bool acceptInput, float projectionDelay, float projectionDepth, float maxCoyoteTime, int maxJumps, float projectileDelay);
+	InputComponent(Entity* entity, bool active, bool acceptInput, float projectionDelay, float projectionDepth, float maxCoyoteTime, int maxJumps, float projectileDelay, float projectileSpeed);
 };
 
 class MovementComponent : public Component
@@ -242,6 +245,22 @@ public:
 	bool damagesObjects;
 
 	DamageComponent(Entity* entity, bool active, bool hasLifetime, float lifetime, bool limitedUses, int uses, float damage, bool damagesPlayers, bool damagesEnemies, bool damagesObjects);
+};
+
+class ParticleComponent : public Component
+{
+public:
+	float lastTick;
+	float tickRate;
+
+	float xOffset;
+	float yOffset;
+	int number;
+	Element element;
+	float minLifetime;
+	float maxLifetime;
+
+	ParticleComponent(Entity* entity, bool active, float tickRate, float xOffset, float yOffset, int number, Element element, float minLifetime, float maxLifetime);
 };
 
 #endif
