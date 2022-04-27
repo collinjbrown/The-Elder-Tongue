@@ -168,4 +168,16 @@ public:
 	void PurgeEntity(Entity* e);
 };
 
+class DamageSystem : public System
+{
+public:
+	vector<DamageComponent*> damagers;
+
+	void Update(float deltaTime);
+
+	void AddComponent(Component* component);
+
+	void PurgeEntity(Entity* e);
+};
+
 #endif

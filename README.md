@@ -21,5 +21,5 @@
 - Add music / sound effects.
 ## Gameplay
 - ~~Add movement.~~
-- Add some basic combat.
+- ~~Add some basic combat.~~
 - Who knows?

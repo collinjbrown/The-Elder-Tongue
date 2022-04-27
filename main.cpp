@@ -169,6 +169,9 @@ int main(void)
     renderer.textureIDs.push_back(swordBaseAerialOne.ID);
     Game::main.animationMap.emplace("sword_baseAerialOne", &swordBaseAerialOne);
 
+    Animation2D slashBaseAerialOne{ "assets/animations/base/slash_baseAerialOne.png", true, 2, 3, 0.05f, { 2, 2, 2 }, false, GL_NEAREST };
+    renderer.textureIDs.push_back(slashBaseAerialOne.ID);
+    Game::main.animationMap.emplace("slash_baseAerialOne", &slashBaseAerialOne);
 
     #pragma endregion
 

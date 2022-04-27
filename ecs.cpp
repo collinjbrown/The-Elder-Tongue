@@ -83,6 +83,10 @@ void ECS::Init()
 	ComponentBlock* colliderBlock = new ComponentBlock(colliderSystem, colliderComponentID);
 	componentBlocks.push_back(colliderBlock);
 
+	DamageSystem* damageSystem = new DamageSystem();
+	ComponentBlock* damageBlock = new ComponentBlock(damageSystem, damageComponentID);
+	componentBlocks.push_back(damageBlock);
+
 	HealthSystem* healthSystem = new HealthSystem();
 	ComponentBlock* healthBlock = new ComponentBlock(healthSystem, healthComponentID);
 	componentBlocks.push_back(healthBlock);
@@ -466,6 +470,7 @@ AnimationComponent::AnimationComponent(Entity* entity, bool active, PositionComp
 	this->pos = pos;
 	activeAnimation = animationName;
 	animations.emplace(animationName, idleAnimation);
+	activeY = animations[activeAnimation]->rows - 1;
 }
 
 #pragma endregion
@@ -826,6 +831,8 @@ void ColliderSystem::Update(float deltaTime)
 												cA->active = false;
 												ECS::main.AddDeadEntity(aDamage->entity);
 											}
+
+											aDamage->lifetime -= deltaTime;
 										}
 
 										if (cB->trigger && cB->doesDamage)
@@ -1493,7 +1500,6 @@ void InputSystem::Update(float deltaTime)
 
 				if (glfwGetMouseButton(Game::main.window, GLFW_MOUSE_BUTTON_2) == GLFW_PRESS && m->lastProjectile >= m->projectileDelay)
 				{
-
 					float screenLeft = (Game::main.camX - (Game::main.windowWidth * Game::main.zoom / 1.0f));
 					float screenRight = (Game::main.camX + (Game::main.windowWidth * Game::main.zoom / 1.0f));
 					float screenBottom = (Game::main.camY - (Game::main.windowHeight * Game::main.zoom / 1.0f));
@@ -1553,30 +1559,44 @@ void InputSystem::Update(float deltaTime)
 
 					if (Game::main.mouseX < phys->pos->x)
 					{
-						if (abs(phys->velocityX) < 0.5f)
-						{
-							phys->velocityX -= move->stabDepth;
-							duel->isAttacking = true;
-							move->canMove = false;
-						}
-						else if (move->jumping)
-						{
-							duel->isAttacking = true;
-							move->canMove = false;
-						}
+						phys->velocityX -= move->stabDepth;
+						duel->isAttacking = true;
 					}
 					else
 					{
-						if (abs(phys->velocityX) < 0.5f)
+						phys->velocityX += move->stabDepth;
+						duel->isAttacking = true;
+					}
+
+					float screenLeft = (Game::main.camX - (Game::main.windowWidth * Game::main.zoom / 1.0f));
+					float screenRight = (Game::main.camX + (Game::main.windowWidth * Game::main.zoom / 1.0f));
+					float screenBottom = (Game::main.camY - (Game::main.windowHeight * Game::main.zoom / 1.0f));
+					float screenTop = (Game::main.camY + (Game::main.windowHeight * Game::main.zoom / 1.0f));
+					float screenElev = Game::main.camZ;
+
+					glm::vec2 projPos = glm::vec2(phys->pos->x, phys->pos->y);
+
+					if (projPos.x > screenLeft && projPos.x < screenRight &&
+						projPos.y > screenBottom && projPos.y < screenTop)
+					{
+						Texture2D* s = Game::main.textureMap["slash_baseAerialOne"];
+						m->lastProjectile = 0.0f;
+
+						Entity* projectile = ECS::main.CreateEntity("Slash");
+						Animation2D* anim1 = Game::main.animationMap["slash_baseAerialOne"];
+
+						ECS::main.RegisterComponent(new PositionComponent(projectile, true, false, phys->pos->x, phys->pos->y, 0.0f), projectile);
+						ECS::main.RegisterComponent(new PhysicsComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], phys->velocityX * 2.0f, phys->velocityY, 0.0f, 0.0f, 0.0f), projectile);
+						ECS::main.RegisterComponent(new ColliderComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], false, false, false, true, false, true, EntityClass::object, 1.0f, 0.0f, 0.0f, 5.0f, 5.0f, 0.0f, 0.0f), projectile);
+						ECS::main.RegisterComponent(new DamageComponent(projectile, true, true, 0.3f, true, 1, 20.0f, false, true, true), projectile);
+						ECS::main.RegisterComponent(new AnimationComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], anim1, "default"), projectile);
+
+						PhysicsComponent* p = (PhysicsComponent*)projectile->componentIDMap[physicsComponentID];
+						if (p->velocityX < 0)
 						{
-							phys->velocityX += move->stabDepth;
-							duel->isAttacking = true;
-							move->canMove = false;
-						}
-						else if (move->jumping)
-						{
-							duel->isAttacking = true;
-							move->canMove = false;
+							AnimationComponent* a = (AnimationComponent*)projectile->componentIDMap[animationComponentID];
+
+							a->flipped = true;
 						}
 					}
 				}
@@ -2214,6 +2234,48 @@ void ParticleSystem::PurgeEntity(Entity* e)
 		{
 			ParticleComponent* s = particles[i];
 			particles.erase(std::remove(particles.begin(), particles.end(), s), particles.end());
+			delete s;
+		}
+	}
+}
+
+#pragma endregion
+
+#pragma region Damage System
+
+void DamageSystem::Update(float deltaTime)
+{
+	for (int i = 0; i < damagers.size(); i++)
+	{
+		DamageComponent* d = damagers[i];
+
+		if (d->active)
+		{
+			if (d->hasLifetime && d->lifetime < 0.0f)
+			{
+				ECS::main.AddDeadEntity(d->entity);
+			}
+			else if (d->hasLifetime)
+			{
+				d->lifetime -= deltaTime;
+			}
+		}
+	}
+}
+
+void DamageSystem::AddComponent(Component* component)
+{
+	damagers.push_back((DamageComponent*)component);
+}
+
+void DamageSystem::PurgeEntity(Entity* e)
+{
+	for (int i = 0; i < damagers.size(); i++)
+	{
+		if (damagers[i]->entity == e)
+		{
+			DamageComponent* s = damagers[i];
+			damagers.erase(std::remove(damagers.begin(), damagers.end(), s), damagers.end());
 			delete s;
 		}
 	}
