@@ -126,7 +126,7 @@ void ECS::Update(float deltaTime)
 		ECS::main.RegisterComponent(new PhysicsComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 1000.0f, 2000.0f), player);
 		ECS::main.RegisterComponent(new ColliderComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], false, false, false, false, true, false, EntityClass::player, 1.0f, 0.2f, 1.0f, 25.0f, 55.0f, 0.0f, 0.0f), player);
 		ECS::main.RegisterComponent(new MovementComponent(player, true, 2000.0f, 500.0f, 2.5f, 100.0f, 0.1f, true, true, false), player);
-		ECS::main.RegisterComponent(new InputComponent(player, true, true, 0.5f, 5000, 0.5f, 2, 0.5f, 2000.0f), player);
+		ECS::main.RegisterComponent(new InputComponent(player, true, true, 0.5f, 5000, 0.5f, 2, 0.5f, 2.0f, 2000.0f), player);
 		ECS::main.RegisterComponent(new CameraFollowComponent(player, true, 10.0f), player);
 		ECS::main.RegisterComponent(new HealthComponent(player, true, 1000.0f, false), player);
 		ECS::main.RegisterComponent(new DuelistComponent(player, true, true, true), player);
@@ -377,7 +377,7 @@ ColliderComponent::ColliderComponent(Entity* entity, bool active, PositionCompon
 
 #pragma region Input Component
 
-InputComponent::InputComponent(Entity* entity, bool active, bool acceptInput, float projectionDelay, float projectionDepth, float maxCoyoteTime, int maxJumps, float projectileDelay, float projectileSpeed)
+InputComponent::InputComponent(Entity* entity, bool active, bool acceptInput, float projectionDelay, float projectionDepth, float maxCoyoteTime, int maxJumps, float projectileDelay, float slashSpeed, float projectileSpeed)
 {
 	this->ID = inputComponentID;
 	this->active = active;
@@ -397,6 +397,8 @@ InputComponent::InputComponent(Entity* entity, bool active, bool acceptInput, fl
 
 	this->lastProjectile = 0.0f;
 	this->projectileDelay = projectileDelay;
+
+	this->slashSpeed = slashSpeed;
 	this->projectileSpeed = projectileSpeed;
 }
 
@@ -522,7 +524,7 @@ DuelistComponent::DuelistComponent(Entity* entity, bool active, bool hasSword, b
 
 #pragma region Damage Component
 
-DamageComponent::DamageComponent(Entity* entity, bool active, bool hasLifetime, float lifetime, bool limitedUses, int uses, float damage, bool damagesPlayers, bool damagesEnemies, bool damagesObjects)
+DamageComponent::DamageComponent(Entity* entity, bool active, bool hasLifetime, float lifetime, bool showAfterUses, bool limitedUses, int uses, float damage, bool damagesPlayers, bool damagesEnemies, bool damagesObjects)
 {
 	this->ID = damageComponentID;
 	this->entity = entity;
@@ -530,6 +532,7 @@ DamageComponent::DamageComponent(Entity* entity, bool active, bool hasLifetime, 
 
 	this->hasLifetime = hasLifetime;
 	this->lifetime = lifetime;
+	this->showAfterUses = showAfterUses;
 	this->limitedUses = limitedUses;
 	this->uses = uses;
 	this->damage = damage;
@@ -829,7 +832,11 @@ void ColliderSystem::Update(float deltaTime)
 											if (aDamage->uses <= 0)
 											{
 												cA->active = false;
-												ECS::main.AddDeadEntity(aDamage->entity);
+
+												if (!aDamage->showAfterUses)
+												{
+													ECS::main.AddDeadEntity(aDamage->entity);
+												}
 											}
 
 											aDamage->lifetime -= deltaTime;
@@ -1520,7 +1527,7 @@ void InputSystem::Update(float deltaTime)
 						ECS::main.RegisterComponent(new PositionComponent(projectile, true, false, phys->pos->x, phys->pos->y, 0.0f), projectile);
 						ECS::main.RegisterComponent(new PhysicsComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], projVel.x, projVel.y, 0.0f, 0.0f, 0.0f), projectile);
 						ECS::main.RegisterComponent(new ColliderComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], false, false, false, true, false, true, EntityClass::object, 1.0f, 0.0f, 0.0f, 5.0f, 5.0f, 0.0f, 0.0f), projectile);
-						ECS::main.RegisterComponent(new DamageComponent(projectile, true, true, 20.0f, true, 1, 10.0f, false, true, true), projectile);
+						ECS::main.RegisterComponent(new DamageComponent(projectile, true, true, 20.0f, false, true, 1, 10.0f, false, true, true), projectile);
 						ECS::main.RegisterComponent(new StaticSpriteComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], s->width / 4.0f, s->height / 4.0f, s), projectile);
 						ECS::main.RegisterComponent(new ParticleComponent(projectile, true, 0.01f, 0.0f, 0.0f, 10, Element::aether, 5.0f, 20.0f), projectile);
 					}
@@ -1586,9 +1593,9 @@ void InputSystem::Update(float deltaTime)
 						Animation2D* anim1 = Game::main.animationMap["slash_baseAerialOne"];
 
 						ECS::main.RegisterComponent(new PositionComponent(projectile, true, false, phys->pos->x, phys->pos->y, 0.0f), projectile);
-						ECS::main.RegisterComponent(new PhysicsComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], phys->velocityX * 2.0f, phys->velocityY, 0.0f, 0.0f, 0.0f), projectile);
+						ECS::main.RegisterComponent(new PhysicsComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], phys->velocityX * m->slashSpeed, phys->velocityY, 0.0f, 0.0f, 0.0f), projectile);
 						ECS::main.RegisterComponent(new ColliderComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], false, false, false, true, false, true, EntityClass::object, 1.0f, 0.0f, 0.0f, 5.0f, 5.0f, 0.0f, 0.0f), projectile);
-						ECS::main.RegisterComponent(new DamageComponent(projectile, true, true, 0.3f, true, 1, 20.0f, false, true, true), projectile);
+						ECS::main.RegisterComponent(new DamageComponent(projectile, true, true, 0.3f, true, true, 1, 20.0f, false, true, true), projectile);
 						ECS::main.RegisterComponent(new AnimationComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], anim1, "default"), projectile);
 
 						PhysicsComponent* p = (PhysicsComponent*)projectile->componentIDMap[physicsComponentID];

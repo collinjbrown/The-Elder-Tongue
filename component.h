@@ -140,9 +140,11 @@ public:
 
 	float lastProjectile;
 	float projectileDelay;
+
+	float slashSpeed;
 	float projectileSpeed;
 
-	InputComponent(Entity* entity, bool active, bool acceptInput, float projectionDelay, float projectionDepth, float maxCoyoteTime, int maxJumps, float projectileDelay, float projectileSpeed);
+	InputComponent(Entity* entity, bool active, bool acceptInput, float projectionDelay, float projectionDepth, float maxCoyoteTime, int maxJumps, float projectileDelay, float slashSpeed, float projectileSpeed);
 };
 
 class MovementComponent : public Component
@@ -239,6 +241,7 @@ class DamageComponent : public Component
 public:
 	bool hasLifetime;
 	float lifetime;
+	bool showAfterUses;
 	bool limitedUses;
 	int uses;
 	float damage;
@@ -249,7 +252,7 @@ public:
 	bool damagesEnemies;
 	bool damagesObjects;
 
-	DamageComponent(Entity* entity, bool active, bool hasLifetime, float lifetime, bool limitedUses, int uses, float damage, bool damagesPlayers, bool damagesEnemies, bool damagesObjects);
+	DamageComponent(Entity* entity, bool active, bool hasLifetime, float lifetime, bool showAfterUses, bool limitedUses, int uses, float damage, bool damagesPlayers, bool damagesEnemies, bool damagesObjects);
 };
 
 class ParticleComponent : public Component
