@@ -1938,7 +1938,7 @@ void AnimationControllerSystem::Update(float deltaTime)
 						c->animator->SetAnimation(s + "aerialOne");
 					}
 				}
-				else if (abs(p->velocityY) > 100.0f && !col->onPlatform)
+				else if (abs(p->velocityY) > 100.0f && !col->onPlatform || c->animator->activeAnimation == s + "aerialOne")
 				{
 					if (c->animator->activeAnimation != s + "jumpUp" && p->velocityY > 0)
 					{
