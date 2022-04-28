@@ -125,11 +125,12 @@ void Renderer::prepareQuad(glm::vec2 position, float width, float height,
     quad.topLeft = { leftX,  topY,      r, g, b, a,   0.0, 1.0,    glTextureIndex };
 }
 
-void Renderer::prepareQuad(PositionComponent* pos, float width, float height,
-    glm::vec4 rgb, int textureID)
+void Renderer::prepareQuad(PositionComponent* pos, float width, float height, float tWidth, float tHeight,
+    glm::vec4 rgb, int textureID, bool tiled)
 {
     // Figure out which batch should be written to
     // -------------------------------------------
+
     auto result = std::find(textureIDs.begin(), textureIDs.end(), textureID);
     int location;
     if (result == textureIDs.end())
@@ -166,10 +167,23 @@ void Renderer::prepareQuad(PositionComponent* pos, float width, float height,
     const float b = rgb.b;
     const float a = rgb.a;
 
-    quad.topRight = { topRight.x, topRight.y,      r, g, b, a,   1.0, 1.0,    glTextureIndex };
-    quad.bottomRight = { bottomRight.x, bottomRight.y,   r, g, b, a,   1.0, 0.0,    glTextureIndex };
-    quad.bottomLeft = { bottomLeft.x,  bottomLeft.y,   r, g, b, a,   0.0, 0.0,    glTextureIndex };
-    quad.topLeft = { topLeft.x,  topLeft.y,      r, g, b, a,   0.0, 1.0,    glTextureIndex };
+    if (tiled)
+    {
+        const float xMod = fmod(width, tWidth);
+        const float yMod = fmod(height, tHeight);
+
+        quad.topRight = { topRight.x, topRight.y,      r, g, b, a,   xMod, yMod,    glTextureIndex };
+        quad.bottomRight = { bottomRight.x, bottomRight.y,   r, g, b, a,   xMod, 0.0,    glTextureIndex };
+        quad.bottomLeft = { bottomLeft.x,  bottomLeft.y,   r, g, b, a,   0.0, 0.0,    glTextureIndex };
+        quad.topLeft = { topLeft.x,  topLeft.y,      r, g, b, a,   0.0, yMod,    glTextureIndex };
+    }
+    else
+    {
+        quad.topRight = { topRight.x, topRight.y,      r, g, b, a,   1.0, 1.0,    glTextureIndex };
+        quad.bottomRight = { bottomRight.x, bottomRight.y,   r, g, b, a,   1.0, 0.0,    glTextureIndex };
+        quad.bottomLeft = { bottomLeft.x,  bottomLeft.y,   r, g, b, a,   0.0, 0.0,    glTextureIndex };
+        quad.topLeft = { topLeft.x,  topLeft.y,      r, g, b, a,   0.0, 1.0,    glTextureIndex };
+    }
 }
 
 

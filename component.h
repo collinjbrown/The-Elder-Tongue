@@ -81,10 +81,12 @@ public:
 	float width;
 	float height;
 
+	bool tiled;
+
 	Texture2D* sprite;
 	PositionComponent* pos;
 
-	StaticSpriteComponent(Entity* entity, bool active, PositionComponent* pos, float width, float height, Texture2D* sprite);
+	StaticSpriteComponent(Entity* entity, bool active, PositionComponent* pos, float width, float height, Texture2D* sprite, bool tiled);
 };
 
 class ColliderComponent : public Component
