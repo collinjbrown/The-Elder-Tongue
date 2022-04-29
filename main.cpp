@@ -218,7 +218,7 @@ int main(void)
     bool slowTime = false;
     float slowLastChange = glfwGetTime();
 
-    bool limitFPS = true;
+    bool limitFPS = false;
     int fps = 60;
     const int ms = (int)(1000 * (1.0f / (fps * 2.0f)));
     auto start = std::chrono::steady_clock::now();

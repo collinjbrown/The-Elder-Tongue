@@ -179,10 +179,13 @@ void ECS::Update(float deltaTime)
 
 		for (int i = 0; i < 25; i++)
 		{
+			float width = rand() % 1000 + 300;
+			float height = rand() % 1000 + 300;
+
 			Entity* platform = CreateEntity("floor");
 			ECS::main.RegisterComponent(new PositionComponent(platform, true, true, rand() % 5000, rand() % 5000, 0), platform);
 			ECS::main.RegisterComponent(new PhysicsComponent(platform, true, (PositionComponent*)platform->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 0.1f, 0.0f), platform);
-			ECS::main.RegisterComponent(new ColliderComponent(platform, true, (PositionComponent*)platform->componentIDMap[positionComponentID], true, false, true, false, false, false, EntityClass::object, 1000.0f, 0.0f, 1.0f, 540.0f, 80.0f, 0.0f, 0.0f), platform);
+			ECS::main.RegisterComponent(new ColliderComponent(platform, true, (PositionComponent*)platform->componentIDMap[positionComponentID], true, false, true, false, false, false, EntityClass::object, 1000.0f, 0.0f, 1.0f, width, height, 0.0f, 0.0f), platform);
 			// ECS::main.RegisterComponent(new StaticSpriteComponent(platform, true, (PositionComponent*)platform->componentIDMap[positionComponentID], tex3->width * 35, tex3->height * 5.0f, tex3, false), platform);
 		}
 
@@ -945,20 +948,20 @@ void ColliderSystem::Update(float deltaTime)
 
 											if (cA->platform && bBot + 5.0f > aTop)
 											{
-												std::cout << "A.\n";
+												// std::cout << "A.\n";
 												cB->onPlatform = true;
 												physB->velocityY = 0.0f;
 											}
 											else if (cB->platform && aBot + 5.0f > bTop)
 											{
-												std::cout << "B.\n";
+												// std::cout << "B.\n";
 												cA->onPlatform = true;
 												physA->velocityY = 0.0f;
-											}
+											}/*
 											else
 											{
 												std::cout << "C.\n";
-											}
+											}*/
 										}
 										else if (cB->platform && aBot + 5.0f > bTop)
 										{
@@ -1261,20 +1264,13 @@ bool ColliderSystem::TestAndResolveCollision(ColliderComponent* colA, PositionCo
 						{
 							if (!posA->stat)
 							{
-								glm::vec2 aDispNormal = Normalize(glm::vec2(displacement.x, displacement.y));
-								glm::vec2 aVel = glm::vec2(physA->velocityX, physA->velocityY);
-
-								std::cout << "Type A\n";
-								std::cout << "Disp Vec: " + std::to_string(aDispNormal.x) + "/" + std::to_string(aDispNormal.y) + "\n";
-								std::cout << "Velocity: " + std::to_string(physA->velocityX) + "/" + std::to_string(physA->velocityY) + "\n";
-								std::cout << "Bounce: " + std::to_string(aVel.x * aDispNormal.x * colA->bounce) + "/" + std::to_string(aVel.y * aDispNormal.y * colA->bounce) + "\n";
-								physA->velocityX += aVel.x * aDispNormal.x * colA->bounce;
-								physA->velocityY += aVel.y * aDispNormal.y * colA->bounce;
-
-								// std::cout << "A\n";
-
-								posA->x += displacement.x * -1.0f;
-								posA->y += displacement.y * -1.0f;
+								posA->x -= displacement.x;
+								posA->y -= displacement.y;
+							}
+							else if (!posB->stat && !colA->platform)
+							{
+								posB->x += displacement.x;
+								posB->y += displacement.y;
 							}
 						}
 					}
@@ -1315,48 +1311,15 @@ bool ColliderSystem::TestAndResolveCollision(ColliderComponent* colA, PositionCo
 
 						if (displacement.x != 0 || displacement.y != 0)
 						{
-							if (!posA->stat && colB->platform)
+							if (!posA->stat && !colB->platform)
 							{
-								glm::vec2 midTopB = (bTopLeft + bTopRight) / 2.0f;
-								glm::vec2 midBotA = (aBottomLeft + aBottomRight) / 2.0f;
-								glm::vec2 upB = Normalize(midTopB - bCenter);
-
-								if (glm::length2(aCenter - bTopLeft) > 0.5f ||
-									glm::length2(aCenter - bTopRight) > 0.5f)
-								{
-
-									glm::vec2 aDispNormal = Normalize(glm::vec2(displacement.x, displacement.y));
-									glm::vec2 aVel = glm::vec2(physA->velocityX, physA->velocityY);
-
-									std::cout << "Type B\n";
-									std::cout << "Disp Vec: " + std::to_string(aDispNormal.x) + "/" + std::to_string(aDispNormal.y) + "\n";
-									std::cout << "Velocity: " + std::to_string(physA->velocityX) + "/" + std::to_string(physA->velocityY) + "\n";
-									std::cout << "Bounce: " + std::to_string(aVel.x * aDispNormal.x * colA->bounce) + "/" + std::to_string(aVel.y * aDispNormal.y * colA->bounce) + "\n";
-
-									physA->velocityX += aVel.x * aDispNormal.x;
-									physA->velocityY += aVel.y * aDispNormal.y;
-
-									posA->x += displacement.x * upB.x * 1.0f;
-									posA->y += displacement.y * upB.y * 1.0f;
-									// std::cout << "B\n";
-								}
+								posA->x += displacement.x;
+								posA->y += displacement.y;
 							}
-							else if (!posA->stat)
+							else if (!posB->stat)
 							{
-								glm::vec2 aDispNormal = Normalize(glm::vec2(displacement.x, displacement.y));
-								glm::vec2 aVel = glm::vec2(physA->velocityX, physA->velocityY);
-
-								std::cout << "Type C\n";
-								std::cout << "Disp Vec: " + std::to_string(aDispNormal.x) + "/" + std::to_string(aDispNormal.y) + "\n";
-								std::cout << "Velocity: " + std::to_string(physA->velocityX) + "/" + std::to_string(physA->velocityY) + "\n";
-								std::cout << "Bounce: " + std::to_string(aVel.x * aDispNormal.x * colA->bounce) + "/" + std::to_string(aVel.y * aDispNormal.y * colA->bounce) + "\n";
-
-								physA->velocityX += aVel.x * aDispNormal.x * colA->bounce;
-								physA->velocityY += aVel.y * aDispNormal.y * colA->bounce;
-
-								posA->x += displacement.x * 1.0f;
-								posA->y += displacement.y * 1.0f;
-								// std::cout << "C\n";
+								posB->x -= displacement.x;
+								posB->y -= displacement.y;
 							}
 						}
 					}
