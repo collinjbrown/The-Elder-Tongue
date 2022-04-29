@@ -907,7 +907,7 @@ void ColliderSystem::Update(float deltaTime)
 										// We need to add a little leeway
 										// (which will also probably require me to deal with tunneling).
 
-									float platformLeeway = 2.0f;
+									float platformLeeway = 10.0f;
 
 									if (!cA->platform && !cB->platform ||
 										cA->platform && !cA->onewayPlatform ||
@@ -954,7 +954,7 @@ void ColliderSystem::Update(float deltaTime)
 										}
 										else if (cB->platform && aBot > bTop - platformLeeway)
 										{
-											if (RaycastDown(1, 10.0f, cA, posA, cB, posB))
+											if (RaycastDown(1, 5.0f, cA, posA, cB, posB))
 											{
 												cA->onPlatform = true;
 											}
@@ -1058,7 +1058,7 @@ bool ColliderSystem::RaycastDown(float size, float distance, ColliderComponent* 
 		}
 	}
 
-	// Game::main.renderer->prepareQuad(aTopRight, aBottomRight, aBottomLeft, aTopLeft, glm::vec4(0.0f, 0.0f, 0.0f, 0.5f), Game::main.textureMap["blank"]->ID);
+	Game::main.renderer->prepareQuad(aTopRight, aBottomRight, aBottomLeft, aTopLeft, glm::vec4(0.0f, 1.0f, 0.0f, 1.0f), Game::main.textureMap["blank"]->ID);
 	return false;
 }
 
@@ -1262,7 +1262,7 @@ bool ColliderSystem::TestAndResolveCollision(ColliderComponent* colA, PositionCo
 							// We want to apply "bounce" to perpendicular velocity
 							// and apply "friction" to parallel velocity.
 
-							glm::vec2 aVel = glm::vec2(physA->velocityX, physA->velocityY);
+							/*glm::vec2 aVel = glm::vec2(physA->velocityX, physA->velocityY);
 							glm::vec2 bVel = glm::vec2(physB->velocityX, physB->velocityY);
 
 							if (colA->bounce != 0)
@@ -1277,7 +1277,7 @@ bool ColliderSystem::TestAndResolveCollision(ColliderComponent* colA, PositionCo
 								glm::vec2 bNewVelocity = (bVel + (Project(bVel, bDispNormal) * -2.0f) * colB->bounce) * (1 - (colB->mass / totalMass)) * deltaTime;
 								physB->velocityX = bNewVelocity.x;
 								physB->velocityY = bNewVelocity.y;
-							}
+							}*/
 
 							/*if (colA->platform)
 							{
@@ -1304,21 +1304,21 @@ bool ColliderSystem::TestAndResolveCollision(ColliderComponent* colA, PositionCo
 							}
 							else if (!posA->stat && !posB->stat)
 							{
-								posA->x += displacement.x * -1 * (1 - (colA->mass / totalMass));
-								posA->y += displacement.y * -1 * (1 - (colA->mass / totalMass));
+								posA->x += displacement.x * -1.05f * (1 - (colA->mass / totalMass));
+								posA->y += displacement.y * -1.05f * (1 - (colA->mass / totalMass));
 
-								posB->x += displacement.x * 1 * (1 - (colB->mass / totalMass));
-								posB->y += displacement.y * 1 * (1 - (colB->mass / totalMass));
+								posB->x += displacement.x * 1.05f * (1 - (colB->mass / totalMass));
+								posB->y += displacement.y * 1.05f * (1 - (colB->mass / totalMass));
 							}
 							else if (posA->stat && !posB->stat)
 							{
-								posB->x += displacement.x * 1;
-								posB->y += displacement.y * 1;
+								posB->x += displacement.x * 1.05f;
+								posB->y += displacement.y * 1.05f;
 							}
 							else if (!posA->stat && posB->stat)
 							{
-								posA->x += displacement.x * -1;
-								posA->y += displacement.y * -1;
+								posA->x += displacement.x * -1.05f;
+								posA->y += displacement.y * -1.05f;
 							}
 						}
 					}
@@ -1376,19 +1376,19 @@ bool ColliderSystem::TestAndResolveCollision(ColliderComponent* colA, PositionCo
 							glm::vec2 aVel = glm::vec2(physA->velocityX, physA->velocityY);
 							glm::vec2 bVel = glm::vec2(physB->velocityX, physB->velocityY);
 
-							if (colA->bounce != 0)
+							/*if (colA->bounce != 0)
 							{
 								glm::vec2 aNewVelocity = (aVel + (Project(aVel, aDispNormal) * -2.0f) * colA->bounce) * (1 - (colA->mass / totalMass)) * deltaTime;
-								// physA->velocityX = aNewVelocity.x;
+								physA->velocityX = aNewVelocity.x;
 								physA->velocityY = aNewVelocity.y;
 							}
 
 							if (colB->bounce != 0)
 							{
 								glm::vec2 bNewVelocity = (bVel + (Project(bVel, bDispNormal) * -2.0f) * colB->bounce) * (1 - (colB->mass / totalMass)) * deltaTime;
-								// physB->velocityX = bNewVelocity.x;
+								physB->velocityX = bNewVelocity.x;
 								physB->velocityY = bNewVelocity.y;
-							}
+							}*/
 
 							if (colB->platform)
 							{
@@ -1400,32 +1400,32 @@ bool ColliderSystem::TestAndResolveCollision(ColliderComponent* colA, PositionCo
 								if (glm::length2(aCenter - bTopLeft) > 0.5f ||
 									glm::length2(aCenter - bTopRight) > 0.5f)
 								{
-									posA->x += displacement.x * upB.x * 1;
-									posA->y += displacement.y * upB.y * 1;
+									posA->x += displacement.x * upB.x * 1.05f;
+									posA->y += displacement.y * upB.y * 1.05f;
 								}
 								else
 								{
-									posA->x += displacement.x * 1;
-									posA->y += displacement.y * 1;
+									posA->x += displacement.x * 1.05f;
+									posA->y += displacement.y * 1.05f;
 								}
 							}
 							else if (!posA->stat && !posB->stat)
 							{
-								posA->x += displacement.x * 1 * (1 - (colA->mass / totalMass));
-								posA->y += displacement.y * 1 * (1 - (colA->mass / totalMass));
+								posA->x += displacement.x * 1.05f * (1 - (colA->mass / totalMass));
+								posA->y += displacement.y * 1.05f * (1 - (colA->mass / totalMass));
 
 								posB->x += displacement.x * -1 * (1 - (colB->mass / totalMass));
 								posB->y += displacement.y * -1 * (1 - (colB->mass / totalMass));
 							}
 							else if (posA->stat && !posB->stat)
 							{
-								posB->x += displacement.x * -1;
-								posB->y += displacement.y * -1;
+								posB->x += displacement.x * -1.05f;
+								posB->y += displacement.y * -1.05f;
 							}
 							else if (!posA->stat && posB->stat)
 							{
-								posA->x += displacement.x * 1;
-								posA->y += displacement.y * 1;
+								posA->x += displacement.x * 1.05f;
+								posA->y += displacement.y * 1.05f;
 							}
 						}
 					}
