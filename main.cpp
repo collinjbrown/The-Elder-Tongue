@@ -218,6 +218,11 @@ int main(void)
     bool slowTime = false;
     float slowLastChange = glfwGetTime();
 
+    bool limitFPS = true;
+    int fps = 60;
+    const int ms = (int)(1000 * (1.0f / (fps * 2.0f)));
+    auto start = std::chrono::steady_clock::now();
+
     while (!glfwWindowShouldClose(window))
     {
         #pragma region Elapsed Time
@@ -231,9 +236,15 @@ int main(void)
         #pragma region FPS
         double currentTime = glfwGetTime();
         frameCount++;
+
+        auto now = std::chrono::steady_clock::now();
+        auto diff = now - start;
+        auto end = now + std::chrono::milliseconds(ms);
+
         // If a second has passed.
-        if (currentTime - lastTime >= 1.0)
+        if (diff >= std::chrono::seconds(1))
         {
+            start = now;
             // Display the frame count here any way you want.
             std::cout << "Frame Count: " + std::to_string(frameCount) + "\n";
 
@@ -367,6 +378,10 @@ int main(void)
         Game::main.renderer->sendToGL();
         Game::main.renderer->resetBuffers();
 
+        if (limitFPS)
+        {
+            std::this_thread::sleep_until(end);
+        }
         glfwSwapBuffers(window);
 
         windowMoved = 0;

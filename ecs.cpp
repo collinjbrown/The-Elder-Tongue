@@ -124,7 +124,7 @@ void ECS::Update(float deltaTime)
 
 		ECS::main.RegisterComponent(new PositionComponent(player, true, false, 0, 100, 0.0f), player);
 		ECS::main.RegisterComponent(new PhysicsComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 2000.0f, 2000.0f), player);
-		ECS::main.RegisterComponent(new ColliderComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], false, false, false, false, true, false, EntityClass::player, 1.0f, 0.2f, 1.0f, 40.0f, 120.0f, 0.0f, 0.0f), player);
+		ECS::main.RegisterComponent(new ColliderComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], false, false, false, false, true, false, EntityClass::player, 1.0f, 1.0f, 1.0f, 40.0f, 120.0f, 0.0f, 0.0f), player);
 		ECS::main.RegisterComponent(new MovementComponent(player, true, 4000.0f, 800.0f, 2.5f, 100.0f, 0.1f, true, true, false), player);
 		ECS::main.RegisterComponent(new InputComponent(player, true, true, 0.5f, 5000, 0.5f, 2, 0.5f, 2.0f, 2000.0f), player);
 		ECS::main.RegisterComponent(new CameraFollowComponent(player, true, 10.0f), player);
@@ -147,28 +147,28 @@ void ECS::Update(float deltaTime)
 		a->AddAnimation("sword_aerialOne", Game::main.animationMap["sword_baseAerialOne"]);
 		#pragma endregion
 
-		#pragma region Test Character Instantiation
-		Animation2D* anim7 = Game::main.animationMap["testIdle"];
-		Animation2D* anim8 = Game::main.animationMap["testWalk"];
-		Animation2D* anim10 = Game::main.animationMap["testJumpUp"];
-		Animation2D* anim11 = Game::main.animationMap["testJumpDown"];
-		Animation2D* anim12 = Game::main.animationMap["testDeath"];
+		//#pragma region Test Character Instantiation
+		//Animation2D* anim7 = Game::main.animationMap["testIdle"];
+		//Animation2D* anim8 = Game::main.animationMap["testWalk"];
+		//Animation2D* anim10 = Game::main.animationMap["testJumpUp"];
+		//Animation2D* anim11 = Game::main.animationMap["testJumpDown"];
+		//Animation2D* anim12 = Game::main.animationMap["testDeath"];
 
-		Entity* character = CreateEntity("Test Character");
-		ECS::main.RegisterComponent(new PositionComponent(character, true, false, 100, 100, 0.0f), character);
-		ECS::main.RegisterComponent(new PhysicsComponent(character, true, (PositionComponent*)character->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 200.0f, 1000.0f), character);
-		ECS::main.RegisterComponent(new ColliderComponent(character, true, (PositionComponent*)character->componentIDMap[positionComponentID], false, false, false, false, true, false, EntityClass::enemy, 1.0f, 0.0f, 1.0f, 25.0f, 55.0f, 0.0f, 0.0f), character);
-		ECS::main.RegisterComponent(new MovementComponent(character, true, 1000.0f, 500.0f, 2.5f, 1.0f, 0.25f, true, true, false), character);
-		ECS::main.RegisterComponent(new AnimationComponent(character, true, (PositionComponent*)character->componentIDMap[positionComponentID], anim7, "idle"), character);
-		ECS::main.RegisterComponent(new DuelistComponent(character, true, false, false), character);
-		ECS::main.RegisterComponent(new HealthComponent(character, true, 100.0f, false), character);
-		AnimationComponent* a2 = (AnimationComponent*)character->componentIDMap[animationComponentID];
-		ECS::main.RegisterComponent(new PlayerAnimationControllerComponent(character, true, a2), character);
-		a2->AddAnimation("walk", anim8);
-		a2->AddAnimation("jumpUp", anim10);
-		a2->AddAnimation("jumpDown", anim11);
-		a2->AddAnimation("dead", anim12);
-		#pragma endregion
+		//Entity* character = CreateEntity("Test Character");
+		//ECS::main.RegisterComponent(new PositionComponent(character, true, false, 100, 100, 0.0f), character);
+		//ECS::main.RegisterComponent(new PhysicsComponent(character, true, (PositionComponent*)character->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 200.0f, 1000.0f), character);
+		//ECS::main.RegisterComponent(new ColliderComponent(character, true, (PositionComponent*)character->componentIDMap[positionComponentID], false, false, false, false, true, false, EntityClass::enemy, 1.0f, 1.0f, 1.0f, 25.0f, 55.0f, 0.0f, 0.0f), character);
+		//ECS::main.RegisterComponent(new MovementComponent(character, true, 1000.0f, 500.0f, 2.5f, 1.0f, 0.25f, true, true, false), character);
+		//ECS::main.RegisterComponent(new AnimationComponent(character, true, (PositionComponent*)character->componentIDMap[positionComponentID], anim7, "idle"), character);
+		//ECS::main.RegisterComponent(new DuelistComponent(character, true, false, false), character);
+		//ECS::main.RegisterComponent(new HealthComponent(character, true, 100.0f, false), character);
+		//AnimationComponent* a2 = (AnimationComponent*)character->componentIDMap[animationComponentID];
+		//ECS::main.RegisterComponent(new PlayerAnimationControllerComponent(character, true, a2), character);
+		//a2->AddAnimation("walk", anim8);
+		//a2->AddAnimation("jumpUp", anim10);
+		//a2->AddAnimation("jumpDown", anim11);
+		//a2->AddAnimation("dead", anim12);
+		//#pragma endregion
 
 		//Texture2D* tex1000 = Game::main.textureMap["wall"];
 		//Entity* wall = CreateEntity("wall");
@@ -907,7 +907,7 @@ void ColliderSystem::Update(float deltaTime)
 										// We need to add a little leeway
 										// (which will also probably require me to deal with tunneling).
 
-									float platformLeeway = 10.0f;
+									float platformLeeway = 5.0f;
 
 									if (!cA->platform && !cB->platform ||
 										cA->platform && !cA->onewayPlatform ||
@@ -943,20 +943,23 @@ void ColliderSystem::Update(float deltaTime)
 												}
 											}
 
-											if (cA->platform && bBot > aTop - platformLeeway)
+											if (cA->platform && bBot > aTop)
 											{
 												cB->onPlatform = true;
+												physB->velocityY = 0.0f;
 											}
-											else if (cB->platform && aBot > bTop - platformLeeway)
+											else if (cB->platform && aBot > bTop)
 											{
 												cA->onPlatform = true;
+												physA->velocityY = 0.0f;
 											}
 										}
-										else if (cB->platform && aBot > bTop - platformLeeway)
+										else if (cB->platform && aBot > bTop)
 										{
-											if (RaycastDown(1, 5.0f, cA, posA, cB, posB))
+											if (RaycastDown(1.0f, 0.1f, cA, posA, cB, posB))
 											{
 												cA->onPlatform = true;
+												physA->velocityY = 0.0f;
 											}
 										}
 									}
@@ -1250,75 +1253,18 @@ bool ColliderSystem::TestAndResolveCollision(ColliderComponent* colA, PositionCo
 
 						if (displacement.x != 0 || displacement.y != 0)
 						{
-							glm::vec2 right = Normalize(collEdge);
-							glm::vec2 up = { right.y, right.x };
-
-							//glm::vec2 aDispNormal = up;
-							//glm::vec2 bDispNormal = -up;
-
-							glm::vec2 aDispNormal = Normalize(glm::vec2(displacement.x, displacement.y));
-							glm::vec2 bDispNormal = -aDispNormal;
-
-							// We want to apply "bounce" to perpendicular velocity
-							// and apply "friction" to parallel velocity.
-
-							/*glm::vec2 aVel = glm::vec2(physA->velocityX, physA->velocityY);
-							glm::vec2 bVel = glm::vec2(physB->velocityX, physB->velocityY);
-
-							if (colA->bounce != 0)
+							if (!posA->stat)
 							{
-								glm::vec2 aNewVelocity = (aVel + (Project(aVel, aDispNormal) * -2.0f) * colA->bounce) * (1 - (colA->mass / totalMass)) * deltaTime;
-								physA->velocityX = aNewVelocity.x;
-								physA->velocityY = aNewVelocity.y;
-							}
+								glm::vec2 aDispNormal = Normalize(glm::vec2(displacement.x, displacement.y));
+								glm::vec2 aVel = glm::vec2(physA->velocityX, physA->velocityY);
 
-							if (colB->bounce != 0)
-							{
-								glm::vec2 bNewVelocity = (bVel + (Project(bVel, bDispNormal) * -2.0f) * colB->bounce) * (1 - (colB->mass / totalMass)) * deltaTime;
-								physB->velocityX = bNewVelocity.x;
-								physB->velocityY = bNewVelocity.y;
-							}*/
+								physA->velocityX += aVel.x * aDispNormal.x * colA->bounce;
+								physA->velocityY += aVel.y * aDispNormal.y * colA->bounce;
 
-							/*if (colA->platform)
-							{
-								glm::vec2 midTopA = (aTopLeft + aTopRight) / 2.0f;
-								glm::vec2 midBotB = (bBottomLeft + bBottomRight) / 2.0f;
-								glm::vec2 upA = Normalize(midTopA - aCenter);
+								// std::cout << "A\n";
 
-								if (midBotB.y * upA.y < midTopA.y * upA.y && physB->velocityX >= 0 && aCenter.x > bCenter.x
-									|| midBotB.y * upA.y < midTopA.y * upA.y && physB->velocityX <= 0 && aCenter.x < bCenter.x)
-								{
-									posB->x += displacement.x * upA.x * -1;
-									posB->y += displacement.y * upA.y * -1;
-								}
-								else
-								{
-									posB->x += displacement.x * 1;
-									posB->y += displacement.y * 1;
-								}
-							}*/
-
-							if (colB->platform)
-							{
-								// Baba Booey
-							}
-							else if (!posA->stat && !posB->stat)
-							{
-								posA->x += displacement.x * -1.05f * (1 - (colA->mass / totalMass));
-								posA->y += displacement.y * -1.05f * (1 - (colA->mass / totalMass));
-
-								posB->x += displacement.x * 1.05f * (1 - (colB->mass / totalMass));
-								posB->y += displacement.y * 1.05f * (1 - (colB->mass / totalMass));
-							}
-							else if (posA->stat && !posB->stat)
-							{
-								posB->x += displacement.x * 1.05f;
-								posB->y += displacement.y * 1.05f;
-							}
-							else if (!posA->stat && posB->stat)
-							{
-								posA->x += displacement.x * -1.05f;
-								posA->y += displacement.y * -1.05f;
+								posA->x += displacement.x * -1.0f;
+								posA->y += displacement.y * -1.0f;
 							}
 						}
 					}
@@ -1359,38 +1305,7 @@ bool ColliderSystem::TestAndResolveCollision(ColliderComponent* colA, PositionCo
 
 						if (displacement.x != 0 || displacement.y != 0)
 						{
-							float oldVelocity = physA->velocityY;
-
-							glm::vec2 right = Normalize(collEdge);
-							glm::vec2 up = { right.y, right.x };
-
-							//glm::vec2 aDispNormal = -up;
-							//glm::vec2 bDispNormal = up;
-
-							glm::vec2 aDispNormal = Normalize(glm::vec2(displacement.x, displacement.y));
-							glm::vec2 bDispNormal = -aDispNormal;
-
-							// We want to apply "bounce" to perpendicular velocity
-							// and apply "friction" to parallel velocity.
-
-							glm::vec2 aVel = glm::vec2(physA->velocityX, physA->velocityY);
-							glm::vec2 bVel = glm::vec2(physB->velocityX, physB->velocityY);
-
-							/*if (colA->bounce != 0)
-							{
-								glm::vec2 aNewVelocity = (aVel + (Project(aVel, aDispNormal) * -2.0f) * colA->bounce) * (1 - (colA->mass / totalMass)) * deltaTime;
-								physA->velocityX = aNewVelocity.x;
-								physA->velocityY = aNewVelocity.y;
-							}
-
-							if (colB->bounce != 0)
-							{
-								glm::vec2 bNewVelocity = (bVel + (Project(bVel, bDispNormal) * -2.0f) * colB->bounce) * (1 - (colB->mass / totalMass)) * deltaTime;
-								physB->velocityX = bNewVelocity.x;
-								physB->velocityY = bNewVelocity.y;
-							}*/
-
-							if (colB->platform)
+							if (!posA->stat && colB->platform)
 							{
 								glm::vec2 midTopB = (bTopLeft + bTopRight) / 2.0f;
 								glm::vec2 midBotA = (aBottomLeft + aBottomRight) / 2.0f;
@@ -1400,32 +1315,29 @@ bool ColliderSystem::TestAndResolveCollision(ColliderComponent* colA, PositionCo
 								if (glm::length2(aCenter - bTopLeft) > 0.5f ||
 									glm::length2(aCenter - bTopRight) > 0.5f)
 								{
-									posA->x += displacement.x * upB.x * 1.05f;
-									posA->y += displacement.y * upB.y * 1.05f;
-								}
-								else
-								{
-									posA->x += displacement.x * 1.05f;
-									posA->y += displacement.y * 1.05f;
-								}
-							}
-							else if (!posA->stat && !posB->stat)
-							{
-								posA->x += displacement.x * 1.05f * (1 - (colA->mass / totalMass));
-								posA->y += displacement.y * 1.05f * (1 - (colA->mass / totalMass));
 
-								posB->x += displacement.x * -1 * (1 - (colB->mass / totalMass));
-								posB->y += displacement.y * -1 * (1 - (colB->mass / totalMass));
+									glm::vec2 aDispNormal = -Normalize(glm::vec2(displacement.x, displacement.y));
+									glm::vec2 aVel = glm::vec2(physA->velocityX, physA->velocityY);
+
+									physA->velocityX += aVel.x * aDispNormal.x;
+									physA->velocityY += aVel.y * aDispNormal.y;
+
+									posA->x += displacement.x * upB.x * 1.0f;
+									posA->y += displacement.y * upB.y * 1.0f;
+									// std::cout << "B\n";
+								}
 							}
-							else if (posA->stat && !posB->stat)
+							else if (!posA->stat)
 							{
-								posB->x += displacement.x * -1.05f;
-								posB->y += displacement.y * -1.05f;
-							}
-							else if (!posA->stat && posB->stat)
-							{
-								posA->x += displacement.x * 1.05f;
-								posA->y += displacement.y * 1.05f;
+								glm::vec2 aDispNormal = -Normalize(glm::vec2(displacement.x, displacement.y));
+								glm::vec2 aVel = glm::vec2(physA->velocityX, physA->velocityY);
+
+								physA->velocityX += aVel.x * aDispNormal.x * colA->bounce;
+								physA->velocityY += aVel.y * aDispNormal.y * colA->bounce;
+
+								posA->x += displacement.x * 1.0f;
+								posA->y += displacement.y * 1.0f;
+								// std::cout << "C\n";
 							}
 						}
 					}
@@ -1947,7 +1859,7 @@ void AnimationControllerSystem::Update(float deltaTime)
 						c->animator->SetAnimation(s + "aerialOne");
 					}
 				}
-				else if (abs(p->velocityY) > 100.0f && !col->onPlatform || c->animator->activeAnimation == s + "aerialOne")
+				else if (abs(p->velocityY) > 500.0f && !col->onPlatform || c->animator->activeAnimation == s + "aerialOne")
 				{
 					if (c->animator->activeAnimation != s + "jumpUp" && p->velocityY > 0)
 					{
