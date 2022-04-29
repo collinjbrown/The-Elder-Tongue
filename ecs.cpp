@@ -943,18 +943,24 @@ void ColliderSystem::Update(float deltaTime)
 												}
 											}
 
-											if (cA->platform && bBot > aTop)
+											if (cA->platform && bBot + 5.0f > aTop)
 											{
+												std::cout << "A.\n";
 												cB->onPlatform = true;
 												physB->velocityY = 0.0f;
 											}
-											else if (cB->platform && aBot > bTop)
+											else if (cB->platform && aBot + 5.0f > bTop)
 											{
+												std::cout << "B.\n";
 												cA->onPlatform = true;
 												physA->velocityY = 0.0f;
 											}
+											else
+											{
+												std::cout << "C.\n";
+											}
 										}
-										else if (cB->platform && aBot > bTop)
+										else if (cB->platform && aBot + 5.0f > bTop)
 										{
 											if (RaycastDown(1.0f, 0.1f, cA, posA, cB, posB))
 											{
@@ -1258,6 +1264,10 @@ bool ColliderSystem::TestAndResolveCollision(ColliderComponent* colA, PositionCo
 								glm::vec2 aDispNormal = Normalize(glm::vec2(displacement.x, displacement.y));
 								glm::vec2 aVel = glm::vec2(physA->velocityX, physA->velocityY);
 
+								std::cout << "Type A\n";
+								std::cout << "Disp Vec: " + std::to_string(aDispNormal.x) + "/" + std::to_string(aDispNormal.y) + "\n";
+								std::cout << "Velocity: " + std::to_string(physA->velocityX) + "/" + std::to_string(physA->velocityY) + "\n";
+								std::cout << "Bounce: " + std::to_string(aVel.x * aDispNormal.x * colA->bounce) + "/" + std::to_string(aVel.y * aDispNormal.y * colA->bounce) + "\n";
 								physA->velocityX += aVel.x * aDispNormal.x * colA->bounce;
 								physA->velocityY += aVel.y * aDispNormal.y * colA->bounce;
 
@@ -1310,14 +1320,18 @@ bool ColliderSystem::TestAndResolveCollision(ColliderComponent* colA, PositionCo
 								glm::vec2 midTopB = (bTopLeft + bTopRight) / 2.0f;
 								glm::vec2 midBotA = (aBottomLeft + aBottomRight) / 2.0f;
 								glm::vec2 upB = Normalize(midTopB - bCenter);
-								// std::cout << std::to_string(abs(physA->velocityX)) + "/" + std::to_string(abs(physA->velocityY));
 
 								if (glm::length2(aCenter - bTopLeft) > 0.5f ||
 									glm::length2(aCenter - bTopRight) > 0.5f)
 								{
 
-									glm::vec2 aDispNormal = -Normalize(glm::vec2(displacement.x, displacement.y));
+									glm::vec2 aDispNormal = Normalize(glm::vec2(displacement.x, displacement.y));
 									glm::vec2 aVel = glm::vec2(physA->velocityX, physA->velocityY);
+
+									std::cout << "Type B\n";
+									std::cout << "Disp Vec: " + std::to_string(aDispNormal.x) + "/" + std::to_string(aDispNormal.y) + "\n";
+									std::cout << "Velocity: " + std::to_string(physA->velocityX) + "/" + std::to_string(physA->velocityY) + "\n";
+									std::cout << "Bounce: " + std::to_string(aVel.x * aDispNormal.x * colA->bounce) + "/" + std::to_string(aVel.y * aDispNormal.y * colA->bounce) + "\n";
 
 									physA->velocityX += aVel.x * aDispNormal.x;
 									physA->velocityY += aVel.y * aDispNormal.y;
@@ -1329,8 +1343,13 @@ bool ColliderSystem::TestAndResolveCollision(ColliderComponent* colA, PositionCo
 							}
 							else if (!posA->stat)
 							{
-								glm::vec2 aDispNormal = -Normalize(glm::vec2(displacement.x, displacement.y));
+								glm::vec2 aDispNormal = Normalize(glm::vec2(displacement.x, displacement.y));
 								glm::vec2 aVel = glm::vec2(physA->velocityX, physA->velocityY);
+
+								std::cout << "Type C\n";
+								std::cout << "Disp Vec: " + std::to_string(aDispNormal.x) + "/" + std::to_string(aDispNormal.y) + "\n";
+								std::cout << "Velocity: " + std::to_string(physA->velocityX) + "/" + std::to_string(physA->velocityY) + "\n";
+								std::cout << "Bounce: " + std::to_string(aVel.x * aDispNormal.x * colA->bounce) + "/" + std::to_string(aVel.y * aDispNormal.y * colA->bounce) + "\n";
 
 								physA->velocityX += aVel.x * aDispNormal.x * colA->bounce;
 								physA->velocityY += aVel.y * aDispNormal.y * colA->bounce;
@@ -1827,11 +1846,11 @@ void AnimationControllerSystem::Update(float deltaTime)
 
 			if (!health->dead)
 			{
-				if (p->velocityX < -100.0f)
+				if (p->velocityX < -200.0f)
 				{
 					c->animator->flipped = true;
 				}
-				else if (p->velocityX > 100.0f)
+				else if (p->velocityX > 200.0f)
 				{
 					c->animator->flipped = false;
 				}
@@ -1870,11 +1889,11 @@ void AnimationControllerSystem::Update(float deltaTime)
 						c->animator->SetAnimation(s + "jumpDown");
 					}
 				}
-				else if (abs(p->velocityX) > 25.0f && col->onPlatform && move->canMove && c->animator->activeAnimation != s + "walk")
+				else if (abs(p->velocityX) > 200.0f && col->onPlatform && move->canMove && c->animator->activeAnimation != s + "walk")
 				{
 					c->animator->SetAnimation(s + "walk");
 				}
-				else if (abs(p->velocityX) < 10.0f && !col->collidedLastTick && col->onPlatform && !move->preparingToJump && move->canMove && c->animator->activeAnimation != s + "idle")
+				else if (abs(p->velocityX) < 100.0f && !col->collidedLastTick && col->onPlatform && !move->preparingToJump && move->canMove && c->animator->activeAnimation != s + "idle")
 				{
 					c->animator->SetAnimation(s + "idle");
 				}
