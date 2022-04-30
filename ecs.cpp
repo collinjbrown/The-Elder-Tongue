@@ -293,7 +293,7 @@ void ECS::Update(float deltaTime)
 			ECS::main.RegisterComponent(new PositionComponent(floor, true, true, i * 500, -200, 0.0f), floor);
 			ECS::main.RegisterComponent(new PhysicsComponent(floor, true, (PositionComponent*)floor->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 0.1f, 0.0f), floor);
 			ECS::main.RegisterComponent(new ColliderComponent(floor, true, (PositionComponent*)floor->componentIDMap[positionComponentID], true, false, true, false, false, false, EntityClass::object, 1000.0f, 0.0f, 1.0f, 540.0f, 80.0f, 0.0f, 0.0f), floor);
-			ECS::main.RegisterComponent(new StaticSpriteComponent(floor, true, (PositionComponent*)floor->componentIDMap[positionComponentID], tex3->width * 35, tex3->height * 5.0f, tex3, false), floor);
+			ECS::main.RegisterComponent(new StaticSpriteComponent(floor, true, (PositionComponent*)floor->componentIDMap[positionComponentID], 540.0f, 80.0f, tex3, false), floor);
 
 			Entity* earth = CreateEntity("floor");
 			ECS::main.RegisterComponent(new PositionComponent(earth, true, true, i * 500, -1000, 0.0f), earth);
@@ -753,11 +753,11 @@ void PhysicsSystem::Update(float deltaTime)
 						{
 							if (p->velocityY > 0)
 							{
-								p->velocityY -= p->drag * deltaTime;
+								p->velocityY -= (p->drag / 4.0f) * deltaTime;
 							}
 							else if (p->velocityY < 0)
 							{
-								p->velocityY += p->drag * deltaTime;
+								p->velocityY += (p->drag / 4.0f) * deltaTime;
 							}
 						}
 					}
@@ -1032,7 +1032,6 @@ void ColliderSystem::Update(float deltaTime)
 							if (!moveA->climbing)
 							{
 								// If you just started climbing, stop all other velocity.
-								std::cout << "Fuck\n";
 								physA->velocityX = 0;
 								physA->velocityY = 0;
 
@@ -1515,8 +1514,8 @@ void InputSystem::Update(float deltaTime)
 					move->climbing = false;
 				}
 
-				if (move->jumping && col->onPlatform ||
-					move->jumping && move->climbing)
+				if (col->onPlatform ||
+					move->climbing)
 				{
 					move->jumping = false;
 					m->jumps = 0;
