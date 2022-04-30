@@ -18,6 +18,103 @@ glm::vec2 Normalize(glm::vec2 a)
 	return a * (1 / Norm(a));
 }
 
+bool PointOverlapRect(glm::vec2 point, glm::vec2 rectCenter, float rWidth, float rHeight)
+{
+	glm::vec2 rBL = glm::vec2(rectCenter.x - (rWidth / 2.0f), rectCenter.y - (rHeight / 2.0f));
+	glm::vec2 rTR = glm::vec2(rectCenter.x + (rWidth / 2.0f), rectCenter.y + (rHeight / 2.0f));
+
+	return (point.x >= rBL.x && point.y >= rBL.y && point.x < rTR.x&& point.y < rTR.y);
+}
+
+bool RectOverlapRect(glm::vec2 rectA, float aWidth, float aHeight, glm::vec2 rectB, float bWidth, float bHeight)
+{
+	glm::vec2 aBL = glm::vec2(rectA.x - (aWidth / 2.0f), rectA.y - (aHeight / 2.0f));
+	glm::vec2 aTR = glm::vec2(rectA.x + (aWidth / 2.0f), rectA.y + (aHeight / 2.0f));
+	glm::vec2 bBL = glm::vec2(rectA.x - (aWidth / 2.0f), rectA.y - (aHeight / 2.0f));
+	glm::vec2 bTR = glm::vec2(rectB.x + (bWidth / 2.0f), rectB.y + (bHeight / 2.0f));
+
+	return (aBL.x < bTR.x&& aTR.x > bBL.x && aBL.y < bTR.y&& aTR.y > bBL.y);
+}
+
+bool RayOverlapRect(glm::vec2 rayOrigin, glm::vec2 rayDir, glm::vec2 rectCenter, float rWidth, float rHeight,
+					glm::vec2& contactPoint, glm::vec2& contactNormal, float& tHitNear)
+{
+	glm::vec2 invertDir = 1.0f / rayDir;
+
+	glm::vec2 rBL = glm::vec2(rectCenter.x - (rWidth / 2.0f), rectCenter.y - (rHeight / 2.0f));
+	glm::vec2 rTR = glm::vec2(rectCenter.x + (rWidth / 2.0f), rectCenter.y + (rHeight / 2.0f));
+
+	glm::vec2 tNear = (rBL - rayOrigin) * invertDir;
+	glm::vec2 tFar = (rTR - rayOrigin) * invertDir;
+
+	if (std::isnan(tFar.y) || std::isnan(tFar.x))
+	{
+		return false;
+	}
+	if (std::isnan(tNear.y) || std::isnan(tNear.x))
+	{
+		return false;
+	}
+
+	if (tNear.x > tFar.x)
+	{
+		std::swap(tNear.x, tFar.x);
+	}
+	if (tNear.y > tFar.y)
+	{
+		std::swap(tNear.y, tFar.y);
+	}
+
+	if (tNear.x > tFar.y || tNear.y > tFar.x)
+	{
+		return false;
+	}
+
+	tHitNear = std::max(tNear.x, tNear.y);
+	float tHitFar = std::min(tFar.x, tFar.y);
+
+	if (tHitFar < 0)
+	{
+		return false;
+	}
+
+	contactPoint = rayOrigin + tHitNear * rayDir;
+
+	if (tNear.x > tNear.y)
+	{
+		if (invertDir.x < 0)
+		{
+			contactNormal = glm::vec2(1, 0);
+		}
+		else
+		{
+			contactNormal = glm::vec2(-1, 0);
+		}
+	}
+	else
+	{
+		if (invertDir.y < 0)
+		{
+			contactNormal = glm::vec2(0, 1);
+		}
+		else
+		{
+			contactNormal = glm::vec2(0, -1);
+		}
+	}
+
+	return true;
+
+	/*if (tHitNear <= 1.0f)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}*/
+}
+
 #pragma endregion
 
 #pragma region Entities
@@ -71,9 +168,9 @@ void ECS::Init()
 	ComponentBlock* inputBlock = new ComponentBlock(inputSystem, inputComponentID);
 	componentBlocks.push_back(inputBlock);
 
-	PhysicsSystem* physicsSystem = new PhysicsSystem();
-	ComponentBlock* physicsBlock = new ComponentBlock(physicsSystem, physicsComponentID);
-	componentBlocks.push_back(physicsBlock);
+	//PhysicsSystem* physicsSystem = new PhysicsSystem();
+	//ComponentBlock* physicsBlock = new ComponentBlock(physicsSystem, physicsComponentID);
+	//componentBlocks.push_back(physicsBlock);
 
 	ParticleSystem* particleSystem = new ParticleSystem();
 	ComponentBlock* particleBlock = new ComponentBlock(particleSystem, particleComponentID);
@@ -94,6 +191,10 @@ void ECS::Init()
 	DuellingSystem* duelistSystem = new DuellingSystem();
 	ComponentBlock* duelistBlock = new ComponentBlock(duelistSystem, duelistComponentID);
 	componentBlocks.push_back(duelistBlock);
+
+	PositionSystem* positionSystem = new PositionSystem();
+	ComponentBlock* positionBlock = new ComponentBlock(positionSystem, positionComponentID);
+	componentBlocks.push_back(positionBlock);
 
 	StaticRenderingSystem* renderingSystem = new StaticRenderingSystem();
 	ComponentBlock* renderingBlock = new ComponentBlock(renderingSystem, spriteComponentID);
@@ -177,17 +278,17 @@ void ECS::Update(float deltaTime)
 
 		Texture2D* tex3 = Game::main.textureMap["blank"];
 
-		for (int i = 0; i < 25; i++)
-		{
-			float width = rand() % 1000 + 300;
-			float height = rand() % 1000 + 300;
+		//for (int i = 0; i < 25; i++)
+		//{
+		//	float width = rand() % 1000 + 300;
+		//	float height = rand() % 1000 + 300;
 
-			Entity* platform = CreateEntity("floor");
-			ECS::main.RegisterComponent(new PositionComponent(platform, true, true, rand() % 5000, rand() % 5000, 0), platform);
-			ECS::main.RegisterComponent(new PhysicsComponent(platform, true, (PositionComponent*)platform->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 0.1f, 0.0f), platform);
-			ECS::main.RegisterComponent(new ColliderComponent(platform, true, (PositionComponent*)platform->componentIDMap[positionComponentID], true, false, true, false, false, false, EntityClass::object, 1000.0f, 0.0f, 1.0f, width, height, 0.0f, 0.0f), platform);
-			// ECS::main.RegisterComponent(new StaticSpriteComponent(platform, true, (PositionComponent*)platform->componentIDMap[positionComponentID], tex3->width * 35, tex3->height * 5.0f, tex3, false), platform);
-		}
+		//	Entity* platform = CreateEntity("floor");
+		//	ECS::main.RegisterComponent(new PositionComponent(platform, true, true, rand() % 5000, rand() % 5000, 0), platform);
+		//	ECS::main.RegisterComponent(new PhysicsComponent(platform, true, (PositionComponent*)platform->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 0.1f, 0.0f), platform);
+		//	ECS::main.RegisterComponent(new ColliderComponent(platform, true, (PositionComponent*)platform->componentIDMap[positionComponentID], true, false, true, false, false, false, EntityClass::object, 1000.0f, 0.0f, 1.0f, width, height, 0.0f, 0.0f), platform);
+		//	// ECS::main.RegisterComponent(new StaticSpriteComponent(platform, true, (PositionComponent*)platform->componentIDMap[positionComponentID], tex3->width * 35, tex3->height * 5.0f, tex3, false), platform);
+		//}
 
 		for (int i = 0; i < 50; i++)
 		{
@@ -647,7 +748,7 @@ void PhysicsSystem::Update(float deltaTime)
 					{
 						MovementComponent* move = (MovementComponent*)col->entity->componentIDMap[movementComponentID];
 
-						if (!col->onPlatform && !move->climbing)
+						if (!move->climbing)
 						{
 							p->velocityY -= p->gravityMod * deltaTime;
 						}
@@ -663,7 +764,7 @@ void PhysicsSystem::Update(float deltaTime)
 							}
 						}
 					}
-					else if (!col->onPlatform)
+					else
 					{
 						p->velocityY -= p->gravityMod * deltaTime;
 					}
@@ -714,10 +815,6 @@ void PhysicsSystem::Update(float deltaTime)
 				{
 					p->rotVelocity = 0;
 				}
-
-				pos->x += p->velocityX * deltaTime;
-				pos->y += p->velocityY * deltaTime;
-				pos->rotation += p->rotVelocity * deltaTime;
 			}
 			else
 			{
@@ -742,6 +839,44 @@ void PhysicsSystem::PurgeEntity(Entity* e)
 		{
 			PhysicsComponent* s = phys[i];
 			phys.erase(std::remove(phys.begin(), phys.end(), s), phys.end());
+			delete s;
+		}
+	}
+}
+
+#pragma endregion
+
+#pragma region Position System
+
+void PositionSystem::Update(float deltaTime)
+{
+	for (int i = 0; i < pos.size(); i++)
+	{
+		PositionComponent* p = pos[i];
+		PhysicsComponent* phys = (PhysicsComponent*)p->entity->componentIDMap[physicsComponentID];
+
+		if (p->active && phys != nullptr)
+		{
+			p->x += phys->velocityX * deltaTime;
+			p->y += phys->velocityY * deltaTime;
+			p->rotation += phys->rotVelocity * deltaTime;
+		}
+	}
+}
+
+void PositionSystem::AddComponent(Component* component)
+{
+	pos.push_back((PositionComponent*)component);
+}
+
+void PositionSystem::PurgeEntity(Entity* e)
+{
+	for (int i = 0; i < pos.size(); i++)
+	{
+		if (pos[i]->entity == e)
+		{
+			PositionComponent* s = pos[i];
+			pos.erase(std::remove(pos.begin(), pos.end(), s), pos.end());
 			delete s;
 		}
 	}
@@ -801,177 +936,104 @@ void ColliderSystem::Update(float deltaTime)
 					PhysicsComponent* physB = (PhysicsComponent*)cB->entity->componentIDMap[physicsComponentID];
 
 					// Two static objects shouldn't be able to collide because they won't be able to resolve that collision.
-					if (!posA->stat || !posB->stat)
+					if (cA->trigger || cB->trigger)
 					{
-						// Test to see if they're even remotely near one another (with respects to their collider size.)
-
-						float d = glm::length2(glm::vec2(posA->x, posA->y) - glm::vec2(posB->x, posB->y));
-						float dA = glm::length2(glm::vec2(posA->x, posA->y) - glm::vec2(posA->x + (cA->width / 2.0f), posA->y + (cA->height / 2.0f)));
-						float dB = glm::length2(glm::vec2(posB->x, posB->y) - glm::vec2(posB->x + (cB->width / 2.0f), posB->y + (cB->height / 2.0f)));
-
-						if (d < dA + dB)
+						if (TestCollision(cA, posA, physA, cB, posB, physB))
 						{
-							// Test to see if they're platforms. We don't want two platforms colliding.
-							if (!cA->platform || !cB->platform)
+							if (cA->trigger && cA->doesDamage)
 							{
-								// Deal with triggers (which don't need to resolve their collisions).
+								DamageComponent* aDamage = (DamageComponent*)cA->entity->componentIDMap[damageComponentID];
 
-								if (cA->trigger || cB->trigger)
+								if (cB->takesDamage)
 								{
-									if (TestCollision(cA, posA, physA, cB, posB, physB))
+									if (cB->entityClass == EntityClass::player && aDamage->damagesPlayers ||
+										cB->entityClass == EntityClass::enemy && aDamage->damagesEnemies ||
+										cB->entityClass == EntityClass::object && aDamage->damagesObjects)
 									{
-										if (cA->trigger && cA->doesDamage)
-										{
-											DamageComponent* aDamage = (DamageComponent*)cA->entity->componentIDMap[damageComponentID];
-
-											if (cB->takesDamage)
-											{
-												if (cB->entityClass == EntityClass::player && aDamage->damagesPlayers ||
-													cB->entityClass == EntityClass::enemy && aDamage->damagesEnemies ||
-													cB->entityClass == EntityClass::object && aDamage->damagesObjects)
-												{
-													HealthComponent* bHealth = (HealthComponent*)cB->entity->componentIDMap[healthComponentID];
-													bHealth->health -= aDamage->damage;
-													aDamage->uses -= 1;
-												}
-											}
-											else
-											{
-												aDamage->uses -= 1;
-											}
-
-											if (aDamage->uses <= 0)
-											{
-												cA->active = false;
-
-												if (!aDamage->showAfterUses)
-												{
-													ECS::main.AddDeadEntity(aDamage->entity);
-												}
-											}
-
-											aDamage->lifetime -= deltaTime;
-										}
-
-										if (cB->trigger && cB->doesDamage)
-										{
-											DamageComponent* bDamage = (DamageComponent*)cB->entity->componentIDMap[damageComponentID];
-
-											if (cA->takesDamage)
-											{
-												if (cA->entityClass == EntityClass::player && bDamage->damagesPlayers ||
-													cA->entityClass == EntityClass::enemy && bDamage->damagesEnemies ||
-													cA->entityClass == EntityClass::object && bDamage->damagesObjects)
-												{
-													HealthComponent* aHealth = (HealthComponent*)cA->entity->componentIDMap[healthComponentID];
-													aHealth->health -= bDamage->damage;
-													bDamage->uses -= 1;
-												}
-											}
-											else
-											{
-												bDamage->uses -= 1;
-											}
-
-											if (bDamage->uses <= 0)
-											{
-												cB->active = false;
-												ECS::main.AddDeadEntity(bDamage->entity);
-											}
-										}
+										HealthComponent* bHealth = (HealthComponent*)cB->entity->componentIDMap[healthComponentID];
+										bHealth->health -= aDamage->damage;
+										aDamage->uses -= 1;
 									}
 								}
 								else
 								{
-									// Test to see if one is a platform and the other is coming from the right direction.
+									aDamage->uses -= 1;
+								}
 
-									float aBot = posA->y - (cA->height / 2.0f) + cA->offsetY;
-									float aTop = posA->y + (cA->height / 2.0f) + cA->offsetY;
+								if (aDamage->uses <= 0)
+								{
+									cA->active = false;
 
-									float bBot = posB->y - (cB->height / 2.0f) + cB->offsetY;
-									float bTop = posB->y + (cB->height / 2.0f) + cB->offsetY;
-
-
-									// I'm an idiot.
-									// What is going on is this:
-									// Let's say A is above B. B is a platform. A is not.
-									// A will only collide with B if the following rules apply:
-
-									/*if (!cA->platform && !cB->platform ||
-										cA->platform && bBot > aTop ||
-										cB->platform && aBot > bTop)*/
-
-										// This won't work properly because that's not how collisions work.
-										// When A collides with B, even if most of it is above B, it won't
-										// properly collide because the bottom of A is below the top of B.
-										// This is a really simple mistake, and I feel kinda dumb;
-										// I've caught myself thinking about collisions as if they actually
-										// take place in continuous time.
-										// We need to add a little leeway
-										// (which will also probably require me to deal with tunneling).
-
-									float platformLeeway = 5.0f;
-
-									if (!cA->platform && !cB->platform ||
-										cA->platform && !cA->onewayPlatform ||
-										cB->platform && !cB->onewayPlatform ||
-										cA->platform && cA->onewayPlatform && bBot > aTop - platformLeeway ||
-										cB->platform && cB->onewayPlatform && aBot > bTop - platformLeeway)
+									if (!aDamage->showAfterUses)
 									{
-										/*float tentativeBDX = (physB->velocityX - physB->drag) * deltaTime;
-										float tentativeBDY = ((physB->velocityY - physB->drag) + (physB->gravityMod * deltaTime)) * deltaTime;*/
-
-										// This does not yet (really) solve for tunneling.
-										if (TestAndResolveCollision(cA, posA, physA, cB, posB, physB, deltaTime))
-										{
-											cA->collidedLastTick = true;
-											cB->collidedLastTick = true;
-
-											if (cB->climbable && aTop > bBot && aBot < bTop && cA->entity->componentIDMap[movementComponentID] != nullptr)
-											{
-												MovementComponent* moveA = (MovementComponent*)cA->entity->componentIDMap[movementComponentID];
-
-												if (moveA->canClimb && moveA->shouldClimb)
-												{
-													if (!keepVelocityClimbing)
-													{
-														// If you just started climbing, stop all other velocity.
-														physA->velocityX = 0;
-														physA->velocityY = 0;
-													}
-
-													moveA->maxClimbHeight = bTop;
-													moveA->minClimbHeight = bBot;
-													moveA->climbing = true;
-												}
-											}
-
-											if (cA->platform && bBot + 5.0f > aTop)
-											{
-												// std::cout << "A.\n";
-												cB->onPlatform = true;
-												physB->velocityY = 0.0f;
-											}
-											else if (cB->platform && aBot + 5.0f > bTop)
-											{
-												// std::cout << "B.\n";
-												cA->onPlatform = true;
-												physA->velocityY = 0.0f;
-											}/*
-											else
-											{
-												std::cout << "C.\n";
-											}*/
-										}
-										else if (cB->platform && aBot + 5.0f > bTop)
-										{
-											if (RaycastDown(1.0f, 0.1f, cA, posA, cB, posB))
-											{
-												cA->onPlatform = true;
-												physA->velocityY = 0.0f;
-											}
-										}
+										ECS::main.AddDeadEntity(aDamage->entity);
 									}
+								}
+
+								aDamage->lifetime -= deltaTime;
+							}
+
+							if (cB->trigger && cB->doesDamage)
+							{
+								DamageComponent* bDamage = (DamageComponent*)cB->entity->componentIDMap[damageComponentID];
+
+								if (cA->takesDamage)
+								{
+									if (cA->entityClass == EntityClass::player && bDamage->damagesPlayers ||
+										cA->entityClass == EntityClass::enemy && bDamage->damagesEnemies ||
+										cA->entityClass == EntityClass::object && bDamage->damagesObjects)
+									{
+										HealthComponent* aHealth = (HealthComponent*)cA->entity->componentIDMap[healthComponentID];
+										aHealth->health -= bDamage->damage;
+										bDamage->uses -= 1;
+									}
+								}
+								else
+								{
+									bDamage->uses -= 1;
+								}
+
+								if (bDamage->uses <= 0)
+								{
+									cB->active = false;
+									ECS::main.AddDeadEntity(bDamage->entity);
+								}
+							}
+						}
+					}
+					else if (!cA->platform)
+					{
+						if (ArbitraryRectangleCollision(cA, posA, physA, cB, posB, physB, deltaTime))
+						{
+							cA->collidedLastTick = true;
+							cB->collidedLastTick = true;
+
+							if (cB->platform)
+							{
+								cA->onPlatform = true;
+							}
+
+							float aBot = (posA->y + cA->offsetY) - (cA->width / 2.0f);
+							float aTop = (posA->y + cA->offsetY) + (cA->width / 2.0f);
+							float bBot = (posB->y + cB->offsetY) - (cB->width / 2.0f);
+							float bTop = (posB->y + cB->offsetY) + (cB->width / 2.0f);
+
+							if (cB->climbable && aTop > bBot && aBot < bTop && cA->entity->componentIDMap[movementComponentID] != nullptr)
+							{
+								MovementComponent* moveA = (MovementComponent*)cA->entity->componentIDMap[movementComponentID];
+
+								if (moveA->canClimb && moveA->shouldClimb)
+								{
+									if (!keepVelocityClimbing)
+									{
+										// If you just started climbing, stop all other velocity.
+										physA->velocityX = 0;
+										physA->velocityY = 0;
+									}
+
+									moveA->maxClimbHeight = bTop;
+									moveA->minClimbHeight = bBot;
+									moveA->climbing = true;
 								}
 							} // Bin gar keine Russin, stamm’ aus Litauen, echt deutsch.
 						} // And when we were children, staying at the arch-duke's,
@@ -1262,13 +1324,29 @@ bool ColliderSystem::TestAndResolveCollision(ColliderComponent* colA, PositionCo
 
 						if (displacement.x != 0 || displacement.y != 0)
 						{
+							glm::vec2 displacementVector = Normalize(displacement);
+
 							if (!posA->stat)
 							{
+								std::cout << "A.\n";
+
+								if (physA->velocityX > 0)
+								{
+									physA->velocityX += displacementVector.x * physA->velocityX;
+								}
+								physA->velocityX += displacementVector.x * physA->velocityX;
+								physA->velocityY += displacementVector.y * physA->velocityY;
+
 								posA->x -= displacement.x;
 								posA->y -= displacement.y;
 							}
 							else if (!posB->stat && !colA->platform)
 							{
+								std::cout << "B.\n";
+
+								physB->velocityX -= displacementVector.x * physB->velocityX;
+								physB->velocityY -= displacementVector.y * physB->velocityY;
+
 								posB->x += displacement.x;
 								posB->y += displacement.y;
 							}
@@ -1311,13 +1389,25 @@ bool ColliderSystem::TestAndResolveCollision(ColliderComponent* colA, PositionCo
 
 						if (displacement.x != 0 || displacement.y != 0)
 						{
+							glm::vec2 displacementVector = Normalize(displacement);
+
 							if (!posA->stat && !colB->platform)
 							{
+								std::cout << "C.\n";
+
+								physA->velocityX += displacementVector.x * physA->velocityX;
+								physA->velocityY += displacementVector.y * physA->velocityY;
+
 								posA->x += displacement.x;
 								posA->y += displacement.y;
 							}
 							else if (!posB->stat)
 							{
+								std::cout << "D.\n";
+
+								physB->velocityX -= displacementVector.x * physB->velocityX;
+								physB->velocityY -= displacementVector.y * physB->velocityY;
+
 								posB->x -= displacement.x;
 								posB->y -= displacement.y;
 							}
@@ -1329,6 +1419,41 @@ bool ColliderSystem::TestAndResolveCollision(ColliderComponent* colA, PositionCo
 	}
 
 	return collided;
+}
+
+bool ColliderSystem::ArbitraryRectangleCollision(ColliderComponent* colA, PositionComponent* posA, PhysicsComponent* physA, ColliderComponent* colB, PositionComponent* posB, PhysicsComponent* physB, float deltaTime)
+{
+	/*bool RayOverlapRect(glm::vec2 rayOrigin, glm::vec2 rayDir, glm::vec2 rectCenter, float rWidth, float rHeight,
+		glm::vec2 & contactPoint, glm::vec2 & contactNormal, float& tHitNear)*/
+
+	glm::vec2 rayOrigin = glm::vec2(posA->x, posA->y);
+	glm::vec2 rayDir = glm::vec2(physA->velocityX + physA->velocityY);
+
+	glm::vec2 rectPos = glm::vec2(posB->x + colB->offsetX, posB->y + colB->offsetY);
+	float rectWidth = colB->width + colA->width;
+	float rectHeight = colB->height + colA->height;
+
+	glm::vec2 contactPoint = glm::vec2(0,0);
+	glm::vec2 contactNormal = glm::vec2(0, 0);
+	float time = 0.0f;
+
+	if (RayOverlapRect(rayOrigin, rayDir * deltaTime, rectPos, rectWidth, rectHeight, contactPoint, contactNormal, time))
+	{
+		std::cout << std::to_string(time) + "\n";
+		if (time <= 1.0f && time >= -0.0f)
+		{
+			glm::vec2 vMod = contactNormal * glm::vec2(abs(physA->velocityX), abs(physA->velocityY)) * (1.0f - time);
+			std::cout << std::to_string(physA->velocityY) + " : " + std::to_string(vMod.y) + "\n";
+
+			glm::vec2 velAdd = glm::vec2(physA->velocityX, physA->velocityY) + vMod;
+			physA->velocityX = velAdd.x;
+			physA->velocityY = velAdd.y;
+
+			return true;
+		}
+	}
+
+	return false;
 }
 
 float ColliderSystem::Dot(glm::vec2 a, glm::vec2 b)
@@ -1386,11 +1511,6 @@ void InputSystem::Update(float deltaTime)
 
 			if (!health->dead)
 			{
-				if (move->jumping && col->onPlatform && phys->velocityY > 0)
-				{
-					col->onPlatform = false;
-				}
-
 				float aBot = phys->pos->y - (col->height / 2.0f) + col->offsetY;
 				float aTop = phys->pos->y + (col->height / 2.0f) + col->offsetY;
 				if (move->climbing && !move->shouldClimb ||
@@ -1609,14 +1729,14 @@ void InputSystem::Update(float deltaTime)
 					phys->gravityMod = phys->baseGravityMod;
 				}
 
-				if (glfwGetKey(Game::main.window, GLFW_KEY_W) == GLFW_PRESS && move->canMove && move->climbing)
+				if (glfwGetKey(Game::main.window, GLFW_KEY_W) == GLFW_PRESS && move->canMove)// && move->climbing)
 				{
 					if (phys->velocityY < move->maxSpeed)
 					{
 						phys->velocityY += move->acceleration * deltaTime;
 					}
 				}
-				else if (glfwGetKey(Game::main.window, GLFW_KEY_S) == GLFW_PRESS && move->canMove && move->climbing)
+				else if (glfwGetKey(Game::main.window, GLFW_KEY_S) == GLFW_PRESS && move->canMove)// && move->climbing)
 				{
 					if (phys->velocityY > -move->maxSpeed)
 					{

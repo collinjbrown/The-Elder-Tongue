@@ -57,6 +57,18 @@ public:
 	void PurgeEntity(Entity* e);
 };
 
+class PositionSystem : public System
+{
+public:
+	vector<PositionComponent*> pos;
+
+	void Update(float deltaTime);
+
+	void AddComponent(Component* component);
+
+	void PurgeEntity(Entity* e);
+};
+
 class ColliderSystem : public System
 {
 	vector<ColliderComponent*> colls;
@@ -68,6 +80,8 @@ class ColliderSystem : public System
 	bool TestCollision(ColliderComponent* colA, PositionComponent* posA, PhysicsComponent* physA, ColliderComponent* colB, PositionComponent* posB, PhysicsComponent* physB);
 
 	bool TestAndResolveCollision(ColliderComponent* colA, PositionComponent* posA, PhysicsComponent* physA, ColliderComponent* colB, PositionComponent* posB, PhysicsComponent* physB, float deltaTime);
+
+	bool ArbitraryRectangleCollision(ColliderComponent* colA, PositionComponent* posA, PhysicsComponent* physA, ColliderComponent* colB, PositionComponent* posB, PhysicsComponent* physB, float deltaTime);
 
 	float Dot(glm::vec2 a, glm::vec2 b);
 
