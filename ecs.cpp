@@ -103,16 +103,12 @@ bool RayOverlapRect(glm::vec2 rayOrigin, glm::vec2 rayDir, glm::vec2 rectCenter,
 		}
 	}
 
-	return true;
+	Texture2D* t = Game::main.textureMap["blank"];
+	Game::main.renderer->prepareQuad(contactPoint, t->width, t->height, glm::vec4(0.0f, 1.0f, 0.0f, 1.0f), t->ID);
+	Game::main.renderer->prepareQuad(contactPoint + contactNormal, t->width / 2.0f, t->height * 2.0f, glm::vec4(0.0f, 0.0f, 1.0f, 1.0f), t->ID);
+	Game::main.renderer->prepareQuad(rayOrigin + rayDir, t->width / 2.0f, t->height / 2.0f, glm::vec4(0.0f, 1.0f, 1.0f, 1.0f), t->ID);
 
-	/*if (tHitNear <= 1.0f)
-	{
-		return true;
-	}
-	else
-	{
-		return false;
-	}*/
+	return true;
 }
 
 #pragma endregion
@@ -168,9 +164,9 @@ void ECS::Init()
 	ComponentBlock* inputBlock = new ComponentBlock(inputSystem, inputComponentID);
 	componentBlocks.push_back(inputBlock);
 
-	//PhysicsSystem* physicsSystem = new PhysicsSystem();
-	//ComponentBlock* physicsBlock = new ComponentBlock(physicsSystem, physicsComponentID);
-	//componentBlocks.push_back(physicsBlock);
+	PhysicsSystem* physicsSystem = new PhysicsSystem();
+	ComponentBlock* physicsBlock = new ComponentBlock(physicsSystem, physicsComponentID);
+	componentBlocks.push_back(physicsBlock);
 
 	ParticleSystem* particleSystem = new ParticleSystem();
 	ComponentBlock* particleBlock = new ComponentBlock(particleSystem, particleComponentID);
@@ -278,17 +274,17 @@ void ECS::Update(float deltaTime)
 
 		Texture2D* tex3 = Game::main.textureMap["blank"];
 
-		//for (int i = 0; i < 25; i++)
-		//{
-		//	float width = rand() % 1000 + 300;
-		//	float height = rand() % 1000 + 300;
+		for (int i = 0; i < 25; i++)
+		{
+			float width = rand() % 1000 + 300;
+			float height = rand() % 1000 + 300;
 
-		//	Entity* platform = CreateEntity("floor");
-		//	ECS::main.RegisterComponent(new PositionComponent(platform, true, true, rand() % 5000, rand() % 5000, 0), platform);
-		//	ECS::main.RegisterComponent(new PhysicsComponent(platform, true, (PositionComponent*)platform->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 0.1f, 0.0f), platform);
-		//	ECS::main.RegisterComponent(new ColliderComponent(platform, true, (PositionComponent*)platform->componentIDMap[positionComponentID], true, false, true, false, false, false, EntityClass::object, 1000.0f, 0.0f, 1.0f, width, height, 0.0f, 0.0f), platform);
-		//	// ECS::main.RegisterComponent(new StaticSpriteComponent(platform, true, (PositionComponent*)platform->componentIDMap[positionComponentID], tex3->width * 35, tex3->height * 5.0f, tex3, false), platform);
-		//}
+			Entity* platform = CreateEntity("floor");
+			ECS::main.RegisterComponent(new PositionComponent(platform, true, true, rand() % 5000, rand() % 5000, 0), platform);
+			ECS::main.RegisterComponent(new PhysicsComponent(platform, true, (PositionComponent*)platform->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 0.1f, 0.0f), platform);
+			ECS::main.RegisterComponent(new ColliderComponent(platform, true, (PositionComponent*)platform->componentIDMap[positionComponentID], true, false, true, false, false, false, EntityClass::object, 1000.0f, 0.0f, 1.0f, width, height, 0.0f, 0.0f), platform);
+			ECS::main.RegisterComponent(new StaticSpriteComponent(platform, true, (PositionComponent*)platform->componentIDMap[positionComponentID], width, height, tex3, false), platform);
+		}
 
 		for (int i = 0; i < 50; i++)
 		{
@@ -296,11 +292,11 @@ void ECS::Update(float deltaTime)
 			ECS::main.RegisterComponent(new PositionComponent(floor, true, true, i * 500, -200, 0.0f), floor);
 			ECS::main.RegisterComponent(new PhysicsComponent(floor, true, (PositionComponent*)floor->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 0.1f, 0.0f), floor);
 			ECS::main.RegisterComponent(new ColliderComponent(floor, true, (PositionComponent*)floor->componentIDMap[positionComponentID], true, false, true, false, false, false, EntityClass::object, 1000.0f, 0.0f, 1.0f, 540.0f, 80.0f, 0.0f, 0.0f), floor);
-			// ECS::main.RegisterComponent(new StaticSpriteComponent(floor, true, (PositionComponent*)floor->componentIDMap[positionComponentID], tex3->width * 35, tex3->height * 5.0f, tex3, false), floor);
+			ECS::main.RegisterComponent(new StaticSpriteComponent(floor, true, (PositionComponent*)floor->componentIDMap[positionComponentID], tex3->width * 35, tex3->height * 5.0f, tex3, false), floor);
 
 			Entity* earth = CreateEntity("floor");
 			ECS::main.RegisterComponent(new PositionComponent(earth, true, true, i * 500, -1000, 0.0f), earth);
-			// ECS::main.RegisterComponent(new StaticSpriteComponent(earth, true, (PositionComponent*)earth->componentIDMap[positionComponentID], tex3->width * 35, tex3->height * 100.0f, tex3, false), earth);
+			ECS::main.RegisterComponent(new StaticSpriteComponent(earth, true, (PositionComponent*)earth->componentIDMap[positionComponentID], tex3->width * 35, tex3->height * 100.0f, tex3, false), earth);
 		}
 	}
 
@@ -916,8 +912,8 @@ void ColliderSystem::Update(float deltaTime)
 			PositionComponent* posA = cA->pos;
 			PhysicsComponent* physA = (PhysicsComponent*)cA->entity->componentIDMap[physicsComponentID];
 
-			Texture2D* t = Game::main.textureMap["test"];
-			Game::main.renderer->prepareQuad(posA, cA->width, cA->height, t->width, t->height, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), Game::main.textureMap["blank"]->ID, false);
+			//Texture2D* t = Game::main.textureMap["test"];
+			//Game::main.renderer->prepareQuad(posA, cA->width, cA->height, t->width, t->height, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), Game::main.textureMap["blank"]->ID, false);
 
 			/*float tentativeADX = (physA->velocityX - physA->drag) * deltaTime;
 			float tentativeADY = ((physA->velocityY - physA->drag) + (physA->gravityMod * deltaTime)) * deltaTime;*/
@@ -1427,7 +1423,7 @@ bool ColliderSystem::ArbitraryRectangleCollision(ColliderComponent* colA, Positi
 		glm::vec2 & contactPoint, glm::vec2 & contactNormal, float& tHitNear)*/
 
 	glm::vec2 rayOrigin = glm::vec2(posA->x, posA->y);
-	glm::vec2 rayDir = glm::vec2(physA->velocityX + physA->velocityY);
+	glm::vec2 rayDir = glm::vec2(physA->velocityX, physA->velocityY);
 
 	glm::vec2 rectPos = glm::vec2(posB->x + colB->offsetX, posB->y + colB->offsetY);
 	float rectWidth = colB->width + colA->width;
@@ -1439,11 +1435,11 @@ bool ColliderSystem::ArbitraryRectangleCollision(ColliderComponent* colA, Positi
 
 	if (RayOverlapRect(rayOrigin, rayDir * deltaTime, rectPos, rectWidth, rectHeight, contactPoint, contactNormal, time))
 	{
-		std::cout << std::to_string(time) + "\n";
-		if (time <= 1.0f && time >= -0.0f)
+		// std::cout << std::to_string(time) + "\n";
+		if (time <= 1.0f && time >= 0.0f)
 		{
 			glm::vec2 vMod = contactNormal * glm::vec2(abs(physA->velocityX), abs(physA->velocityY)) * (1.0f - time);
-			std::cout << std::to_string(physA->velocityY) + " : " + std::to_string(vMod.y) + "\n";
+			// std::cout << std::to_string(physA->velocityY) + " : " + std::to_string(vMod.y) + "\n";
 
 			glm::vec2 velAdd = glm::vec2(physA->velocityX, physA->velocityY) + vMod;
 			physA->velocityX = velAdd.x;
@@ -1729,14 +1725,14 @@ void InputSystem::Update(float deltaTime)
 					phys->gravityMod = phys->baseGravityMod;
 				}
 
-				if (glfwGetKey(Game::main.window, GLFW_KEY_W) == GLFW_PRESS && move->canMove)// && move->climbing)
+				if (glfwGetKey(Game::main.window, GLFW_KEY_W) == GLFW_PRESS && move->canMove && move->climbing)
 				{
 					if (phys->velocityY < move->maxSpeed)
 					{
 						phys->velocityY += move->acceleration * deltaTime;
 					}
 				}
-				else if (glfwGetKey(Game::main.window, GLFW_KEY_S) == GLFW_PRESS && move->canMove)// && move->climbing)
+				else if (glfwGetKey(Game::main.window, GLFW_KEY_S) == GLFW_PRESS && move->canMove && move->climbing)
 				{
 					if (phys->velocityY > -move->maxSpeed)
 					{
@@ -1929,11 +1925,11 @@ void AnimationControllerSystem::Update(float deltaTime)
 
 			if (!health->dead)
 			{
-				if (p->velocityX < -200.0f)
+				if (p->velocityX < -100.0f)
 				{
 					c->animator->flipped = true;
 				}
-				else if (p->velocityX > 200.0f)
+				else if (p->velocityX > 100.0f)
 				{
 					c->animator->flipped = false;
 				}
@@ -1961,7 +1957,7 @@ void AnimationControllerSystem::Update(float deltaTime)
 						c->animator->SetAnimation(s + "aerialOne");
 					}
 				}
-				else if (abs(p->velocityY) > 500.0f && !col->onPlatform || c->animator->activeAnimation == s + "aerialOne")
+				else if (abs(p->velocityY) > 200.0f && !col->onPlatform || c->animator->activeAnimation == s + "aerialOne")
 				{
 					if (c->animator->activeAnimation != s + "jumpUp" && p->velocityY > 0)
 					{
@@ -1972,11 +1968,11 @@ void AnimationControllerSystem::Update(float deltaTime)
 						c->animator->SetAnimation(s + "jumpDown");
 					}
 				}
-				else if (abs(p->velocityX) > 200.0f && col->onPlatform && move->canMove && c->animator->activeAnimation != s + "walk")
+				else if (abs(p->velocityX) > 10.0f && col->onPlatform && move->canMove && c->animator->activeAnimation != s + "walk")
 				{
 					c->animator->SetAnimation(s + "walk");
 				}
-				else if (abs(p->velocityX) < 100.0f && !col->collidedLastTick && col->onPlatform && !move->preparingToJump && move->canMove && c->animator->activeAnimation != s + "idle")
+				else if (abs(p->velocityX) < 10.0f && col->onPlatform && move->canMove && c->animator->activeAnimation != s + "idle")
 				{
 					c->animator->SetAnimation(s + "idle");
 				}
