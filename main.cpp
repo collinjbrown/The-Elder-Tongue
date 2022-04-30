@@ -124,7 +124,7 @@ int main(void)
     renderer.textureIDs.push_back(baseIdle.ID);
     Game::main.animationMap.emplace("baseIdle", &baseIdle);
 
-    Animation2D baseWalk{ "assets/animations/lily/lily_run.png", true, 3, 4, 0.07f, { 3, 3, 3, 3 }, true, GL_NEAREST };
+    Animation2D baseWalk{ "assets/animations/lily/lily_run.png", true, 3, 4, 0.05f, { 3, 3, 3, 3 }, true, GL_NEAREST };
     renderer.textureIDs.push_back(baseWalk.ID);
     Game::main.animationMap.emplace("baseWalk", &baseWalk);
 
@@ -145,7 +145,7 @@ int main(void)
     renderer.textureIDs.push_back(swordBaseIdle.ID);
     Game::main.animationMap.emplace("sword_baseIdle", &swordBaseIdle);
 
-    Animation2D swordBaseWalk{ "assets/animations/lily/lily_run.png", true, 3, 4, 0.07f, { 3, 3, 3, 3 }, true, GL_NEAREST };
+    Animation2D swordBaseWalk{ "assets/animations/lily/lily_run.png", true, 3, 4, 0.05f, { 3, 3, 3, 3 }, true, GL_NEAREST };
     renderer.textureIDs.push_back(swordBaseWalk.ID);
     Game::main.animationMap.emplace("sword_baseWalk", &swordBaseWalk);
 

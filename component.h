@@ -159,6 +159,7 @@ public:
 
 	bool jumping;
 	bool preparingToJump;
+	float airControl;
 
 	bool canMove;
 	float lastMoveAttempt;
@@ -171,7 +172,7 @@ public:
 	float maxClimbHeight;
 	float minClimbHeight;
 
-	MovementComponent(Entity* entity, bool active, float acceleration, float maxSpeed, float maxJumpHeight, float stabDepth, float moveAttemptDelay, bool canMove, bool canClimb, bool shouldClimb);
+	MovementComponent(Entity* entity, bool active, float acceleration, float maxSpeed, float maxJumpHeight, float stabDepth, float moveAttemptDelay, float airControl, bool canMove, bool canClimb, bool shouldClimb);
 };
 
 class CameraFollowComponent : public Component
