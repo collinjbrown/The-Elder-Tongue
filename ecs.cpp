@@ -226,7 +226,7 @@ void ECS::Update(float deltaTime)
 		ECS::main.RegisterComponent(new PositionComponent(player, true, false, 0, 100, 0.0f), player);
 		ECS::main.RegisterComponent(new PhysicsComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 5000.0f, 2000.0f), player);
 		ECS::main.RegisterComponent(new ColliderComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], false, false, false, false, true, false, EntityClass::player, 1.0f, 1.0f, 10.0f, 40.0f, 120.0f, 0.0f, 0.0f), player);
-		ECS::main.RegisterComponent(new MovementComponent(player, true, 4000.0f, 1000.0f, 2.5f, 100.0f, 0.1f, 0.5f, true, true, false), player);
+		ECS::main.RegisterComponent(new MovementComponent(player, true, 6000.0f, 1000.0f, 2.5f, 100.0f, 0.1f, 0.5f, true, true, false), player);
 		ECS::main.RegisterComponent(new InputComponent(player, true, true, 0.5f, 5000, 0.5f, 2, 0.5f, 2.0f, 2000.0f), player);
 		ECS::main.RegisterComponent(new CameraFollowComponent(player, true, 10.0f), player);
 		ECS::main.RegisterComponent(new HealthComponent(player, true, 1000.0f, false), player);
@@ -751,7 +751,7 @@ void PhysicsSystem::Update(int activeScene, float deltaTime)
 					{
 						MovementComponent* move = (MovementComponent*)col->entity->componentIDMap[movementComponentID];
 
-						if (!move->climbing)
+						if (!move->climbing && !col->onPlatform)
 						{
 							p->velocityY -= p->gravityMod * deltaTime;
 						}
@@ -760,14 +760,24 @@ void PhysicsSystem::Update(int activeScene, float deltaTime)
 							if (p->velocityY > 0)
 							{
 								p->velocityY -= (p->drag / 4.0f) * deltaTime;
+
+								if (p->velocityY < 0)
+								{
+									p->velocityY = 0;
+								}
 							}
 							else if (p->velocityY < 0)
 							{
 								p->velocityY += (p->drag / 4.0f) * deltaTime;
+
+								if (p->velocityY > 0)
+								{
+									p->velocityY = 0;
+								}
 							}
 						}
 					}
-					else
+					else if (!col->onPlatform)
 					{
 						p->velocityY -= p->gravityMod * deltaTime;
 					}
@@ -775,10 +785,20 @@ void PhysicsSystem::Update(int activeScene, float deltaTime)
 					if (p->velocityX > 0 && col->onPlatform)
 					{
 						p->velocityX -= p->drag * deltaTime;
+
+						if (p->velocityX < 0)
+						{
+							p->velocityX = 0;
+						}
 					}
 					else if (p->velocityX < 0 && col->onPlatform)
 					{
-						p->velocityX += p->drag * deltaTime;
+						p->velocityX += p->drag * deltaTime;\
+
+						if (p->velocityX > 0)
+						{
+							p->velocityX = 0;
+						}
 					}
 
 					if (p->velocityY > 0 && col->onPlatform)
