@@ -134,9 +134,9 @@ Entity:: Entity(int ID, int scene, std::string name)
 #pragma endregion
 
 #pragma region Component Blocks
-void ComponentBlock::Update(float deltaTime)
+void ComponentBlock::Update(int activeScene, float deltaTime)
 {
-	system->Update(deltaTime);
+	system->Update(activeScene, deltaTime);
 }
 void ComponentBlock::AddComponent(Component* c)
 {
@@ -306,7 +306,7 @@ void ECS::Update(float deltaTime)
 
 	for (int i = 0; i < componentBlocks.size(); i++)
 	{
-		componentBlocks[i]->Update(deltaTime);
+		componentBlocks[i]->Update(activeScene, deltaTime);
 	}
 
 	PurgeDeadEntities();
@@ -682,7 +682,7 @@ ParticleComponent::ParticleComponent(Entity* entity, bool active, float tickRate
 
 #pragma region Static Rendering System
 
-void StaticRenderingSystem::Update(float deltaTime)
+void StaticRenderingSystem::Update(int activeScene, float deltaTime)
 {
 	float screenLeft = (Game::main.camX - (Game::main.windowWidth * Game::main.zoom / 1.0f));
 	float screenRight = (Game::main.camX + (Game::main.windowWidth * Game::main.zoom / 1.0f));
@@ -694,7 +694,8 @@ void StaticRenderingSystem::Update(float deltaTime)
 	{
 		StaticSpriteComponent* s = sprites[i];
 
-		if (s->active)
+		if (s->active && s->entity->Get_Scene() == activeScene ||
+			s->active && s->entity->Get_Scene() == 0)
 		{
 			PositionComponent* pos = s->pos;
 
@@ -730,13 +731,14 @@ void StaticRenderingSystem::PurgeEntity(Entity* e)
 
 #pragma region Physics System
 
-void PhysicsSystem::Update(float deltaTime)
+void PhysicsSystem::Update(int activeScene, float deltaTime)
 {
 	for (int i = 0; i < phys.size(); i++)
 	{
 		PhysicsComponent* p = phys[i];
 
-		if (p->active)
+		if (p->active && p->entity->Get_Scene() == activeScene ||
+			p->active && p->entity->Get_Scene() == 0)
 		{
 			PositionComponent* pos = p->pos;
 			ColliderComponent* col = (ColliderComponent*)p->entity->componentIDMap[colliderComponentID];
@@ -849,14 +851,15 @@ void PhysicsSystem::PurgeEntity(Entity* e)
 
 #pragma region Position System
 
-void PositionSystem::Update(float deltaTime)
+void PositionSystem::Update(int activeScene, float deltaTime)
 {
 	for (int i = 0; i < pos.size(); i++)
 	{
 		PositionComponent* p = pos[i];
 		PhysicsComponent* phys = (PhysicsComponent*)p->entity->componentIDMap[physicsComponentID];
 
-		if (p->active && phys != nullptr)
+		if (p->active && phys != nullptr && p->entity->Get_Scene() == activeScene ||
+			p->active && phys != nullptr && p->entity->Get_Scene() == 0)
 		{
 			p->x += phys->velocityX * deltaTime;
 			p->y += phys->velocityY * deltaTime;
@@ -887,16 +890,18 @@ void PositionSystem::PurgeEntity(Entity* e)
 
 #pragma region Collider System
 
-void ColliderSystem::Update(float deltaTime)
+void ColliderSystem::Update(int activeScene, float deltaTime)
 {
 	for (int i = 0; i < colls.size(); i++)
 	{
 		ColliderComponent* cA = colls[i];
-		cA->onPlatform = false;
-		cA->collidedLastTick = false;
 
-		if (cA->active)
+		if (cA->active && cA->entity->Get_Scene() == activeScene ||
+			cA->active && cA->entity->Get_Scene() == 0)
 		{
+			cA->onPlatform = false;
+			cA->collidedLastTick = false;
+
 			PositionComponent* posA = cA->pos;
 			PhysicsComponent* physA = (PhysicsComponent*)cA->entity->componentIDMap[physicsComponentID];
 
@@ -1491,13 +1496,14 @@ void ColliderSystem::PurgeEntity(Entity* e)
 
 #pragma region Input System
 
-void InputSystem::Update(float deltaTime)
+void InputSystem::Update(int activeScene, float deltaTime)
 {
 	for (int i = 0; i < move.size(); i++)
 	{
 		InputComponent* m = move[i];
 
-		if (m->active)
+		if (m->active && m->entity->Get_Scene() == activeScene ||
+			m->active && m->entity->Get_Scene() == 0)
 		{
 			MovementComponent* move = (MovementComponent*)m->entity->componentIDMap[movementComponentID];
 			PhysicsComponent* phys = (PhysicsComponent*)m->entity->componentIDMap[physicsComponentID];
@@ -1868,13 +1874,14 @@ void InputSystem::PurgeEntity(Entity* e)
 
 #pragma region Camera Follow System
 
-void CameraFollowSystem::Update(float deltaTime)
+void CameraFollowSystem::Update(int activeScene, float deltaTime)
 {
 	for (int i = 0; i < folls.size(); i++)
 	{
 		CameraFollowComponent* f = folls[i];
 
-		if (f->active)
+		if (f->active && f->entity->Get_Scene() == activeScene ||
+			f->active && f->entity->Get_Scene() == 0)
 		{
 			PositionComponent* pos = (PositionComponent*)f->entity->componentIDMap[positionComponentID];
 
@@ -1911,94 +1918,99 @@ void CameraFollowSystem::PurgeEntity(Entity* e)
 
 #pragma region Animation Controller System
 
-void AnimationControllerSystem::Update(float deltaTime)
+void AnimationControllerSystem::Update(int activeScene, float deltaTime)
 {
 	for (int i = 0; i < controllers.size(); i++)
 	{
 		AnimationControllerComponent* c = controllers[i];
 
-		if (c->subID == dragonriderAnimControllerSubID)
+		if (c->active && c->entity->Get_Scene() == activeScene ||
+			c->active && c->entity->Get_Scene() == 0)
 		{
-			// I'm thinking what we'll do is just hard code the various animation conditions
-			// into the animation controller; this will serve as the animation controller
-			// for the player and other dragon riders.
 
-			// We are going to assume that any entity with a dragon rider animation controller component
-			// (that is a long-ass name) also has a physics and collider component.
-			// I think I can safely assume this because dragonriders should basically always
-			// have the same set of components, aside from the player's.
-
-			PlayerAnimationControllerComponent* d = (PlayerAnimationControllerComponent*)c;
-			PhysicsComponent* p = (PhysicsComponent*)d->entity->componentIDMap[physicsComponentID];
-			ColliderComponent* col = (ColliderComponent*)d->entity->componentIDMap[colliderComponentID];
-			MovementComponent* move = (MovementComponent*)d->entity->componentIDMap[movementComponentID];
-			HealthComponent* health = (HealthComponent*)d->entity->componentIDMap[healthComponentID];
-			DuelistComponent* duel = (DuelistComponent*)d->entity->componentIDMap[duelistComponentID];
-
-			std::string s = "";
-
-			if (duel->hasSword && duel->isDrawn)
+			if (c->subID == dragonriderAnimControllerSubID)
 			{
-				s = "sword_";
-			}
+				// I'm thinking what we'll do is just hard code the various animation conditions
+				// into the animation controller; this will serve as the animation controller
+				// for the player and other dragon riders.
 
-			if (!health->dead)
-			{
-				if (p->velocityX < -100.0f)
+				// We are going to assume that any entity with a dragon rider animation controller component
+				// (that is a long-ass name) also has a physics and collider component.
+				// I think I can safely assume this because dragonriders should basically always
+				// have the same set of components, aside from the player's.
+
+				PlayerAnimationControllerComponent* d = (PlayerAnimationControllerComponent*)c;
+				PhysicsComponent* p = (PhysicsComponent*)d->entity->componentIDMap[physicsComponentID];
+				ColliderComponent* col = (ColliderComponent*)d->entity->componentIDMap[colliderComponentID];
+				MovementComponent* move = (MovementComponent*)d->entity->componentIDMap[movementComponentID];
+				HealthComponent* health = (HealthComponent*)d->entity->componentIDMap[healthComponentID];
+				DuelistComponent* duel = (DuelistComponent*)d->entity->componentIDMap[duelistComponentID];
+
+				std::string s = "";
+
+				if (duel->hasSword && duel->isDrawn)
 				{
-					c->animator->flipped = true;
-				}
-				else if (p->velocityX > 100.0f)
-				{
-					c->animator->flipped = false;
+					s = "sword_";
 				}
 
-				if (d->entity->componentIDMap[inputComponentID] != nullptr)
+				if (!health->dead)
 				{
-					if (move->preparingToJump && Game::main.mouseX < p->pos->x)
+					if (p->velocityX < -100.0f)
 					{
 						c->animator->flipped = true;
 					}
-					else if (move->preparingToJump && Game::main.mouseX > p->pos->x)
+					else if (p->velocityX > 100.0f)
 					{
 						c->animator->flipped = false;
 					}
-				}
 
-				if (duel->isAttacking)
-				{
-					if (c->animator->activeAnimation != s + "stab" && !move->jumping)
+					if (d->entity->componentIDMap[inputComponentID] != nullptr)
 					{
-						c->animator->SetAnimation(s + "stab");
+						if (move->preparingToJump && Game::main.mouseX < p->pos->x)
+						{
+							c->animator->flipped = true;
+						}
+						else if (move->preparingToJump && Game::main.mouseX > p->pos->x)
+						{
+							c->animator->flipped = false;
+						}
 					}
-					else if (c->animator->activeAnimation != s + "aerialOne" && move->jumping)
+
+					if (duel->isAttacking)
 					{
-						c->animator->SetAnimation(s + "aerialOne");
+						if (c->animator->activeAnimation != s + "stab" && !move->jumping)
+						{
+							c->animator->SetAnimation(s + "stab");
+						}
+						else if (c->animator->activeAnimation != s + "aerialOne" && move->jumping)
+						{
+							c->animator->SetAnimation(s + "aerialOne");
+						}
+					}
+					else if (abs(p->velocityY) > 200.0f && !col->onPlatform || c->animator->activeAnimation == s + "aerialOne")
+					{
+						if (c->animator->activeAnimation != s + "jumpUp" && p->velocityY > 0)
+						{
+							c->animator->SetAnimation(s + "jumpUp");
+						}
+						else if (c->animator->activeAnimation != s + "jumpDown" && p->velocityY < 0)
+						{
+							c->animator->SetAnimation(s + "jumpDown");
+						}
+					}
+					else if (abs(p->velocityX) > 100.0f && col->onPlatform && move->canMove && c->animator->activeAnimation != s + "walk")
+					{
+						c->animator->SetAnimation(s + "walk");
+					}
+					else if (abs(p->velocityX) < 100.0f && col->onPlatform && move->canMove && c->animator->activeAnimation != s + "idle")
+					{
+						c->animator->SetAnimation(s + "idle");
 					}
 				}
-				else if (abs(p->velocityY) > 200.0f && !col->onPlatform || c->animator->activeAnimation == s + "aerialOne")
+				else if (c->animator->activeAnimation != s + "dead")
 				{
-					if (c->animator->activeAnimation != s + "jumpUp" && p->velocityY > 0)
-					{
-						c->animator->SetAnimation(s + "jumpUp");
-					}
-					else if (c->animator->activeAnimation != s + "jumpDown" && p->velocityY < 0)
-					{
-						c->animator->SetAnimation(s + "jumpDown");
-					}
+					c->animator->SetAnimation(s + "dead");
 				}
-				else if (abs(p->velocityX) > 100.0f && col->onPlatform && move->canMove && c->animator->activeAnimation != s + "walk")
-				{
-					c->animator->SetAnimation(s + "walk");
-				}
-				else if (abs(p->velocityX) < 100.0f && col->onPlatform && move->canMove && c->animator->activeAnimation != s + "idle")
-				{
-					c->animator->SetAnimation(s + "idle");
-				}
-			}
-			else if (c->animator->activeAnimation != s + "dead")
-			{
-				c->animator->SetAnimation(s + "dead");
 			}
 		}
 	}
@@ -2026,7 +2038,7 @@ void AnimationControllerSystem::PurgeEntity(Entity* e)
 
 #pragma region Animation System
 
-void AnimationSystem::Update(float deltaTime)
+void AnimationSystem::Update(int activeScene, float deltaTime)
 {
 	float screenLeft = (Game::main.camX - (Game::main.windowWidth * Game::main.zoom / 1.0f));
 	float screenRight = (Game::main.camX + (Game::main.windowWidth * Game::main.zoom / 1.0f));
@@ -2054,7 +2066,8 @@ void AnimationSystem::Update(float deltaTime)
 
 		AnimationComponent* a = anims[i];
 
-		if (a->active)
+		if (a->active && a->entity->Get_Scene() == activeScene ||
+			a->active && a->entity->Get_Scene() == 0)
 		{
 			a->lastTick += deltaTime;
 
@@ -2126,19 +2139,23 @@ void AnimationSystem::PurgeEntity(Entity* e)
 
 #pragma region Health System
 
-void HealthSystem::Update(float deltaTime)
+void HealthSystem::Update(int activeScene, float deltaTime)
 {
 	for (int i = 0; i < healths.size(); i++)
 	{
 		HealthComponent* h = healths[i];
 
-		if (h->health <= 0.0f)
+		if (h->active && h->entity->Get_Scene() == activeScene ||
+			h->active && h->entity->Get_Scene() == 0)
 		{
-			// You're dead.
-			h->dead = true;
+			if (h->health <= 0.0f)
+			{
+				// You're dead.
+				h->dead = true;
 
-			h->active = false;
-			ECS::main.AddDeadEntity(h->entity);
+				h->active = false;
+				ECS::main.AddDeadEntity(h->entity);
+			}
 		}
 	}
 }
@@ -2165,13 +2182,14 @@ void HealthSystem::PurgeEntity(Entity* e)
 
 #pragma region Duelist System
 
-void DuellingSystem::Update(float deltaTime)
+void DuellingSystem::Update(int activeScene, float deltaTime)
 {
 	for (int i = 0; i < duels.size(); i++)
 	{
 		DuelistComponent* d = duels[i];
 
-		if (d->active)
+		if (d->active && d->entity->Get_Scene() == activeScene ||
+			d->active && d->entity->Get_Scene() == 0)
 		{
 			if (d->isAttacking)
 			{
@@ -2226,7 +2244,7 @@ void DuellingSystem::PurgeEntity(Entity* e)
 
 #pragma region Particle System
 
-void ParticleSystem::Update(float deltaTime)
+void ParticleSystem::Update(int activeScene, float deltaTime)
 {
 	float screenLeft = (Game::main.camX - (Game::main.windowWidth * Game::main.zoom / 1.0f));
 	float screenRight = (Game::main.camX + (Game::main.windowWidth * Game::main.zoom / 1.0f));
@@ -2238,7 +2256,8 @@ void ParticleSystem::Update(float deltaTime)
 	{
 		ParticleComponent* p = particles[i];
 
-		if (p->active)
+		if (p->active && p->entity->Get_Scene() == activeScene ||
+			p->active && p->entity->Get_Scene() == 0)
 		{
 			if (p->lastTick >= p->tickRate)
 			{
@@ -2284,13 +2303,14 @@ void ParticleSystem::PurgeEntity(Entity* e)
 
 #pragma region Damage System
 
-void DamageSystem::Update(float deltaTime)
+void DamageSystem::Update(int activeScene, float deltaTime)
 {
 	for (int i = 0; i < damagers.size(); i++)
 	{
 		DamageComponent* d = damagers[i];
 
-		if (d->active)
+		if (d->active && d->entity->Get_Scene() == activeScene ||
+			d->active && d->entity->Get_Scene() == 0)
 		{
 			if (d->hasLifetime && d->lifetime < 0.0f)
 			{

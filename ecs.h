@@ -19,7 +19,7 @@ public:
 	System* system;
 	int componentID;
 
-	void Update(float deltaTime);
+	void Update(int activeScene, float deltaTime);
 	void AddComponent(Component* c);
 	void PurgeEntity(Entity* e);
 	ComponentBlock(System* system, int componentID);
@@ -33,6 +33,7 @@ private:
 
 public:
 	static ECS main;
+	int activeScene;
 	vector<Entity*> entities;
 	vector<Entity*> dyingEntities;
 

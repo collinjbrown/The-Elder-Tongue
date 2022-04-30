@@ -45,7 +45,7 @@ struct Collision
 class System
 {
 public:
-	virtual void Update(float deltaTime) = 0;
+	virtual void Update(int activeScene, float deltaTime) = 0;
 	virtual void AddComponent(Component* component) = 0;
 	virtual void PurgeEntity(Entity* e) = 0;
 };
@@ -55,7 +55,7 @@ class StaticRenderingSystem : public System
 public:
 	vector<StaticSpriteComponent*> sprites;
 
-	void Update(float deltaTime);
+	void Update(int activeScene, float deltaTime);
 
 	void AddComponent(Component* component);
 
@@ -67,7 +67,7 @@ class PhysicsSystem : public System
 public:
 	vector<PhysicsComponent*> phys;
 
-	void Update(float deltaTime);
+	void Update(int activeScene, float deltaTime);
 
 	void AddComponent(Component* component);
 
@@ -79,7 +79,7 @@ class PositionSystem : public System
 public:
 	vector<PositionComponent*> pos;
 
-	void Update(float deltaTime);
+	void Update(int activeScene, float deltaTime);
 
 	void AddComponent(Component* component);
 
@@ -90,7 +90,7 @@ class ColliderSystem : public System
 {
 	vector<ColliderComponent*> colls;
 
-	void Update(float deltaTime);
+	void Update(int activeScene, float deltaTime);
 
 	bool RaycastDown(float size, float distance, ColliderComponent* colA, PositionComponent* posA, ColliderComponent* colB, PositionComponent* posB);
 
@@ -116,7 +116,7 @@ class InputSystem : public System
 public:
 	vector<InputComponent*> move;
 
-	void Update(float deltaTime);
+	void Update(int activeScene, float deltaTime);
 
 	void CalculateProjection(PhysicsComponent* phys, InputComponent* m, MovementComponent* move);
 
@@ -130,7 +130,7 @@ class CameraFollowSystem : public System
 public:
 	vector<CameraFollowComponent*> folls;
 
-	void Update(float deltaTime);
+	void Update(int activeScene, float deltaTime);
 
 	float Lerp(float a, float b, float t);
 
@@ -144,7 +144,7 @@ class AnimationControllerSystem : public System
 public:
 	vector<AnimationControllerComponent*> controllers;
 
-	void Update(float deltaTime);
+	void Update(int activeScene, float deltaTime);
 
 	void AddComponent(Component* component);
 
@@ -156,7 +156,7 @@ class AnimationSystem : public System
 public:
 	vector<AnimationComponent*> anims;
 
-	void Update(float deltaTime);
+	void Update(int activeScene, float deltaTime);
 
 	void AddComponent(Component* component);
 
@@ -168,7 +168,7 @@ class HealthSystem : public System
 public:
 	vector<HealthComponent*> healths;
 
-	void Update(float deltaTime);
+	void Update(int activeScene, float deltaTime);
 
 	void AddComponent(Component* component);
 
@@ -180,7 +180,7 @@ class DuellingSystem : public System
 public:
 	vector<DuelistComponent*> duels;
 
-	void Update(float deltaTime);
+	void Update(int activeScene, float deltaTime);
 
 	void AddComponent(Component* component);
 
@@ -192,7 +192,7 @@ class ParticleSystem : public System
 public:
 	vector<ParticleComponent*> particles;
 
-	void Update(float deltaTime);
+	void Update(int activeScene, float deltaTime);
 
 	void AddComponent(Component* component);
 
@@ -204,7 +204,7 @@ class DamageSystem : public System
 public:
 	vector<DamageComponent*> damagers;
 
-	void Update(float deltaTime);
+	void Update(int activeScene, float deltaTime);
 
 	void AddComponent(Component* component);
 
