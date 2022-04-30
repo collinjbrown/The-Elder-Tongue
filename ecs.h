@@ -41,7 +41,7 @@ public:
 	uint32_t GetID();
 	void Init();
 	void Update(float deltaTime);
-	Entity* CreateEntity(std::string name);
+	Entity* CreateEntity(int scene, std::string name);
 	void DeleteEntity(Entity* e);
 	void AddDeadEntity(Entity* e);
 	void PurgeDeadEntities();

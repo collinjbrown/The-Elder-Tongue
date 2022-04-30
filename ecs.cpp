@@ -117,14 +117,17 @@ bool RayOverlapRect(glm::vec2 rayOrigin, glm::vec2 rayDir, glm::vec2 rectCenter,
 #pragma region Entities
 
 int Entity::Get_ID() { return ID; }
+int Entity::Get_Scene() { return scene; }
 std::string Entity::Get_Name() { return name; }
 
 void Entity::Set_ID(int newID) { ID = newID; }
+void Entity::Set_Scene(int newScene) { scene = newScene; }
 void Entity::Set_Name(std::string newName) { name = newName; }
 
-Entity:: Entity(int ID, std::string name)
+Entity:: Entity(int ID, int scene, std::string name)
 {
 	this->ID = ID;
+	this->scene = scene;
 	this->name = name;
 };
 
@@ -217,7 +220,7 @@ void ECS::Update(float deltaTime)
 	if (round == 1)
 	{
 		#pragma region Player Instantiation
-		Entity* player = CreateEntity("The Player");
+		Entity* player = CreateEntity(0, "The Player");
 		Animation2D* anim1 = Game::main.animationMap["baseIdle"];
 
 		ECS::main.RegisterComponent(new PositionComponent(player, true, false, 0, 100, 0.0f), player);
@@ -269,7 +272,7 @@ void ECS::Update(float deltaTime)
 		//#pragma endregion
 
 		Texture2D* tex1000 = Game::main.textureMap["wall"];
-		Entity* wall = CreateEntity("wall");
+		Entity* wall = CreateEntity(0, "wall");
 		ECS::main.RegisterComponent(new PositionComponent(wall, true, true, 0, 0, 0), wall);
 		ECS::main.RegisterComponent(new StaticSpriteComponent(wall, true, (PositionComponent*)wall->componentIDMap[positionComponentID], 50000.0f, 50000.0f, tex1000, true), wall);
 
@@ -280,7 +283,7 @@ void ECS::Update(float deltaTime)
 			float width = rand() % 1000 + 300;
 			float height = rand() % 1000 + 300;
 
-			Entity* platform = CreateEntity("floor");
+			Entity* platform = CreateEntity(0, "floor");
 			ECS::main.RegisterComponent(new PositionComponent(platform, true, true, rand() % 5000, rand() % 5000, 0), platform);
 			ECS::main.RegisterComponent(new PhysicsComponent(platform, true, (PositionComponent*)platform->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 0.1f, 0.0f), platform);
 			ECS::main.RegisterComponent(new ColliderComponent(platform, true, (PositionComponent*)platform->componentIDMap[positionComponentID], true, false, true, false, false, false, EntityClass::object, 1000.0f, 0.0f, 1.0f, width, height, 0.0f, 0.0f), platform);
@@ -289,13 +292,13 @@ void ECS::Update(float deltaTime)
 
 		for (int i = 0; i < 50; i++)
 		{
-			Entity* floor = CreateEntity("floor");
+			Entity* floor = CreateEntity(0, "floor");
 			ECS::main.RegisterComponent(new PositionComponent(floor, true, true, i * 500, -200, 0.0f), floor);
 			ECS::main.RegisterComponent(new PhysicsComponent(floor, true, (PositionComponent*)floor->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 0.1f, 0.0f), floor);
 			ECS::main.RegisterComponent(new ColliderComponent(floor, true, (PositionComponent*)floor->componentIDMap[positionComponentID], true, false, true, false, false, false, EntityClass::object, 1000.0f, 0.0f, 1.0f, 540.0f, 80.0f, 0.0f, 0.0f), floor);
 			ECS::main.RegisterComponent(new StaticSpriteComponent(floor, true, (PositionComponent*)floor->componentIDMap[positionComponentID], 540.0f, 80.0f, tex3, false), floor);
 
-			Entity* earth = CreateEntity("floor");
+			Entity* earth = CreateEntity(0, "floor");
 			ECS::main.RegisterComponent(new PositionComponent(earth, true, true, i * 500, -1000, 0.0f), earth);
 			ECS::main.RegisterComponent(new StaticSpriteComponent(earth, true, (PositionComponent*)earth->componentIDMap[positionComponentID], tex3->width * 35, tex3->height * 100.0f, tex3, false), earth);
 		}
@@ -332,9 +335,9 @@ void ECS::PurgeDeadEntities()
 	}
 }
 
-Entity* ECS::CreateEntity(std::string name)
+Entity* ECS::CreateEntity(int scene, std::string name)
 {
-	Entity* e = new Entity(GetID(), name);
+	Entity* e = new Entity(GetID(), scene, name);
 	return e;
 }
 
@@ -1543,7 +1546,7 @@ void InputSystem::Update(float deltaTime)
 						Texture2D* s = Game::main.textureMap["aether_bullet"];
 						m->lastProjectile = 0.0f;
 
-						Entity* projectile = ECS::main.CreateEntity("Bullet");
+						Entity* projectile = ECS::main.CreateEntity(0, "Bullet");
 
 						ECS::main.RegisterComponent(new PositionComponent(projectile, true, false, phys->pos->x, phys->pos->y, 0.0f), projectile);
 						ECS::main.RegisterComponent(new PhysicsComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], projVel.x, projVel.y, 0.0f, 0.0f, 0.0f), projectile);
@@ -1610,7 +1613,7 @@ void InputSystem::Update(float deltaTime)
 						Texture2D* s = Game::main.textureMap["slash_baseAerialOne"];
 						m->lastProjectile = 0.0f;
 
-						Entity* projectile = ECS::main.CreateEntity("Slash");
+						Entity* projectile = ECS::main.CreateEntity(0, "Slash");
 						Animation2D* anim1 = Game::main.animationMap["slash_baseAerialOne"];
 
 						ECS::main.RegisterComponent(new PositionComponent(projectile, true, false, phys->pos->x, phys->pos->y, 0.0f), projectile);

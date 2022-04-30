@@ -28,6 +28,7 @@ class Entity
 private:
     // Basic Info
     int ID;
+    int scene;
     std::string name;
 
 public:
@@ -36,12 +37,14 @@ public:
     std::vector<Component*> components;
 
     int         Get_ID();
+    int         Get_Scene();
     std::string Get_Name();
 
     void        Set_ID(int newID);
+    void        Set_Scene(int newScene);
     void        Set_Name(std::string newName);
 
-    Entity(int ID, std::string name);
+    Entity(int ID, int scene, std::string name);
 
     Entity() {};
 };
