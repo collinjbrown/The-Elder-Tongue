@@ -5,6 +5,7 @@
 #include "system.h"
 #include "component.h"
 #include "entity.h"
+#include <algorithm>
 
 #pragma region Math
 
@@ -103,10 +104,10 @@ bool RayOverlapRect(glm::vec2 rayOrigin, glm::vec2 rayDir, glm::vec2 rectCenter,
 		}
 	}
 
-	Texture2D* t = Game::main.textureMap["blank"];
+	/*Texture2D* t = Game::main.textureMap["blank"];
 	Game::main.renderer->prepareQuad(contactPoint, t->width, t->height, glm::vec4(0.0f, 1.0f, 0.0f, 1.0f), t->ID);
 	Game::main.renderer->prepareQuad(contactPoint + contactNormal, t->width / 2.0f, t->height * 2.0f, glm::vec4(0.0f, 0.0f, 1.0f, 1.0f), t->ID);
-	Game::main.renderer->prepareQuad(rayOrigin + rayDir, t->width / 2.0f, t->height / 2.0f, glm::vec4(0.0f, 1.0f, 1.0f, 1.0f), t->ID);
+	Game::main.renderer->prepareQuad(rayOrigin + rayDir, t->width / 2.0f, t->height / 2.0f, glm::vec4(0.0f, 1.0f, 1.0f, 1.0f), t->ID);*/
 
 	return true;
 }
@@ -220,8 +221,8 @@ void ECS::Update(float deltaTime)
 		Animation2D* anim1 = Game::main.animationMap["baseIdle"];
 
 		ECS::main.RegisterComponent(new PositionComponent(player, true, false, 0, 100, 0.0f), player);
-		ECS::main.RegisterComponent(new PhysicsComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 2000.0f, 2000.0f), player);
-		ECS::main.RegisterComponent(new ColliderComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], false, false, false, false, true, false, EntityClass::player, 1.0f, 1.0f, 1.0f, 40.0f, 120.0f, 0.0f, 0.0f), player);
+		ECS::main.RegisterComponent(new PhysicsComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 5000.0f, 2000.0f), player);
+		ECS::main.RegisterComponent(new ColliderComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], false, false, false, false, true, false, EntityClass::player, 1.0f, 1.0f, 10.0f, 40.0f, 120.0f, 0.0f, 0.0f), player);
 		ECS::main.RegisterComponent(new MovementComponent(player, true, 4000.0f, 800.0f, 2.5f, 100.0f, 0.1f, true, true, false), player);
 		ECS::main.RegisterComponent(new InputComponent(player, true, true, 0.5f, 5000, 0.5f, 2, 0.5f, 2.0f, 2000.0f), player);
 		ECS::main.RegisterComponent(new CameraFollowComponent(player, true, 10.0f), player);
@@ -892,35 +893,14 @@ void ColliderSystem::Update(float deltaTime)
 
 		if (cA->active)
 		{
-
-			bool keepVelocityClimbing = true;
-
-			if (cA->entity->componentIDMap[movementComponentID] != nullptr)
-			{
-				MovementComponent* moveA = (MovementComponent*)cA->entity->componentIDMap[movementComponentID];
-
-				if (moveA->climbing)
-				{
-					keepVelocityClimbing = true;
-				}
-				else
-				{
-					keepVelocityClimbing = false;
-				}
-			}
-
 			PositionComponent* posA = cA->pos;
 			PhysicsComponent* physA = (PhysicsComponent*)cA->entity->componentIDMap[physicsComponentID];
 
-			//Texture2D* t = Game::main.textureMap["test"];
-			//Game::main.renderer->prepareQuad(posA, cA->width, cA->height, t->width, t->height, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), Game::main.textureMap["blank"]->ID, false);
+			/*Texture2D* t = Game::main.textureMap["test"];
+			Game::main.renderer->prepareQuad(posA, cA->width, cA->height, t->width, t->height, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), Game::main.textureMap["blank"]->ID, false);
+			Game::main.renderer->prepareQuad(posA, cA->width * 0.8f, cA->height * 0.8f, t->width, t->height, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), Game::main.textureMap["blank"]->ID, false);*/
 
-			/*float tentativeADX = (physA->velocityX - physA->drag) * deltaTime;
-			float tentativeADY = ((physA->velocityY - physA->drag) + (physA->gravityMod * deltaTime)) * deltaTime;*/
-
-			// Right now, the game can support as many colliders as we realistically need.
-			// But it can't support a ton. It'll run fairly well at a couple hundred colliders
-			// so I'm not really worried about that.
+			std::vector<std::pair<Collision*, float>> z;
 
 			for (int j = 0; j < colls.size(); j++)
 			{
@@ -932,9 +912,9 @@ void ColliderSystem::Update(float deltaTime)
 					PhysicsComponent* physB = (PhysicsComponent*)cB->entity->componentIDMap[physicsComponentID];
 
 					// Two static objects shouldn't be able to collide because they won't be able to resolve that collision.
-					if (cA->trigger || cB->trigger)
+					if (cA->trigger)
 					{
-						if (TestCollision(cA, posA, physA, cB, posB, physB))
+						if (ArbitraryRectangleCollision(cA, posA, physA, cB, posB, physB, deltaTime) != nullptr)
 						{
 							if (cA->trigger && cA->doesDamage)
 							{
@@ -999,43 +979,73 @@ void ColliderSystem::Update(float deltaTime)
 					}
 					else if (!cA->platform)
 					{
-						if (ArbitraryRectangleCollision(cA, posA, physA, cB, posB, physB, deltaTime))
+						glm::vec2 contactPoint, contactNormal;
+						float time;
+
+						Collision* c = ArbitraryRectangleCollision(cA, posA, physA, cB, posB, physB, deltaTime);
+
+						if (c != nullptr)
 						{
 							cA->collidedLastTick = true;
 							cB->collidedLastTick = true;
 
-							if (cB->platform)
+							z.push_back(std::pair(c, c->time));
+						}
+					}
+				}
+			}
+
+			// Sort the collisions for distance.
+			std::sort(z.begin(), z.end(), [](const std::pair<Collision*, float>& a, const std::pair<Collision*, float>& b)
+				{
+					return a.second < b.second;
+				});
+
+			// Resolve all the collisions we just made.
+			for (auto j : z)
+			{
+				ColliderComponent* cB = j.first->colB;
+				PositionComponent* posB = (PositionComponent*)cB->entity->componentIDMap[positionComponentID];
+				PhysicsComponent* physB = (PhysicsComponent*)cB->entity->componentIDMap[physicsComponentID];
+
+				Collision* c = ArbitraryRectangleCollision(cA, posA, physA, cB, posB, physB, deltaTime);
+
+				if (c != nullptr)
+				{
+					glm::vec2 vMod = c->contactNormal * glm::vec2(abs(physA->velocityX), abs(physA->velocityY)) * (1.0f - c->time);
+
+					glm::vec2 velAdd = glm::vec2(physA->velocityX, physA->velocityY) + vMod;
+					physA->velocityX = velAdd.x;
+					physA->velocityY = velAdd.y;
+
+					if (cB->platform && c->contactNormal.x == 0 && c->contactNormal.y == 1)
+					{
+						cA->onPlatform = true;
+					}
+
+					if (cB->climbable && c->contactNormal.x != 0 && cA->entity->componentIDMap[movementComponentID] != nullptr)
+					{
+						MovementComponent* moveA = (MovementComponent*)cA->entity->componentIDMap[movementComponentID];
+
+						if (moveA->canClimb && moveA->shouldClimb)
+						{
+							if (!moveA->climbing)
 							{
-								cA->onPlatform = true;
+								// If you just started climbing, stop all other velocity.
+								std::cout << "Fuck\n";
+								physA->velocityX = 0;
+								physA->velocityY = 0;
+
+								moveA->maxClimbHeight = cB->pos->y + (cB->height / 2.0f);
+								moveA->minClimbHeight = cB->pos->y - (cB->height / 2.0f);
 							}
 
-							float aBot = (posA->y + cA->offsetY) - (cA->width / 2.0f);
-							float aTop = (posA->y + cA->offsetY) + (cA->width / 2.0f);
-							float bBot = (posB->y + cB->offsetY) - (cB->width / 2.0f);
-							float bTop = (posB->y + cB->offsetY) + (cB->width / 2.0f);
-
-							if (cB->climbable && aTop > bBot && aBot < bTop && cA->entity->componentIDMap[movementComponentID] != nullptr)
-							{
-								MovementComponent* moveA = (MovementComponent*)cA->entity->componentIDMap[movementComponentID];
-
-								if (moveA->canClimb && moveA->shouldClimb)
-								{
-									if (!keepVelocityClimbing)
-									{
-										// If you just started climbing, stop all other velocity.
-										physA->velocityX = 0;
-										physA->velocityY = 0;
-									}
-
-									moveA->maxClimbHeight = bTop;
-									moveA->minClimbHeight = bBot;
-									moveA->climbing = true;
-								}
-							} // Bin gar keine Russin, stamm’ aus Litauen, echt deutsch.
-						} // And when we were children, staying at the arch-duke's,
-					} // My cousin's, he took me out on a sled,
-				} // And I was frightened. He said, Marie,
-			} // Marie, hold on tight. And down we went.
+							moveA->climbing = true;
+						}	// Bin gar keine Russin, stamm’ aus Litauen, echt deutsch.
+					}	// And when we were children, staying at the arch-duke's,
+				}	// My cousin's, he took me out on a sled,
+			}	// And I was frightened. He said, Marie,
+			 // Marie, hold on tight. And down we went.
 		} // In the mountains, there you feel free.
 	} // I read, much of the night,
 } // and go south in the winter.
@@ -1417,11 +1427,8 @@ bool ColliderSystem::TestAndResolveCollision(ColliderComponent* colA, PositionCo
 	return collided;
 }
 
-bool ColliderSystem::ArbitraryRectangleCollision(ColliderComponent* colA, PositionComponent* posA, PhysicsComponent* physA, ColliderComponent* colB, PositionComponent* posB, PhysicsComponent* physB, float deltaTime)
+Collision* ColliderSystem::ArbitraryRectangleCollision(ColliderComponent* colA, PositionComponent* posA, PhysicsComponent* physA, ColliderComponent* colB, PositionComponent* posB, PhysicsComponent* physB, float deltaTime)
 {
-	/*bool RayOverlapRect(glm::vec2 rayOrigin, glm::vec2 rayDir, glm::vec2 rectCenter, float rWidth, float rHeight,
-		glm::vec2 & contactPoint, glm::vec2 & contactNormal, float& tHitNear)*/
-
 	glm::vec2 rayOrigin = glm::vec2(posA->x, posA->y);
 	glm::vec2 rayDir = glm::vec2(physA->velocityX, physA->velocityY);
 
@@ -1435,21 +1442,13 @@ bool ColliderSystem::ArbitraryRectangleCollision(ColliderComponent* colA, Positi
 
 	if (RayOverlapRect(rayOrigin, rayDir * deltaTime, rectPos, rectWidth, rectHeight, contactPoint, contactNormal, time))
 	{
-		// std::cout << std::to_string(time) + "\n";
-		if (time <= 1.0f && time >= 0.0f)
+		if (time < 1.0f && time >= 0.0f)
 		{
-			glm::vec2 vMod = contactNormal * glm::vec2(abs(physA->velocityX), abs(physA->velocityY)) * (1.0f - time);
-			// std::cout << std::to_string(physA->velocityY) + " : " + std::to_string(vMod.y) + "\n";
-
-			glm::vec2 velAdd = glm::vec2(physA->velocityX, physA->velocityY) + vMod;
-			physA->velocityX = velAdd.x;
-			physA->velocityY = velAdd.y;
-
-			return true;
+			return new Collision(contactPoint, contactNormal, time, colB);
 		}
 	}
 
-	return false;
+	return nullptr;
 }
 
 float ColliderSystem::Dot(glm::vec2 a, glm::vec2 b)
@@ -1968,11 +1967,11 @@ void AnimationControllerSystem::Update(float deltaTime)
 						c->animator->SetAnimation(s + "jumpDown");
 					}
 				}
-				else if (abs(p->velocityX) > 10.0f && col->onPlatform && move->canMove && c->animator->activeAnimation != s + "walk")
+				else if (abs(p->velocityX) > 100.0f && col->onPlatform && move->canMove && c->animator->activeAnimation != s + "walk")
 				{
 					c->animator->SetAnimation(s + "walk");
 				}
-				else if (abs(p->velocityX) < 10.0f && col->onPlatform && move->canMove && c->animator->activeAnimation != s + "idle")
+				else if (abs(p->velocityX) < 100.0f && col->onPlatform && move->canMove && c->animator->activeAnimation != s + "idle")
 				{
 					c->animator->SetAnimation(s + "idle");
 				}

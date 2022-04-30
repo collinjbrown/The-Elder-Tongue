@@ -25,6 +25,23 @@ class DamageComponent;
 class ParticleComponent;
 class Entity;
 
+struct Collision
+{
+	glm::vec2 contactPoint;
+	glm::vec2 contactNormal;
+	float time;
+
+	ColliderComponent* colB;
+
+	Collision(glm::vec2 contactPoint, glm::vec2 contactNormal, float time, ColliderComponent* colB)
+	{
+		this->contactPoint = contactPoint;
+		this->contactNormal = contactNormal;
+		this->time = time;
+		this->colB = colB;
+	}
+};
+
 class System
 {
 public:
@@ -81,7 +98,7 @@ class ColliderSystem : public System
 
 	bool TestAndResolveCollision(ColliderComponent* colA, PositionComponent* posA, PhysicsComponent* physA, ColliderComponent* colB, PositionComponent* posB, PhysicsComponent* physB, float deltaTime);
 
-	bool ArbitraryRectangleCollision(ColliderComponent* colA, PositionComponent* posA, PhysicsComponent* physA, ColliderComponent* colB, PositionComponent* posB, PhysicsComponent* physB, float deltaTime);
+	Collision* ArbitraryRectangleCollision(ColliderComponent* colA, PositionComponent* posA, PhysicsComponent* physA, ColliderComponent* colB, PositionComponent* posB, PhysicsComponent* physB, float deltaTime);
 
 	float Dot(glm::vec2 a, glm::vec2 b);
 
