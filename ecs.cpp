@@ -1013,51 +1013,12 @@ void ColliderSystem::Update(int activeScene, float deltaTime)
 					PositionComponent* posB = (PositionComponent*)cB->entity->componentIDMap[positionComponentID];
 					PhysicsComponent* physB = (PhysicsComponent*)cB->entity->componentIDMap[physicsComponentID];
 
-					// Two static objects shouldn't be able to collide because they won't be able to resolve that collision.
-					if (cA->trigger)
-					{
-						/*if (cB->trigger && cB->doesDamage)
-						{
-							DamageComponent* bDamage = (DamageComponent*)cB->entity->componentIDMap[damageComponentID];
-
-							if (bDamage->creator != cA->entity)
-							{
-								if (cA->takesDamage)
-								{
-									if (cA->entityClass == EntityClass::player && bDamage->damagesPlayers ||
-										cA->entityClass == EntityClass::enemy && bDamage->damagesEnemies ||
-										cA->entityClass == EntityClass::object && bDamage->damagesObjects)
-									{
-										HealthComponent* aHealth = (HealthComponent*)cA->entity->componentIDMap[healthComponentID];
-										aHealth->health -= bDamage->damage;
-										bDamage->uses -= 1;
-									}
-								}
-								else
-								{
-									bDamage->uses -= 1;
-								}
-
-								if (bDamage->uses <= 0)
-								{
-									cB->active = false;
-
-									if (!bDamage->showAfterUses)
-									{
-										ECS::main.AddDeadEntity(bDamage->entity);
-									}
-								}
-
-								bDamage->lifetime -= deltaTime;
-							}
-						}*/
-					}
-					else if (!cA->platform)
+					if (!cA->platform)
 					{
 						glm::vec2 contactPoint, contactNormal;
 						float time;
 
-						Collision* c = ArbitraryRectangleCollision(cA, posA, physA, cB, posB, physB, deltaTime);
+						Collision* c = DynamicArbitraryRectangleCollision(cA, posA, physA, cB, posB, physB, deltaTime);
 
 						if (c != nullptr)
 						{
@@ -1083,15 +1044,19 @@ void ColliderSystem::Update(int activeScene, float deltaTime)
 				PositionComponent* posB = (PositionComponent*)cB->entity->componentIDMap[positionComponentID];
 				PhysicsComponent* physB = (PhysicsComponent*)cB->entity->componentIDMap[physicsComponentID];
 
-				Collision* c = ArbitraryRectangleCollision(cA, posA, physA, cB, posB, physB, deltaTime);
+				Collision* c = nullptr;
+				c = DynamicArbitraryRectangleCollision(cA, posA, physA, cB, posB, physB, deltaTime);
 
 				if (c != nullptr)
 				{
-					glm::vec2 vMod = c->contactNormal * glm::vec2(abs(physA->velocityX), abs(physA->velocityY)) * (1.0f - c->time);
+					if (c->resolve)
+					{
+						glm::vec2 vMod = c->contactNormal * glm::vec2(abs(physA->velocityX), abs(physA->velocityY)) * (1.0f - c->time);
 
-					glm::vec2 velAdd = glm::vec2(physA->velocityX, physA->velocityY) + vMod;
-					physA->velocityX = velAdd.x;
-					physA->velocityY = velAdd.y;
+						glm::vec2 velAdd = glm::vec2(physA->velocityX, physA->velocityY) + vMod;
+						physA->velocityX = velAdd.x;
+						physA->velocityY = velAdd.y;
+					}
 
 					if (cB->platform && c->contactNormal.y == 1)
 					{
@@ -1115,6 +1080,42 @@ void ColliderSystem::Update(int activeScene, float deltaTime)
 							}
 
 							moveA->climbing = true;
+						}
+					}
+
+					if (cB->trigger && cB->doesDamage)
+					{
+						DamageComponent* bDamage = (DamageComponent*)cB->entity->componentIDMap[damageComponentID];
+
+						if (bDamage->creator != cA->entity)
+						{
+							if (cA->takesDamage)
+							{
+								if (cA->entityClass == EntityClass::player && bDamage->damagesPlayers ||
+									cA->entityClass == EntityClass::enemy && bDamage->damagesEnemies ||
+									cA->entityClass == EntityClass::object && bDamage->damagesObjects)
+								{
+									HealthComponent* aHealth = (HealthComponent*)cA->entity->componentIDMap[healthComponentID];
+									aHealth->health -= bDamage->damage;
+									bDamage->uses -= 1;
+								}
+							}
+							else
+							{
+								bDamage->uses -= 1;
+							}
+
+							if (bDamage->uses <= 0)
+							{
+								cB->active = false;
+
+								if (!bDamage->showAfterUses)
+								{
+									ECS::main.AddDeadEntity(bDamage->entity);
+								}
+							}
+
+							bDamage->lifetime -= deltaTime;
 						}	// Bin gar keine Russin, stamm’ aus Litauen, echt deutsch.
 					}	// And when we were children, staying at the arch-duke's,
 				}	// My cousin's, he took me out on a sled,
@@ -1542,7 +1543,32 @@ Collision* ColliderSystem::ArbitraryRectangleCollision(ColliderComponent* colA, 
 	{
 		if (time < 1.0f && time >= 0.0f)
 		{
-			return new Collision(contactPoint, contactNormal, time, colB);
+			return new Collision(contactPoint, contactNormal, time, colB, (!colA->trigger && !colB->trigger));
+		}
+	}
+
+	return nullptr;
+}
+
+Collision* ColliderSystem::DynamicArbitraryRectangleCollision(ColliderComponent* colA, PositionComponent* posA, PhysicsComponent* physA, ColliderComponent* colB, PositionComponent* posB, PhysicsComponent* physB, float deltaTime)
+{
+
+	glm::vec2 rayOrigin = glm::vec2(posA->x, posA->y);
+	glm::vec2 rayDir =  glm::vec2(physA->velocityX, physA->velocityY) - glm::vec2(physB->velocityX, physB->velocityY);
+
+	glm::vec2 rectPos = glm::vec2(posB->x + colB->offsetX, posB->y + colB->offsetY);
+	float rectWidth = colB->width + colA->width;
+	float rectHeight = colB->height + colA->height;
+
+	glm::vec2 contactPoint = glm::vec2(0, 0);
+	glm::vec2 contactNormal = glm::vec2(0, 0);
+	float time = 0.0f;
+
+	if (RayOverlapRect(rayOrigin, rayDir * deltaTime, rectPos, rectWidth, rectHeight, contactPoint, contactNormal, time))
+	{
+		if (time < 1.0f && time >= 0.0f)
+		{
+			return new Collision(contactPoint, contactNormal, time, colB, (!colA->trigger && !colB->trigger));
 		}
 	}
 

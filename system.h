@@ -32,14 +32,17 @@ struct Collision
 	glm::vec2 contactNormal;
 	float time;
 
+	bool resolve;
+
 	ColliderComponent* colB;
 
-	Collision(glm::vec2 contactPoint, glm::vec2 contactNormal, float time, ColliderComponent* colB)
+	Collision(glm::vec2 contactPoint, glm::vec2 contactNormal, float time, ColliderComponent* colB, bool resolve)
 	{
 		this->contactPoint = contactPoint;
 		this->contactNormal = contactNormal;
 		this->time = time;
 		this->colB = colB;
+		this->resolve = resolve;
 	}
 };
 
@@ -100,6 +103,8 @@ class ColliderSystem : public System
 	bool TestAndResolveCollision(ColliderComponent* colA, PositionComponent* posA, PhysicsComponent* physA, ColliderComponent* colB, PositionComponent* posB, PhysicsComponent* physB, float deltaTime);
 
 	Collision* ArbitraryRectangleCollision(ColliderComponent* colA, PositionComponent* posA, PhysicsComponent* physA, ColliderComponent* colB, PositionComponent* posB, PhysicsComponent* physB, float deltaTime);
+
+	Collision* DynamicArbitraryRectangleCollision(ColliderComponent* colA, PositionComponent* posA, PhysicsComponent* physA, ColliderComponent* colB, PositionComponent* posB, PhysicsComponent* physB, float deltaTime);
 
 	float Dot(glm::vec2 a, glm::vec2 b);
 
