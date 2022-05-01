@@ -234,11 +234,11 @@ void ECS::Update(float deltaTime)
 		Texture2D* t = Game::main.textureMap["blank"];
 		Entity* soul = CreateEntity(0, "Soul");
 		ECS::main.RegisterComponent(new PositionComponent(soul, true, false, -50.0f, 100.0f, 0.0f), soul);
-		ECS::main.RegisterComponent(new PhysicsComponent(soul, true, (PositionComponent*)soul->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 10000.0f, 0.0f), soul);
+		ECS::main.RegisterComponent(new PhysicsComponent(soul, true, (PositionComponent*)soul->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), soul);
 		// ECS::main.RegisterComponent(new ColliderComponent(enemy, true, (PositionComponent*)enemy->componentIDMap[positionComponentID], false, false, false, false, true, false, EntityClass::enemy, 1.0f, 1.0f, 10.0f, 40.0f, 120.0f, 0.0f, 0.0f), enemy);
 		// ECS::main.RegisterComponent(new HealthComponent(enemy, true, 100.0f, false), enemy);
 		ECS::main.RegisterComponent(new StaticSpriteComponent(soul, true, (PositionComponent*)soul->componentIDMap[positionComponentID], t->width, t->height, t, true), soul);
-		ECS::main.RegisterComponent(new AIComponent(soul, true, false, 0.0f, 0.0f, 2.0f, 0.0f, AIType::soul), soul);
+		ECS::main.RegisterComponent(new AIComponent(soul, true, false, 0.0f, 0.0f, 0.5f, 0.0f, AIType::soul), soul);
 
 		#pragma endregion
 
@@ -1742,8 +1742,9 @@ void InputSystem::Update(int activeScene, float deltaTime)
 						ECS::main.RegisterComponent(new PhysicsComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], projVel.x, projVel.y, 0.0f, 0.0f, 0.0f), projectile);
 						ECS::main.RegisterComponent(new ColliderComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], false, false, false, true, false, true, EntityClass::object, 1.0f, 0.0f, 0.0f, 5.0f, 5.0f, 0.0f, 0.0f), projectile);
 						ECS::main.RegisterComponent(new DamageComponent(projectile, true, move->entity, true, 20.0f, false, true, 1, 10.0f, false, true, true), projectile);
-						ECS::main.RegisterComponent(new StaticSpriteComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], s->width / 4.0f, s->height / 4.0f, s, false), projectile);
-						ECS::main.RegisterComponent(new ParticleComponent(projectile, true, 0.01f, 0.0f, 0.0f, 10, Element::aether, 5.0f, 20.0f), projectile);
+						ECS::main.RegisterComponent(new StaticSpriteComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], s->width, s->height, s, false), projectile);
+						// ECS::main.RegisterComponent(new ParticleComponent(projectile, true, 0.01f, 0.0f, 0.0f, 10, Element::aether, 5.0f, 20.0f), projectile);
+						ParticleEngine::main.AddParticles(25, projPos.x + (projVel.x * deltaTime), projPos.y + (projVel.y * deltaTime), Element::aether, rand() % 40 + 1);
 					}
 				}
 				else
@@ -2631,13 +2632,13 @@ void AISystem::Update(int activeScene, float deltaTime)
 					target = glm::vec2(posB->x + (colB->width), posB->y + (colB->height));
 				}
 
-				if (glm::length2(position - target) > 500.0f)
+				if (glm::length2(position - target) > 2000.0f)
 				{
 					glm::vec2 vel = -Normalize(position - lerp(position, target, deltaTime));
 					PhysicsComponent* physA = (PhysicsComponent*)a->entity->componentIDMap[physicsComponentID];
 
-					posA->x += vel.x;
-					posA->y += vel.y;
+					posA->x += vel.x * (1.0f / a->projectileSpeed);
+					posA->y += vel.y * (1.0f / a->projectileSpeed);
 
 					physA->velocityX += vel.x * a->projectileSpeed;
 					physA->velocityY += vel.y * a->projectileSpeed;
