@@ -260,9 +260,9 @@ void ECS::Update(float deltaTime)
 		ECS::main.RegisterComponent(new PositionComponent(enemy, true, false, -50.0f, 100.0f, 0.0f), enemy);
 		ECS::main.RegisterComponent(new PhysicsComponent(enemy, true, (PositionComponent*)enemy->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 5000.0f, 2000.0f), enemy);
 		ECS::main.RegisterComponent(new ColliderComponent(enemy, true, (PositionComponent*)enemy->componentIDMap[positionComponentID], false, false, false, false, true, false, EntityClass::enemy, 1.0f, 1.0f, 10.0f, 40.0f, 120.0f, 0.0f, 0.0f), enemy);
-		ECS::main.RegisterComponent(new HealthComponent(enemy, true, 1000.0f, false), enemy);
+		ECS::main.RegisterComponent(new HealthComponent(enemy, true, 100.0f, false), enemy);
 		ECS::main.RegisterComponent(new StaticSpriteComponent(enemy, true, (PositionComponent*)enemy->componentIDMap[positionComponentID], t->width, t->height, t, true), enemy);
-		ECS::main.RegisterComponent(new AIComponent(enemy, true, false, 400000.0f, 800000.0f, 100.0f, 5.0f, AIType::aerial), enemy);
+		ECS::main.RegisterComponent(new AIComponent(enemy, true, false, 1000000.0f, 2000000.0f, 300.0f, 1.5f, AIType::aerial), enemy);
 
 		#pragma endregion
 
@@ -1013,19 +1013,26 @@ void ColliderSystem::Update(int activeScene, float deltaTime)
 					PositionComponent* posB = (PositionComponent*)cB->entity->componentIDMap[positionComponentID];
 					PhysicsComponent* physB = (PhysicsComponent*)cB->entity->componentIDMap[physicsComponentID];
 
-					if (!cA->platform)
+					float combVel = glm::length2(glm::vec2(physA->velocityX + physB->velocityX, physA->velocityY + physB->velocityY));
+					float combSize = glm::length2(glm::vec2((cA->width + cB->width) / 2.0f, (cA->height + cB->height) / 2.0f));
+					float dist = glm::length2(glm::vec2(posA->x + cA->offsetX, posA->y + cA->offsetY) - glm::vec2(posB->x + cB->offsetX, posB->y + cB->offsetY));
+
+					if (dist <= combVel + combSize)
 					{
-						glm::vec2 contactPoint, contactNormal;
-						float time;
-
-						Collision* c = DynamicArbitraryRectangleCollision(cA, posA, physA, cB, posB, physB, deltaTime);
-
-						if (c != nullptr)
+						if (!cA->platform)
 						{
-							cA->collidedLastTick = true;
-							cB->collidedLastTick = true;
+							glm::vec2 contactPoint, contactNormal;
+							float time;
 
-							z.push_back(std::pair(c, c->time));
+							Collision* c = DynamicArbitraryRectangleCollision(cA, posA, physA, cB, posB, physB, deltaTime);
+
+							if (c != nullptr)
+							{
+								cA->collidedLastTick = true;
+								cB->collidedLastTick = true;
+
+								z.push_back(std::pair(c, c->time));
+							}
 						}
 					}
 				}
@@ -1083,6 +1090,41 @@ void ColliderSystem::Update(int activeScene, float deltaTime)
 						}
 					}
 
+					if (cA->trigger && cA->doesDamage)
+					{
+						DamageComponent* aDamage = (DamageComponent*)cA->entity->componentIDMap[damageComponentID];
+
+						if (aDamage->creator != cB->entity)
+						{
+							if (cB->takesDamage)
+							{
+								if (cB->entityClass == EntityClass::player && aDamage->damagesPlayers ||
+									cB->entityClass == EntityClass::enemy && aDamage->damagesEnemies ||
+									cB->entityClass == EntityClass::object && aDamage->damagesObjects)
+								{
+									HealthComponent* bHealth = (HealthComponent*)cB->entity->componentIDMap[healthComponentID];
+									bHealth->health -= aDamage->damage;
+									aDamage->uses -= 1;
+								}
+							}
+							else
+							{
+								aDamage->uses -= 1;
+							}
+
+							if (aDamage->uses <= 0)
+							{
+								cA->active = false;
+
+								if (!aDamage->showAfterUses)
+								{
+									ECS::main.AddDeadEntity(aDamage->entity);
+								}
+							}
+
+							aDamage->lifetime -= deltaTime;
+						}
+					}
 					if (cB->trigger && cB->doesDamage)
 					{
 						DamageComponent* bDamage = (DamageComponent*)cB->entity->componentIDMap[damageComponentID];
@@ -2532,8 +2574,8 @@ void AISystem::Update(int activeScene, float deltaTime)
 						ECS::main.RegisterComponent(new PositionComponent(projectile, true, false, posA->x, posA->y, 0.0f), projectile);
 						ECS::main.RegisterComponent(new PhysicsComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], vel.x, vel.y, 0.0f, 0.0f, 0.0f), projectile);
 						ECS::main.RegisterComponent(new ColliderComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], false, false, false, true, false, true, EntityClass::object, 1.0f, 0.0f, 0.0f, 5.0f, 5.0f, 0.0f, 0.0f), projectile);
-						ECS::main.RegisterComponent(new DamageComponent(projectile, true, a->entity, true, 20.0f, false, true, 1, 10.0f, true, true, true), projectile);
-						ECS::main.RegisterComponent(new StaticSpriteComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], s->width / 2.0f, s->height / 2.0f, s, false), projectile);
+						ECS::main.RegisterComponent(new DamageComponent(projectile, true, a->entity, true, 10.0f, false, true, 1, 10.0f, true, true, true), projectile);
+						ECS::main.RegisterComponent(new StaticSpriteComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], s->width, s->height, s, false), projectile);
 					}
 					else
 					{
