@@ -117,6 +117,10 @@ glm::vec2 lerp(glm::vec2 pos, glm::vec2 tar, float step)
 	return (pos * (1.0f - step) + (tar * step));
 }
 
+float Dot(glm::vec2 a, glm::vec2 b)
+{
+	return a.x * b.x + a.y * b.y;
+}
 #pragma endregion
 
 #pragma region Entities
@@ -2619,8 +2623,9 @@ void AISystem::Update(int activeScene, float deltaTime)
 				PositionComponent* posB = (PositionComponent*)player->componentIDMap[positionComponentID];
 				PhysicsComponent* physB = (PhysicsComponent*)player->componentIDMap[physicsComponentID];
 				ColliderComponent* colB = (ColliderComponent*)player->componentIDMap[colliderComponentID];
-
+				
 				glm::vec2 position = glm::vec2(posA->x, posA->y);
+				glm::vec2 mouse = glm::vec2(Game::main.mouseX, Game::main.mouseY);
 				glm::vec2 target;
 
 				if (physB->velocityX >= 0)
@@ -2632,6 +2637,11 @@ void AISystem::Update(int activeScene, float deltaTime)
 					target = glm::vec2(posB->x + (colB->width), posB->y + (colB->height));
 				}
 
+				// Look
+				float r = std::atan2(mouse.y - position.y, mouse.x - position.x) * (180 / M_PI);
+				posA->rotation = r;
+
+				// Move
 				if (glm::length2(position - target) > 2000.0f)
 				{
 					glm::vec2 vel = -Normalize(position - lerp(position, target, deltaTime));
