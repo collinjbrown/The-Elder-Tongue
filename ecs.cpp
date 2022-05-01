@@ -112,6 +112,10 @@ bool RayOverlapRect(glm::vec2 rayOrigin, glm::vec2 rayDir, glm::vec2 rectCenter,
 	return true;
 }
 
+glm::vec2 lerp(glm::vec2 pos, glm::vec2 tar, float step)
+{
+	return (pos * (1.0f - step) + (tar * step));
+}
 
 #pragma endregion
 
@@ -224,6 +228,20 @@ void ECS::Update(float deltaTime)
 
 	if (round == 1)
 	{
+
+		#pragma region Soul Instantiation
+
+		Texture2D* t = Game::main.textureMap["blank"];
+		Entity* soul = CreateEntity(0, "Soul");
+		ECS::main.RegisterComponent(new PositionComponent(soul, true, false, -50.0f, 100.0f, 0.0f), soul);
+		ECS::main.RegisterComponent(new PhysicsComponent(soul, true, (PositionComponent*)soul->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 10000.0f, 0.0f), soul);
+		// ECS::main.RegisterComponent(new ColliderComponent(enemy, true, (PositionComponent*)enemy->componentIDMap[positionComponentID], false, false, false, false, true, false, EntityClass::enemy, 1.0f, 1.0f, 10.0f, 40.0f, 120.0f, 0.0f, 0.0f), enemy);
+		// ECS::main.RegisterComponent(new HealthComponent(enemy, true, 100.0f, false), enemy);
+		ECS::main.RegisterComponent(new StaticSpriteComponent(soul, true, (PositionComponent*)soul->componentIDMap[positionComponentID], t->width, t->height, t, true), soul);
+		ECS::main.RegisterComponent(new AIComponent(soul, true, false, 0.0f, 0.0f, 2.0f, 0.0f, AIType::soul), soul);
+
+		#pragma endregion
+
 		#pragma region Player Instantiation
 		player = CreateEntity(0, "The Player");
 		Animation2D* anim1 = Game::main.animationMap["baseIdle"];
@@ -232,7 +250,7 @@ void ECS::Update(float deltaTime)
 		ECS::main.RegisterComponent(new PhysicsComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 5000.0f, 2000.0f), player);
 		ECS::main.RegisterComponent(new ColliderComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], false, false, false, false, true, false, EntityClass::player, 1.0f, 1.0f, 10.0f, 40.0f, 120.0f, 0.0f, 0.0f), player);
 		ECS::main.RegisterComponent(new MovementComponent(player, true, 6000.0f, 1000.0f, 2.5f, 100.0f, 0.1f, 0.5f, true, true, false), player);
-		ECS::main.RegisterComponent(new InputComponent(player, true, true, 0.5f, 5000.0f, 0.5f, 2, 0.5f, 2.0f, 2000.0f), player);
+		ECS::main.RegisterComponent(new InputComponent(player, true, soul, true, 0.5f, 5000.0f, 0.5f, 2, 0.5f, 2.0f, 2000.0f), player);
 		ECS::main.RegisterComponent(new CameraFollowComponent(player, true, 10.0f), player);
 		ECS::main.RegisterComponent(new HealthComponent(player, true, 1000.0f, false), player);
 		ECS::main.RegisterComponent(new DuelistComponent(player, true, true, true), player);
@@ -251,19 +269,6 @@ void ECS::Update(float deltaTime)
 		a->AddAnimation("sword_dead", Game::main.animationMap["baseDeath"]);
 		a->AddAnimation("sword_stab", Game::main.animationMap["sword_baseStab"]);
 		a->AddAnimation("sword_aerialOne", Game::main.animationMap["sword_baseAerialOne"]);
-		#pragma endregion
-
-		#pragma region Enemy Instantiation
-
-		Texture2D* t = Game::main.textureMap["blank"];
-		Entity* enemy = CreateEntity(0, "Enemy");
-		ECS::main.RegisterComponent(new PositionComponent(enemy, true, false, -50.0f, 100.0f, 0.0f), enemy);
-		ECS::main.RegisterComponent(new PhysicsComponent(enemy, true, (PositionComponent*)enemy->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 5000.0f, 2000.0f), enemy);
-		ECS::main.RegisterComponent(new ColliderComponent(enemy, true, (PositionComponent*)enemy->componentIDMap[positionComponentID], false, false, false, false, true, false, EntityClass::enemy, 1.0f, 1.0f, 10.0f, 40.0f, 120.0f, 0.0f, 0.0f), enemy);
-		ECS::main.RegisterComponent(new HealthComponent(enemy, true, 100.0f, false), enemy);
-		ECS::main.RegisterComponent(new StaticSpriteComponent(enemy, true, (PositionComponent*)enemy->componentIDMap[positionComponentID], t->width, t->height, t, true), enemy);
-		ECS::main.RegisterComponent(new AIComponent(enemy, true, false, 1000000.0f, 2000000.0f, 300.0f, 1.5f, AIType::aerial), enemy);
-
 		#pragma endregion
 
 		//#pragma region Test Character Instantiation
@@ -534,12 +539,13 @@ ColliderComponent::ColliderComponent(Entity* entity, bool active, PositionCompon
 
 #pragma region Input Component
 
-InputComponent::InputComponent(Entity* entity, bool active, bool acceptInput, float projectionDelay, float projectionDepth, float maxCoyoteTime, int maxJumps, float projectileDelay, float slashSpeed, float projectileSpeed)
+InputComponent::InputComponent(Entity* entity, bool active, Entity* soul, bool acceptInput, float projectionDelay, float projectionDepth, float maxCoyoteTime, int maxJumps, float projectileDelay, float slashSpeed, float projectileSpeed)
 {
 	this->ID = inputComponentID;
 	this->active = active;
 	this->entity = entity;
 
+	this->soul = soul;
 	this->acceptInput = acceptInput;
 	this->projectionDelay = projectionDelay;
 	this->projectionDepth = projectionDepth;
@@ -894,6 +900,24 @@ void PhysicsSystem::Update(int activeScene, float deltaTime)
 				}
 				else
 				{
+					if (p->velocityY > 0)
+					{
+						p->velocityY -= p->drag * deltaTime;
+					}
+					else if (p->velocityY < 0)
+					{
+						p->velocityY += p->drag * deltaTime;
+					}
+
+					if (p->rotVelocity > 0)
+					{
+						p->rotVelocity -= p->drag * deltaTime;
+					}
+					else if (p->rotVelocity < 0)
+					{
+						p->rotVelocity += p->drag * deltaTime;
+					}
+
 					p->velocityY -= p->gravityMod * deltaTime;
 				}
 
@@ -1701,7 +1725,9 @@ void InputSystem::Update(int activeScene, float deltaTime)
 					float screenTop = (Game::main.camY + (Game::main.windowHeight * Game::main.zoom / 1.0f));
 					float screenElev = Game::main.camZ;
 					
-					glm::vec2 projPos = glm::vec2(phys->pos->x, phys->pos->y);
+					PositionComponent* soulPos = (PositionComponent*)m->soul->componentIDMap[positionComponentID];
+
+					glm::vec2 projPos = glm::vec2(soulPos->x, soulPos->y);
 					glm::vec2 projVel = Normalize(glm::vec2(Game::main.mouseX - projPos.x, Game::main.mouseY - projPos.y)) * m->projectileSpeed;
 
 					if (projPos.x > screenLeft && projPos.x < screenRight &&
@@ -1712,7 +1738,7 @@ void InputSystem::Update(int activeScene, float deltaTime)
 
 						Entity* projectile = ECS::main.CreateEntity(0, "Bullet");
 
-						ECS::main.RegisterComponent(new PositionComponent(projectile, true, false, phys->pos->x, phys->pos->y, 0.0f), projectile);
+						ECS::main.RegisterComponent(new PositionComponent(projectile, true, false, projPos.x, projPos.y, 0.0f), projectile);
 						ECS::main.RegisterComponent(new PhysicsComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], projVel.x, projVel.y, 0.0f, 0.0f, 0.0f), projectile);
 						ECS::main.RegisterComponent(new ColliderComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], false, false, false, true, false, true, EntityClass::object, 1.0f, 0.0f, 0.0f, 5.0f, 5.0f, 0.0f, 0.0f), projectile);
 						ECS::main.RegisterComponent(new DamageComponent(projectile, true, move->entity, true, 20.0f, false, true, 1, 10.0f, false, true, true), projectile);
@@ -2514,73 +2540,107 @@ void AISystem::Update(int activeScene, float deltaTime)
 			a->active && a->entity->Get_Scene() == 0)
 		{
 			Entity* player = ECS::main.player;
-
-			PositionComponent* posA = (PositionComponent*)a->entity->componentIDMap[positionComponentID];
-			PositionComponent* posB = (PositionComponent*)player->componentIDMap[positionComponentID];
-
-			glm::vec2 aCoor = glm::vec2(posA->x, posA->y);
-			glm::vec2 lookRay = aCoor - glm::vec2(posB->x, posB->y);
-
-			float dist = glm::length2(lookRay);
-
-			// std::cout << std::to_string(dist) + "\n";
-			if (dist <= a->procRange || dist <= a->chaseRange && a->proc)
+			
+			if (a->aiType == AIType::aerial)
 			{
-				bool blocked = false;
-				if (!a->proc)
+				PositionComponent* posA = (PositionComponent*)a->entity->componentIDMap[positionComponentID];
+				PositionComponent* posB = (PositionComponent*)player->componentIDMap[positionComponentID];
+
+				glm::vec2 aCoor = glm::vec2(posA->x, posA->y);
+				glm::vec2 lookRay = aCoor - glm::vec2(posB->x, posB->y);
+
+				float dist = glm::length2(lookRay);
+
+				// std::cout << std::to_string(dist) + "\n";
+				if (dist <= a->procRange || dist <= a->chaseRange && a->proc)
 				{
-					int myID = a->entity->Get_ID();
-					int playerID = player->Get_ID();
-
-					for (int en = 0; en < ECS::main.entities.size(); en++)
+					bool blocked = false;
+					if (!a->proc)
 					{
-						PositionComponent* posC = (PositionComponent*)ECS::main.entities[en]->componentIDMap[positionComponentID];
-						ColliderComponent* colC = (ColliderComponent*)ECS::main.entities[en]->componentIDMap[colliderComponentID];
+						int myID = a->entity->Get_ID();
+						int playerID = player->Get_ID();
 
-						if (colC != nullptr)
+						for (int en = 0; en < ECS::main.entities.size(); en++)
 						{
-							int colID = colC->entity->Get_ID();
+							PositionComponent* posC = (PositionComponent*)ECS::main.entities[en]->componentIDMap[positionComponentID];
+							ColliderComponent* colC = (ColliderComponent*)ECS::main.entities[en]->componentIDMap[colliderComponentID];
 
-							if (colC->active && !colC->trigger && colID != playerID && colID != myID)
+							if (colC != nullptr)
 							{
-								glm::vec2 cp = glm::vec2(0, 0);
-								glm::vec2 cn = glm::vec2(0, 0);
-								float t = 0.0f;
+								int colID = colC->entity->Get_ID();
 
-								if (RayOverlapRect(aCoor, lookRay, glm::vec2(posC->x + colC->offsetX, posC->y + colC->offsetY), colC->width, colC->height, cp, cn, t))
+								if (colC->active && !colC->trigger && colID != playerID && colID != myID)
 								{
-									blocked = true;
-									break;
+									glm::vec2 cp = glm::vec2(0, 0);
+									glm::vec2 cn = glm::vec2(0, 0);
+									float t = 0.0f;
+
+									if (RayOverlapRect(aCoor, lookRay, glm::vec2(posC->x + colC->offsetX, posC->y + colC->offsetY), colC->width, colC->height, cp, cn, t))
+									{
+										blocked = true;
+										break;
+									}
 								}
 							}
 						}
 					}
+
+					if (!blocked || a->proc)
+					{
+						a->proc = true;
+
+						if (a->lastAttack >= a->attackRate)
+						{
+							a->lastAttack = 0.0f;
+
+							Texture2D* s = Game::main.textureMap["aether_bullet"];
+
+							Entity* projectile = ECS::main.CreateEntity(0, "Bullet");
+
+							glm::vec2 vel = -Normalize(lookRay) * a->projectileSpeed;
+
+							ECS::main.RegisterComponent(new PositionComponent(projectile, true, false, posA->x, posA->y, 0.0f), projectile);
+							ECS::main.RegisterComponent(new PhysicsComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], vel.x, vel.y, 0.0f, 0.0f, 0.0f), projectile);
+							ECS::main.RegisterComponent(new ColliderComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], false, false, false, true, false, true, EntityClass::object, 1.0f, 0.0f, 0.0f, 5.0f, 5.0f, 0.0f, 0.0f), projectile);
+							ECS::main.RegisterComponent(new DamageComponent(projectile, true, a->entity, true, 10.0f, false, true, 1, 10.0f, true, true, true), projectile);
+							ECS::main.RegisterComponent(new StaticSpriteComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], s->width, s->height, s, false), projectile);
+						}
+						else
+						{
+							a->lastAttack += deltaTime;
+						}
+					}
+				}
+			}
+			else if (a->aiType == AIType::soul)
+			{
+				PositionComponent* posA = (PositionComponent*)a->entity->componentIDMap[positionComponentID];
+				PositionComponent* posB = (PositionComponent*)player->componentIDMap[positionComponentID];
+				PhysicsComponent* physB = (PhysicsComponent*)player->componentIDMap[physicsComponentID];
+				ColliderComponent* colB = (ColliderComponent*)player->componentIDMap[colliderComponentID];
+
+				glm::vec2 position = glm::vec2(posA->x, posA->y);
+				glm::vec2 target;
+
+				if (physB->velocityX >= 0)
+				{
+					target = glm::vec2(posB->x - (colB->width), posB->y + (colB->height));
+				}
+				else
+				{
+					target = glm::vec2(posB->x + (colB->width), posB->y + (colB->height));
 				}
 
-				if (!blocked || a->proc)
+				if (glm::length2(position - target) > 500.0f)
 				{
-					a->proc = true;
+					glm::vec2 vel = -Normalize(position - lerp(position, target, deltaTime));
+					PhysicsComponent* physA = (PhysicsComponent*)a->entity->componentIDMap[physicsComponentID];
 
-					if (a->lastAttack >= a->attackRate)
-					{
-						a->lastAttack = 0.0f;
+					posA->x += vel.x;
+					posA->y += vel.y;
 
-						Texture2D* s = Game::main.textureMap["aether_bullet"];
-
-						Entity* projectile = ECS::main.CreateEntity(0, "Bullet");
-
-						glm::vec2 vel = -Normalize(lookRay) * a->projectileSpeed;
-
-						ECS::main.RegisterComponent(new PositionComponent(projectile, true, false, posA->x, posA->y, 0.0f), projectile);
-						ECS::main.RegisterComponent(new PhysicsComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], vel.x, vel.y, 0.0f, 0.0f, 0.0f), projectile);
-						ECS::main.RegisterComponent(new ColliderComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], false, false, false, true, false, true, EntityClass::object, 1.0f, 0.0f, 0.0f, 5.0f, 5.0f, 0.0f, 0.0f), projectile);
-						ECS::main.RegisterComponent(new DamageComponent(projectile, true, a->entity, true, 10.0f, false, true, 1, 10.0f, true, true, true), projectile);
-						ECS::main.RegisterComponent(new StaticSpriteComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], s->width, s->height, s, false), projectile);
-					}
-					else
-					{
-						a->lastAttack += deltaTime;
-					}
+					physA->velocityX += vel.x * a->projectileSpeed;
+					physA->velocityY += vel.y * a->projectileSpeed;
 				}
 			}
 		}

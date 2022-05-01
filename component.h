@@ -126,6 +126,7 @@ public:
 class InputComponent : public Component
 {
 public:
+	Entity* soul;
 	bool acceptInput;
 
 	bool projecting;
@@ -147,7 +148,7 @@ public:
 	float slashSpeed;
 	float projectileSpeed;
 
-	InputComponent(Entity* entity, bool active, bool acceptInput, float projectionDelay, float projectionDepth, float maxCoyoteTime, int maxJumps, float projectileDelay, float slashSpeed, float projectileSpeed);
+	InputComponent(Entity* entity, bool active, Entity* soul, bool acceptInput, float projectionDelay, float projectionDepth, float maxCoyoteTime, int maxJumps, float projectileDelay, float slashSpeed, float projectileSpeed);
 };
 
 class MovementComponent : public Component
@@ -277,7 +278,7 @@ public:
 	ParticleComponent(Entity* entity, bool active, float tickRate, float xOffset, float yOffset, int number, Element element, float minLifetime, float maxLifetime);
 };
 
-enum class AIType { aerial, ground };
+enum class AIType { aerial, ground, soul };
 class AIComponent : public Component
 {
 public:
