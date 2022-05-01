@@ -24,6 +24,7 @@ static int healthComponentID = 10;
 static int duelistComponentID = 11;
 static int damageComponentID = 12;
 static int particleComponentID = 13;
+static int aiComponentID = 14;
 
 static int dragonriderAnimControllerSubID = 1;
 
@@ -242,6 +243,8 @@ public:
 class DamageComponent : public Component
 {
 public:
+	Entity* creator;
+
 	bool hasLifetime;
 	float lifetime;
 	bool showAfterUses;
@@ -255,7 +258,7 @@ public:
 	bool damagesEnemies;
 	bool damagesObjects;
 
-	DamageComponent(Entity* entity, bool active, bool hasLifetime, float lifetime, bool showAfterUses, bool limitedUses, int uses, float damage, bool damagesPlayers, bool damagesEnemies, bool damagesObjects);
+	DamageComponent(Entity* entity, bool active, Entity* creator, bool hasLifetime, float lifetime, bool showAfterUses, bool limitedUses, int uses, float damage, bool damagesPlayers, bool damagesEnemies, bool damagesObjects);
 };
 
 class ParticleComponent : public Component
@@ -272,6 +275,23 @@ public:
 	float maxLifetime;
 
 	ParticleComponent(Entity* entity, bool active, float tickRate, float xOffset, float yOffset, int number, Element element, float minLifetime, float maxLifetime);
+};
+
+enum class AIType { aerial, ground };
+class AIComponent : public Component
+{
+public:
+	bool proc;
+	float procRange;
+	float chaseRange;
+
+	float projectileSpeed;
+	float lastAttack;
+	float attackRate;
+
+	AIType aiType;
+
+	AIComponent(Entity* entity, bool active, bool proc, float procRange, float chaseRange, float projectileSpeed, float attackRate, AIType aiType);
 };
 
 #endif

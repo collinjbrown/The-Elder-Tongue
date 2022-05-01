@@ -23,6 +23,7 @@ class HealthComponent;
 class DuelistComponent;
 class DamageComponent;
 class ParticleComponent;
+class AIComponent;
 class Entity;
 
 struct Collision
@@ -94,7 +95,7 @@ class ColliderSystem : public System
 
 	bool RaycastDown(float size, float distance, ColliderComponent* colA, PositionComponent* posA, ColliderComponent* colB, PositionComponent* posB);
 
-	bool TestCollision(ColliderComponent* colA, PositionComponent* posA, PhysicsComponent* physA, ColliderComponent* colB, PositionComponent* posB, PhysicsComponent* physB);
+	bool TestCollision(ColliderComponent* colA, PositionComponent* posA, PhysicsComponent* physA, ColliderComponent* colB, PositionComponent* posB, PhysicsComponent* physB, float deltaTime);
 
 	bool TestAndResolveCollision(ColliderComponent* colA, PositionComponent* posA, PhysicsComponent* physA, ColliderComponent* colB, PositionComponent* posB, PhysicsComponent* physB, float deltaTime);
 
@@ -203,6 +204,18 @@ class DamageSystem : public System
 {
 public:
 	vector<DamageComponent*> damagers;
+
+	void Update(int activeScene, float deltaTime);
+
+	void AddComponent(Component* component);
+
+	void PurgeEntity(Entity* e);
+};
+
+class AISystem : public System
+{
+public:
+	vector<AIComponent*> ai;
 
 	void Update(int activeScene, float deltaTime);
 

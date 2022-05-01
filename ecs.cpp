@@ -7,7 +7,7 @@
 #include "entity.h"
 #include <algorithm>
 
-#pragma region Math
+#pragma region Utility
 
 float Norm(glm::vec2 a)
 {
@@ -112,6 +112,7 @@ bool RayOverlapRect(glm::vec2 rayOrigin, glm::vec2 rayDir, glm::vec2 rectCenter,
 	return true;
 }
 
+
 #pragma endregion
 
 #pragma region Entities
@@ -163,6 +164,10 @@ void ECS::Init()
 {
 	// I think we're going to have to initiate every component block
 	// at the beginning of the game. This might be long.
+
+	AISystem* aiSystem = new AISystem();
+	ComponentBlock* aiBlock = new ComponentBlock(aiSystem, aiComponentID);
+	componentBlocks.push_back(aiBlock);
 
 	InputSystem* inputSystem = new InputSystem();
 	ComponentBlock* inputBlock = new ComponentBlock(inputSystem, inputComponentID);
@@ -220,14 +225,14 @@ void ECS::Update(float deltaTime)
 	if (round == 1)
 	{
 		#pragma region Player Instantiation
-		Entity* player = CreateEntity(0, "The Player");
+		player = CreateEntity(0, "The Player");
 		Animation2D* anim1 = Game::main.animationMap["baseIdle"];
 
 		ECS::main.RegisterComponent(new PositionComponent(player, true, false, 0, 100, 0.0f), player);
 		ECS::main.RegisterComponent(new PhysicsComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 5000.0f, 2000.0f), player);
 		ECS::main.RegisterComponent(new ColliderComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], false, false, false, false, true, false, EntityClass::player, 1.0f, 1.0f, 10.0f, 40.0f, 120.0f, 0.0f, 0.0f), player);
 		ECS::main.RegisterComponent(new MovementComponent(player, true, 6000.0f, 1000.0f, 2.5f, 100.0f, 0.1f, 0.5f, true, true, false), player);
-		ECS::main.RegisterComponent(new InputComponent(player, true, true, 0.5f, 5000, 0.5f, 2, 0.5f, 2.0f, 2000.0f), player);
+		ECS::main.RegisterComponent(new InputComponent(player, true, true, 0.5f, 5000.0f, 0.5f, 2, 0.5f, 2.0f, 2000.0f), player);
 		ECS::main.RegisterComponent(new CameraFollowComponent(player, true, 10.0f), player);
 		ECS::main.RegisterComponent(new HealthComponent(player, true, 1000.0f, false), player);
 		ECS::main.RegisterComponent(new DuelistComponent(player, true, true, true), player);
@@ -246,6 +251,19 @@ void ECS::Update(float deltaTime)
 		a->AddAnimation("sword_dead", Game::main.animationMap["baseDeath"]);
 		a->AddAnimation("sword_stab", Game::main.animationMap["sword_baseStab"]);
 		a->AddAnimation("sword_aerialOne", Game::main.animationMap["sword_baseAerialOne"]);
+		#pragma endregion
+
+		#pragma region Enemy Instantiation
+
+		Texture2D* t = Game::main.textureMap["blank"];
+		Entity* enemy = CreateEntity(0, "Enemy");
+		ECS::main.RegisterComponent(new PositionComponent(enemy, true, false, -50.0f, 100.0f, 0.0f), enemy);
+		ECS::main.RegisterComponent(new PhysicsComponent(enemy, true, (PositionComponent*)enemy->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 5000.0f, 2000.0f), enemy);
+		ECS::main.RegisterComponent(new ColliderComponent(enemy, true, (PositionComponent*)enemy->componentIDMap[positionComponentID], false, false, false, false, true, false, EntityClass::enemy, 1.0f, 1.0f, 10.0f, 40.0f, 120.0f, 0.0f, 0.0f), enemy);
+		ECS::main.RegisterComponent(new HealthComponent(enemy, true, 1000.0f, false), enemy);
+		ECS::main.RegisterComponent(new StaticSpriteComponent(enemy, true, (PositionComponent*)enemy->componentIDMap[positionComponentID], t->width, t->height, t, true), enemy);
+		ECS::main.RegisterComponent(new AIComponent(enemy, true, false, 400000.0f, 800000.0f, 100.0f, 5.0f, AIType::aerial), enemy);
+
 		#pragma endregion
 
 		//#pragma region Test Character Instantiation
@@ -271,10 +289,10 @@ void ECS::Update(float deltaTime)
 		//a2->AddAnimation("dead", anim12);
 		//#pragma endregion
 
-		Texture2D* tex1000 = Game::main.textureMap["wall"];
+		/*Texture2D* tex1000 = Game::main.textureMap["wall"];
 		Entity* wall = CreateEntity(0, "wall");
 		ECS::main.RegisterComponent(new PositionComponent(wall, true, true, 0, 0, 0), wall);
-		ECS::main.RegisterComponent(new StaticSpriteComponent(wall, true, (PositionComponent*)wall->componentIDMap[positionComponentID], 50000.0f, 50000.0f, tex1000, true), wall);
+		ECS::main.RegisterComponent(new StaticSpriteComponent(wall, true, (PositionComponent*)wall->componentIDMap[positionComponentID], 50000.0f, 50000.0f, tex1000, true), wall);*/
 
 		Texture2D* tex3 = Game::main.textureMap["blank"];
 
@@ -302,6 +320,10 @@ void ECS::Update(float deltaTime)
 			ECS::main.RegisterComponent(new PositionComponent(earth, true, true, i * 500, -1000, 0.0f), earth);
 			ECS::main.RegisterComponent(new StaticSpriteComponent(earth, true, (PositionComponent*)earth->componentIDMap[positionComponentID], tex3->width * 35, tex3->height * 100.0f, tex3, false), earth);
 		}
+
+		// Do this after we instantiate objects so that it can properly sort out which nodes
+		// are blocked and which aren't.
+		// CreateNodeMap();
 	}
 
 	for (int i = 0; i < componentBlocks.size(); i++)
@@ -310,6 +332,34 @@ void ECS::Update(float deltaTime)
 	}
 
 	PurgeDeadEntities();
+}
+
+// We probably aren't actually gonna use this, but I'll leave it here just in case.
+void ECS::CreateNodeMap()
+{
+	for (int x = 0; x < mWidth; x++)
+	{
+		for (int y = 0; y < mHeight; y++)
+		{
+			bool blocked = false;
+			Node* n = new Node(x, y);
+
+			for (int e = 0; e < entities.size(); e++)
+			{
+				PositionComponent* pos = (PositionComponent*)entities[e]->componentIDMap[positionComponentID];
+				ColliderComponent* col = (ColliderComponent*)entities[e]->componentIDMap[colliderComponentID];
+
+				blocked = (PointOverlapRect(glm::vec2(x * nodeSize, y * nodeSize), glm::vec2(pos->x, pos->y) + glm::vec2(col->offsetX, col->offsetY), col->width, col->height) && !col->trigger && pos->stat);
+				
+				if (blocked)
+				{
+					n->col = col;
+				}
+
+				nodeMap[x][y] = n;
+			}
+		}
+	}
 }
 
 void ECS::AddDeadEntity(Entity* e)
@@ -632,11 +682,13 @@ DuelistComponent::DuelistComponent(Entity* entity, bool active, bool hasSword, b
 
 #pragma region Damage Component
 
-DamageComponent::DamageComponent(Entity* entity, bool active, bool hasLifetime, float lifetime, bool showAfterUses, bool limitedUses, int uses, float damage, bool damagesPlayers, bool damagesEnemies, bool damagesObjects)
+DamageComponent::DamageComponent(Entity* entity, bool active, Entity* creator, bool hasLifetime, float lifetime, bool showAfterUses, bool limitedUses, int uses, float damage, bool damagesPlayers, bool damagesEnemies, bool damagesObjects)
 {
 	this->ID = damageComponentID;
 	this->entity = entity;
 	this->active = active;
+
+	this->creator = creator;
 
 	this->hasLifetime = hasLifetime;
 	this->lifetime = lifetime;
@@ -672,6 +724,27 @@ ParticleComponent::ParticleComponent(Entity* entity, bool active, float tickRate
 	
 	this->minLifetime = minLifetime;
 	this->maxLifetime = maxLifetime;
+}
+
+#pragma endregion
+
+#pragma region AI Component
+
+AIComponent::AIComponent(Entity* entity, bool active, bool proc, float procRange, float chaseRange, float projectileSpeed, float attackRate, AIType aiType)
+{
+	this->ID = aiComponentID;
+	this->entity = entity;
+	this->active = active;
+
+	this->proc = proc;
+	this->procRange = procRange;
+	this->chaseRange = chaseRange;
+
+	this->projectileSpeed = projectileSpeed;
+	this->lastAttack = 0.0f;
+	this->attackRate = attackRate;
+
+	this->aiType = aiType;
 }
 
 #pragma endregion
@@ -943,45 +1016,12 @@ void ColliderSystem::Update(int activeScene, float deltaTime)
 					// Two static objects shouldn't be able to collide because they won't be able to resolve that collision.
 					if (cA->trigger)
 					{
-						if (ArbitraryRectangleCollision(cA, posA, physA, cB, posB, physB, deltaTime) != nullptr)
+						/*if (cB->trigger && cB->doesDamage)
 						{
-							if (cA->trigger && cA->doesDamage)
+							DamageComponent* bDamage = (DamageComponent*)cB->entity->componentIDMap[damageComponentID];
+
+							if (bDamage->creator != cA->entity)
 							{
-								DamageComponent* aDamage = (DamageComponent*)cA->entity->componentIDMap[damageComponentID];
-
-								if (cB->takesDamage)
-								{
-									if (cB->entityClass == EntityClass::player && aDamage->damagesPlayers ||
-										cB->entityClass == EntityClass::enemy && aDamage->damagesEnemies ||
-										cB->entityClass == EntityClass::object && aDamage->damagesObjects)
-									{
-										HealthComponent* bHealth = (HealthComponent*)cB->entity->componentIDMap[healthComponentID];
-										bHealth->health -= aDamage->damage;
-										aDamage->uses -= 1;
-									}
-								}
-								else
-								{
-									aDamage->uses -= 1;
-								}
-
-								if (aDamage->uses <= 0)
-								{
-									cA->active = false;
-
-									if (!aDamage->showAfterUses)
-									{
-										ECS::main.AddDeadEntity(aDamage->entity);
-									}
-								}
-
-								aDamage->lifetime -= deltaTime;
-							}
-
-							if (cB->trigger && cB->doesDamage)
-							{
-								DamageComponent* bDamage = (DamageComponent*)cB->entity->componentIDMap[damageComponentID];
-
 								if (cA->takesDamage)
 								{
 									if (cA->entityClass == EntityClass::player && bDamage->damagesPlayers ||
@@ -1001,10 +1041,16 @@ void ColliderSystem::Update(int activeScene, float deltaTime)
 								if (bDamage->uses <= 0)
 								{
 									cB->active = false;
-									ECS::main.AddDeadEntity(bDamage->entity);
+
+									if (!bDamage->showAfterUses)
+									{
+										ECS::main.AddDeadEntity(bDamage->entity);
+									}
 								}
+
+								bDamage->lifetime -= deltaTime;
 							}
-						}
+						}*/
 					}
 					else if (!cA->platform)
 					{
@@ -1170,7 +1216,7 @@ bool ColliderSystem::RaycastDown(float size, float distance, ColliderComponent* 
 	return false;
 }
 
-bool ColliderSystem::TestCollision(ColliderComponent* colA, PositionComponent* posA, PhysicsComponent* physA, ColliderComponent* colB, PositionComponent* posB, PhysicsComponent* physB)
+bool ColliderSystem::TestCollision(ColliderComponent* colA, PositionComponent* posA, PhysicsComponent* physA, ColliderComponent* colB, PositionComponent* posB, PhysicsComponent* physB, float deltaTime)
 {
 	float aCX = colA->offsetX;
 	float aCY = colA->offsetY;
@@ -1181,7 +1227,6 @@ bool ColliderSystem::TestCollision(ColliderComponent* colA, PositionComponent* p
 	float aRX = (colA->width / 2.0f) + colA->offsetX;
 	float aTY = (colA->height / 2.0f) + colA->offsetY;
 
-
 	float bCX = colB->offsetX;
 	float bCY = colB->offsetY;
 
@@ -1191,82 +1236,107 @@ bool ColliderSystem::TestCollision(ColliderComponent* colA, PositionComponent* p
 	float bRX = (colB->width / 2.0f) + colB->offsetX;
 	float bTY = (colB->height / 2.0f) + colB->offsetY;
 
-	glm::vec2 aCenter = glm::vec2(posA->x, posA->y) + posA->Rotate(glm::vec2(aCX, aCY));
-	glm::vec2 aTopLeft = glm::vec2(posA->x, posA->y) + posA->Rotate(glm::vec2(aLX, aTY));
-	glm::vec2 aBottomLeft = glm::vec2(posA->x, posA->y) + posA->Rotate(glm::vec2(aLX, aBY));
-	glm::vec2 aTopRight = glm::vec2(posA->x, posA->y) + posA->Rotate(glm::vec2(aRX, aTY));
-	glm::vec2 aBottomRight = glm::vec2(posA->x, posA->y) + posA->Rotate(glm::vec2(aRX, aBY));
+	float dT = (int)(deltaTime * 100 + 0.5);
+	dT = max(0.1f, 5.0f * ((float)dT / 100));
+	// std::cout << std::to_string(deltaTime) + "/" + std::to_string(dT) + "\n";
 
-	std::array<glm::vec2, 4> colliderOne = { aTopLeft, aTopRight, aBottomRight, aBottomLeft };
-
-	glm::vec2 bCenter = glm::vec2(posB->x, posB->y) + posB->Rotate(glm::vec2(bCX, bCY));
-	glm::vec2 bTopLeft = glm::vec2(posB->x, posB->y) + posB->Rotate(glm::vec2(bLX, bTY));
-	glm::vec2 bBottomLeft = glm::vec2(posB->x, posB->y) + posB->Rotate(glm::vec2(bLX, bBY));
-	glm::vec2 bTopRight = glm::vec2(posB->x, posB->y) + posB->Rotate(glm::vec2(bRX, bTY));
-	glm::vec2 bBottomRight = glm::vec2(posB->x, posB->y) + posB->Rotate(glm::vec2(bRX, bBY));
-
-	std::array<glm::vec2, 4> colliderTwo = { bTopLeft, bTopRight, bBottomRight, bBottomLeft };
-
-	float totalMass = colA->mass + colB->mass;
-	bool collided = false;
-
-	// Game::main.renderer->prepareQuad(aTopRight, aBottomRight, aBottomLeft, aTopLeft, glm::vec4(1.0f, 0.0f, 0.0f, 0.5f), Game::main.textureMap["blank"]->ID);
-
-	for (int s = 0; s < 2; s++)
+	if (dT != 0)
 	{
-		if (s == 0)
+		float it = 1.0f;
+		glm::vec2 aCenter = (glm::vec2(posA->x, posA->y) + glm::vec2(physA->velocityX * it * deltaTime, physA->velocityY * it * deltaTime)) + posA->Rotate(glm::vec2(aCX, aCY));
+		glm::vec2 aTopLeft = (glm::vec2(posA->x, posA->y) + glm::vec2(physA->velocityX * it * deltaTime, physA->velocityY * it * deltaTime)) + posA->Rotate(glm::vec2(aLX, aTY));
+		glm::vec2 aBottomLeft = (glm::vec2(posA->x, posA->y) + glm::vec2(physA->velocityX * it * deltaTime, physA->velocityY * it * deltaTime)) + posA->Rotate(glm::vec2(aLX, aBY));
+		glm::vec2 aTopRight = (glm::vec2(posA->x, posA->y) + glm::vec2(physA->velocityX * it * deltaTime, physA->velocityY * it * deltaTime)) + posA->Rotate(glm::vec2(aRX, aTY));
+		glm::vec2 aBottomRight = (glm::vec2(posA->x, posA->y) + glm::vec2(physA->velocityX * it * deltaTime, physA->velocityY * it * deltaTime)) + posA->Rotate(glm::vec2(aRX, aBY));
+
+		glm::vec2 bCenter = (glm::vec2(posB->x, posB->y) + glm::vec2(physB->velocityX * it * deltaTime, physB->velocityY * it * deltaTime)) + posB->Rotate(glm::vec2(bCX, bCY));
+		glm::vec2 bTopLeft = (glm::vec2(posB->x, posB->y) + glm::vec2(physB->velocityX * it * deltaTime, physB->velocityY * it * deltaTime)) + posB->Rotate(glm::vec2(bLX, bTY));
+		glm::vec2 bBottomLeft = (glm::vec2(posB->x, posB->y) + glm::vec2(physB->velocityX * it * deltaTime, physB->velocityY * it * deltaTime)) + posB->Rotate(glm::vec2(bLX, bBY));
+		glm::vec2 bTopRight = (glm::vec2(posB->x, posB->y) + glm::vec2(physB->velocityX * it * deltaTime, physB->velocityY * it * deltaTime)) + posB->Rotate(glm::vec2(bRX, bTY));
+		glm::vec2 bBottomRight = (glm::vec2(posB->x, posB->y) + glm::vec2(physB->velocityX * it * deltaTime, physB->velocityY * it * deltaTime)) + posB->Rotate(glm::vec2(bRX, bBY));
+
+		std::array<glm::vec2, 4> colliderOne = { aTopLeft, aTopRight, aBottomRight, aBottomLeft };
+
+		std::array<glm::vec2, 4> colliderTwo = { bTopLeft, bTopRight, bBottomRight, bBottomLeft };
+
+		float totalMass = colA->mass + colB->mass;
+
+		// Texture2D* t = Game::main.textureMap["test"];
+		// Game::main.renderer->prepareQuad(posA, abs(aTopRight.x - aTopLeft.y), abs(aTopRight.y - aBottomRight.y), t->width, t->height, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), Game::main.textureMap["test"]->ID, false);
+		// Game::main.renderer->prepareQuad(aTopRight, aBottomRight, aBottomLeft, aTopLeft, glm::vec4(1.0f, 0.0f, 0.0f, 0.5f), Game::main.textureMap["blank"]->ID);
+
+		for (int s = 0; s < 2; s++)
 		{
-			// Diagonals
-			for (int p = 0; p < colliderOne.size(); p++)
+			if (s == 0)
 			{
-				glm::vec2 lineA = aCenter;
-				glm::vec2 lineB = colliderOne[p];
-
-				// Edges
-				for (int q = 0; q < colliderTwo.size(); q++)
+				// Diagonals
+				for (int p = 0; p < colliderOne.size(); p++)
 				{
-					glm::vec2 edgeA = colliderTwo[q];
-					glm::vec2 edgeB = colliderTwo[(q + 1) % colliderTwo.size()];
+					glm::vec2 displacement = { 0, 0 };
+					glm::vec2 collEdge = { 0, 0 };
 
-					float h = (edgeB.x - edgeA.x) * (lineA.y - lineB.y) - (lineA.x - lineB.x) * (edgeB.y - edgeA.y);
-					float t1 = ((edgeA.y - edgeB.y) * (lineA.x - edgeA.x) + (edgeB.x - edgeA.x) * (lineA.y - edgeA.y)) / h;
-					float t2 = ((lineA.y - lineB.y) * (lineA.x - edgeA.x) + (lineB.x - lineA.x) * (lineA.y - edgeA.y)) / h;
+					glm::vec2 lineA = aCenter;
+					glm::vec2 lineB = colliderOne[p];
 
-					if (t1 >= 0.0f && t1 < 1.0f && t2 >= 0.0f && t2 < 1.0f)
+					// Edges
+					for (int q = 0; q < colliderTwo.size(); q++)
 					{
-						collided = true;
+						glm::vec2 edgeA = colliderTwo[q];
+						glm::vec2 edgeB = colliderTwo[(q + 1) % colliderTwo.size()];
+
+						float h = (edgeB.x - edgeA.x) * (lineA.y - lineB.y) - (lineA.x - lineB.x) * (edgeB.y - edgeA.y);
+						float t1 = ((edgeA.y - edgeB.y) * (lineA.x - edgeA.x) + (edgeB.x - edgeA.x) * (lineA.y - edgeA.y)) / h;
+						float t2 = ((lineA.y - lineB.y) * (lineA.x - edgeA.x) + (lineB.x - lineA.x) * (lineA.y - edgeA.y)) / h;
+
+						if (t1 >= 0.0f && t1 < 1.0f && t2 >= 0.0f && t2 < 1.0f)
+						{
+							if (collEdge.x == 0 && collEdge.y == 0)
+							{
+								collEdge = edgeB - edgeA;
+							}
+
+							return true;
+						}
 					}
 				}
 			}
-		}
-		else
-		{
-			// Diagonals
-			for (int p = 0; p < colliderTwo.size(); p++)
+			else
 			{
-				glm::vec2 lineA = bCenter;
-				glm::vec2 lineB = colliderTwo[p];
-
-				// Edges
-				for (int q = 0; q < colliderOne.size(); q++)
+				// Diagonals
+				for (int p = 0; p < colliderTwo.size(); p++)
 				{
-					glm::vec2 edgeA = colliderOne[q];
-					glm::vec2 edgeB = colliderOne[(q + 1) % colliderOne.size()];
+					glm::vec2 displacement = { 0, 0 };
+					glm::vec2 collEdge = { 0, 0 };
 
-					float h = (edgeB.x - edgeA.x) * (lineA.y - lineB.y) - (lineA.x - lineB.x) * (edgeB.y - edgeA.y);
-					float t1 = ((edgeA.y - edgeB.y) * (lineA.x - edgeA.x) + (edgeB.x - edgeA.x) * (lineA.y - edgeA.y)) / h;
-					float t2 = ((lineA.y - lineB.y) * (lineA.x - edgeA.x) + (lineB.x - lineA.x) * (lineA.y - edgeA.y)) / h;
+					glm::vec2 lineA = bCenter;
+					glm::vec2 lineB = colliderTwo[p];
 
-					if (t1 >= 0.0f && t1 < 1.0f && t2 >= 0.0f && t2 < 1.0f)
+					// Edges
+					for (int q = 0; q < colliderOne.size(); q++)
 					{
-						collided = true;
+						glm::vec2 edgeA = colliderOne[q];
+						glm::vec2 edgeB = colliderOne[(q + 1) % colliderOne.size()];
+
+						float h = (edgeB.x - edgeA.x) * (lineA.y - lineB.y) - (lineA.x - lineB.x) * (edgeB.y - edgeA.y);
+						float t1 = ((edgeA.y - edgeB.y) * (lineA.x - edgeA.x) + (edgeB.x - edgeA.x) * (lineA.y - edgeA.y)) / h;
+						float t2 = ((lineA.y - lineB.y) * (lineA.x - edgeA.x) + (lineB.x - lineA.x) * (lineA.y - edgeA.y)) / h;
+
+						if (t1 >= 0.0f && t1 < 1.0f && t2 >= 0.0f && t2 < 1.0f)
+						{
+							if (collEdge.x == 0 && collEdge.y == 0)
+							{
+								collEdge = edgeB - edgeA;
+							}
+
+							return true;
+						}
 					}
 				}
 			}
 		}
 	}
 
-	return collided;
+	return false;
 }
 
 bool ColliderSystem::TestAndResolveCollision(ColliderComponent* colA, PositionComponent* posA, PhysicsComponent* physA, ColliderComponent* colB, PositionComponent* posB, PhysicsComponent* physB, float deltaTime)
@@ -1577,7 +1647,7 @@ void InputSystem::Update(int activeScene, float deltaTime)
 						ECS::main.RegisterComponent(new PositionComponent(projectile, true, false, phys->pos->x, phys->pos->y, 0.0f), projectile);
 						ECS::main.RegisterComponent(new PhysicsComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], projVel.x, projVel.y, 0.0f, 0.0f, 0.0f), projectile);
 						ECS::main.RegisterComponent(new ColliderComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], false, false, false, true, false, true, EntityClass::object, 1.0f, 0.0f, 0.0f, 5.0f, 5.0f, 0.0f, 0.0f), projectile);
-						ECS::main.RegisterComponent(new DamageComponent(projectile, true, true, 20.0f, false, true, 1, 10.0f, false, true, true), projectile);
+						ECS::main.RegisterComponent(new DamageComponent(projectile, true, move->entity, true, 20.0f, false, true, 1, 10.0f, false, true, true), projectile);
 						ECS::main.RegisterComponent(new StaticSpriteComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], s->width / 4.0f, s->height / 4.0f, s, false), projectile);
 						ECS::main.RegisterComponent(new ParticleComponent(projectile, true, 0.01f, 0.0f, 0.0f, 10, Element::aether, 5.0f, 20.0f), projectile);
 					}
@@ -1645,7 +1715,7 @@ void InputSystem::Update(int activeScene, float deltaTime)
 						ECS::main.RegisterComponent(new PositionComponent(projectile, true, false, phys->pos->x, phys->pos->y, 0.0f), projectile);
 						ECS::main.RegisterComponent(new PhysicsComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], phys->velocityX * m->slashSpeed, phys->velocityY, 0.0f, 0.0f, 0.0f), projectile);
 						ECS::main.RegisterComponent(new ColliderComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], false, false, false, true, false, true, EntityClass::object, 1.0f, 0.0f, 0.0f, 5.0f, 5.0f, 0.0f, 0.0f), projectile);
-						ECS::main.RegisterComponent(new DamageComponent(projectile, true, true, 0.3f, true, true, 1, 20.0f, false, true, true), projectile);
+						ECS::main.RegisterComponent(new DamageComponent(projectile, true, move->entity, true, 0.3f, true, true, 1, 20.0f, false, true, true), projectile);
 						ECS::main.RegisterComponent(new AnimationComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], anim1, "default"), projectile);
 
 						PhysicsComponent* p = (PhysicsComponent*)projectile->componentIDMap[physicsComponentID];
@@ -2357,6 +2427,111 @@ void DamageSystem::PurgeEntity(Entity* e)
 		{
 			DamageComponent* s = damagers[i];
 			damagers.erase(std::remove(damagers.begin(), damagers.end(), s), damagers.end());
+			delete s;
+		}
+	}
+}
+
+#pragma endregion
+
+#pragma region AI System
+
+void AISystem::Update(int activeScene, float deltaTime)
+{
+	for (int i = 0; i < ai.size(); i++)
+	{
+		AIComponent* a = ai[i];
+
+		if (a->active && a->entity->Get_Scene() == activeScene ||
+			a->active && a->entity->Get_Scene() == 0)
+		{
+			Entity* player = ECS::main.player;
+
+			PositionComponent* posA = (PositionComponent*)a->entity->componentIDMap[positionComponentID];
+			PositionComponent* posB = (PositionComponent*)player->componentIDMap[positionComponentID];
+
+			glm::vec2 aCoor = glm::vec2(posA->x, posA->y);
+			glm::vec2 lookRay = aCoor - glm::vec2(posB->x, posB->y);
+
+			float dist = glm::length2(lookRay);
+
+			// std::cout << std::to_string(dist) + "\n";
+			if (dist <= a->procRange || dist <= a->chaseRange && a->proc)
+			{
+				bool blocked = false;
+				if (!a->proc)
+				{
+					int myID = a->entity->Get_ID();
+					int playerID = player->Get_ID();
+
+					for (int en = 0; en < ECS::main.entities.size(); en++)
+					{
+						PositionComponent* posC = (PositionComponent*)ECS::main.entities[en]->componentIDMap[positionComponentID];
+						ColliderComponent* colC = (ColliderComponent*)ECS::main.entities[en]->componentIDMap[colliderComponentID];
+
+						if (colC != nullptr)
+						{
+							int colID = colC->entity->Get_ID();
+
+							if (colC->active && !colC->trigger && colID != playerID && colID != myID)
+							{
+								glm::vec2 cp = glm::vec2(0, 0);
+								glm::vec2 cn = glm::vec2(0, 0);
+								float t = 0.0f;
+
+								if (RayOverlapRect(aCoor, lookRay, glm::vec2(posC->x + colC->offsetX, posC->y + colC->offsetY), colC->width, colC->height, cp, cn, t))
+								{
+									blocked = true;
+									break;
+								}
+							}
+						}
+					}
+				}
+
+				if (!blocked || a->proc)
+				{
+					a->proc = true;
+
+					if (a->lastAttack >= a->attackRate)
+					{
+						a->lastAttack = 0.0f;
+
+						Texture2D* s = Game::main.textureMap["aether_bullet"];
+
+						Entity* projectile = ECS::main.CreateEntity(0, "Bullet");
+
+						glm::vec2 vel = -Normalize(lookRay) * a->projectileSpeed;
+
+						ECS::main.RegisterComponent(new PositionComponent(projectile, true, false, posA->x, posA->y, 0.0f), projectile);
+						ECS::main.RegisterComponent(new PhysicsComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], vel.x, vel.y, 0.0f, 0.0f, 0.0f), projectile);
+						ECS::main.RegisterComponent(new ColliderComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], false, false, false, true, false, true, EntityClass::object, 1.0f, 0.0f, 0.0f, 5.0f, 5.0f, 0.0f, 0.0f), projectile);
+						ECS::main.RegisterComponent(new DamageComponent(projectile, true, a->entity, true, 20.0f, false, true, 1, 10.0f, true, true, true), projectile);
+						ECS::main.RegisterComponent(new StaticSpriteComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], s->width / 2.0f, s->height / 2.0f, s, false), projectile);
+					}
+					else
+					{
+						a->lastAttack += deltaTime;
+					}
+				}
+			}
+		}
+	}
+}
+
+void AISystem::AddComponent(Component* component)
+{
+	ai.push_back((AIComponent*)component);
+}
+
+void AISystem::PurgeEntity(Entity* e)
+{
+	for (int i = 0; i < ai.size(); i++)
+	{
+		if (ai[i]->entity == e)
+		{
+			AIComponent* s = ai[i];
+			ai.erase(std::remove(ai.begin(), ai.end(), s), ai.end());
 			delete s;
 		}
 	}
