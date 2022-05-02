@@ -26,7 +26,7 @@ static int damageComponentID = 12;
 static int particleComponentID = 13;
 static int aiComponentID = 14;
 
-static int dragonriderAnimControllerSubID = 1;
+static int lilyAnimControllerSubID = 1;
 
 enum EntityClass { player, enemy, object };
 

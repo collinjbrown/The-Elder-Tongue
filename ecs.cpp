@@ -654,7 +654,7 @@ AnimationComponent::AnimationComponent(Entity* entity, bool active, PositionComp
 PlayerAnimationControllerComponent::PlayerAnimationControllerComponent(Entity* entity, bool active, AnimationComponent* animator)
 {
 	this->ID = animationControllerComponentID;
-	this->subID = dragonriderAnimControllerSubID;
+	this->subID = lilyAnimControllerSubID;
 	this->entity = entity;
 	this->active = active;
 
@@ -2121,7 +2121,7 @@ void AnimationControllerSystem::Update(int activeScene, float deltaTime)
 			c->active && c->entity->Get_Scene() == 0)
 		{
 
-			if (c->subID == dragonriderAnimControllerSubID)
+			if (c->subID == lilyAnimControllerSubID)
 			{
 				// I'm thinking what we'll do is just hard code the various animation conditions
 				// into the animation controller; this will serve as the animation controller
