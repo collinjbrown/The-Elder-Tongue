@@ -14,6 +14,7 @@ public:
     static Texture2D* whiteTexture();
 
     GLuint       ID;
+    GLuint       mapID;
     unsigned int width;
     unsigned int height;
     GLuint       internalFormat;
@@ -23,7 +24,7 @@ public:
     GLuint       filterMin;
     GLuint       filterMax;
 
-    Texture2D(const char* file, bool alpha, int filter = GL_LINEAR);
+    Texture2D(const char* file, GLuint mapID, bool alpha, int filter = GL_LINEAR);
 
     void bind() const;
 };

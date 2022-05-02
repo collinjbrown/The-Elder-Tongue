@@ -4,10 +4,12 @@
 #include <iostream>
 #include <climits>
 
-Animation2D::Animation2D(const char* file, bool alpha, int columns, int rows, float speed, std::vector<int> rowsToCols, bool loop, int filter)
+Animation2D::Animation2D(const char* file, GLuint mapID, bool alpha, int columns, int rows, float speed, std::vector<int> rowsToCols, bool loop, int filter)
     : width(0), height(0), internalFormat(GL_RGB), imageFormat(GL_RGB), wrapS(GL_REPEAT),
     wrapT(GL_REPEAT), filterMin(filter), filterMax(filter)
 {
+    this->mapID = mapID;
+
     glGenTextures(1, &this->ID);
 
     if (alpha)

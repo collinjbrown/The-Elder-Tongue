@@ -232,17 +232,16 @@ void ECS::Update(float deltaTime)
 
 	if (round == 1)
 	{
-
 		#pragma region Soul Instantiation
 
-		Texture2D* t = Game::main.textureMap["blank"];
-		Entity* soul = CreateEntity(0, "Soul");
-		ECS::main.RegisterComponent(new PositionComponent(soul, true, false, -50.0f, 100.0f, 0.0f), soul);
-		ECS::main.RegisterComponent(new PhysicsComponent(soul, true, (PositionComponent*)soul->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), soul);
-		// ECS::main.RegisterComponent(new ColliderComponent(enemy, true, (PositionComponent*)enemy->componentIDMap[positionComponentID], false, false, false, false, true, false, EntityClass::enemy, 1.0f, 1.0f, 10.0f, 40.0f, 120.0f, 0.0f, 0.0f), enemy);
-		// ECS::main.RegisterComponent(new HealthComponent(enemy, true, 100.0f, false), enemy);
-		ECS::main.RegisterComponent(new StaticSpriteComponent(soul, true, (PositionComponent*)soul->componentIDMap[positionComponentID], t->width, t->height, t, true), soul);
-		ECS::main.RegisterComponent(new AIComponent(soul, true, false, 0.0f, 0.0f, 0.5f, 0.0f, AIType::soul), soul);
+		//Texture2D* t = Game::main.textureMap["blank"];
+		//Entity* soul = CreateEntity(0, "Soul");
+		//ECS::main.RegisterComponent(new PositionComponent(soul, true, false, -50.0f, 100.0f, 0.0f), soul);
+		//ECS::main.RegisterComponent(new PhysicsComponent(soul, true, (PositionComponent*)soul->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), soul);
+		//// ECS::main.RegisterComponent(new ColliderComponent(enemy, true, (PositionComponent*)enemy->componentIDMap[positionComponentID], false, false, false, false, true, false, EntityClass::enemy, 1.0f, 1.0f, 10.0f, 40.0f, 120.0f, 0.0f, 0.0f), enemy);
+		//// ECS::main.RegisterComponent(new HealthComponent(enemy, true, 100.0f, false), enemy);
+		//ECS::main.RegisterComponent(new StaticSpriteComponent(soul, true, (PositionComponent*)soul->componentIDMap[positionComponentID], t->width, t->height, t, true), soul);
+		//ECS::main.RegisterComponent(new AIComponent(soul, true, false, 0.0f, 0.0f, 0.5f, 0.0f, AIType::soul), soul);
 
 		#pragma endregion
 
@@ -251,15 +250,15 @@ void ECS::Update(float deltaTime)
 		Animation2D* anim1 = Game::main.animationMap["baseIdle"];
 
 		ECS::main.RegisterComponent(new PositionComponent(player, true, false, 0, 100, 0.0f), player);
-		ECS::main.RegisterComponent(new PhysicsComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 5000.0f, 2000.0f), player);
+		// ECS::main.RegisterComponent(new PhysicsComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 5000.0f, 2000.0f), player);
 		ECS::main.RegisterComponent(new ColliderComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], false, false, false, false, true, false, EntityClass::player, 1.0f, 1.0f, 10.0f, 40.0f, 120.0f, 0.0f, 0.0f), player);
-		ECS::main.RegisterComponent(new MovementComponent(player, true, 6000.0f, 1000.0f, 2.5f, 100.0f, 0.1f, 0.5f, true, true, false), player);
-		ECS::main.RegisterComponent(new InputComponent(player, true, soul, true, 0.5f, 5000.0f, 0.5f, 2, 0.5f, 2.0f, 2000.0f), player);
+		// ECS::main.RegisterComponent(new MovementComponent(player, true, 6000.0f, 1000.0f, 2.5f, 100.0f, 0.1f, 0.5f, true, true, false), player);
+		// ECS::main.RegisterComponent(new InputComponent(player, true, soul, true, 0.5f, 5000.0f, 0.5f, 2, 0.5f, 2.0f, 2000.0f), player);
 		ECS::main.RegisterComponent(new CameraFollowComponent(player, true, 10.0f), player);
 		ECS::main.RegisterComponent(new HealthComponent(player, true, 1000.0f, false), player);
-		ECS::main.RegisterComponent(new DuelistComponent(player, true, true, true), player);
+		// ECS::main.RegisterComponent(new DuelistComponent(player, true, true, true), player);
 		ECS::main.RegisterComponent(new AnimationComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], anim1, "idle"), player);
-		AnimationComponent* a = (AnimationComponent*)player->componentIDMap[animationComponentID];
+		/*AnimationComponent* a = (AnimationComponent*)player->componentIDMap[animationComponentID];
 		ECS::main.RegisterComponent(new PlayerAnimationControllerComponent(player, true, a), player);
 		a->AddAnimation("walk", Game::main.animationMap["baseWalk"]);
 		a->AddAnimation("jumpUp", Game::main.animationMap["baseJumpUp"]);
@@ -272,7 +271,7 @@ void ECS::Update(float deltaTime)
 		a->AddAnimation("sword_jumpDown", Game::main.animationMap["sword_baseJumpDown"]);
 		a->AddAnimation("sword_dead", Game::main.animationMap["baseDeath"]);
 		a->AddAnimation("sword_stab", Game::main.animationMap["sword_baseStab"]);
-		a->AddAnimation("sword_aerialOne", Game::main.animationMap["sword_baseAerialOne"]);
+		a->AddAnimation("sword_aerialOne", Game::main.animationMap["sword_baseAerialOne"]);*/
 		#pragma endregion
 
 		//#pragma region Test Character Instantiation
@@ -298,37 +297,37 @@ void ECS::Update(float deltaTime)
 		//a2->AddAnimation("dead", anim12);
 		//#pragma endregion
 
-		/*Texture2D* tex1000 = Game::main.textureMap["wall"];
-		Entity* wall = CreateEntity(0, "wall");
-		ECS::main.RegisterComponent(new PositionComponent(wall, true, true, 0, 0, 0), wall);
-		ECS::main.RegisterComponent(new StaticSpriteComponent(wall, true, (PositionComponent*)wall->componentIDMap[positionComponentID], 50000.0f, 50000.0f, tex1000, true), wall);*/
+		//Texture2D* tex1000 = Game::main.textureMap["wall"];
+		//Entity* wall = CreateEntity(0, "wall");
+		//ECS::main.RegisterComponent(new PositionComponent(wall, true, true, 0, 0, 0), wall);
+		//ECS::main.RegisterComponent(new StaticSpriteComponent(wall, true, (PositionComponent*)wall->componentIDMap[positionComponentID], 50000.0f, 50000.0f, tex1000, true), wall);
 
-		Texture2D* tex3 = Game::main.textureMap["blank"];
+		//Texture2D* tex3 = Game::main.textureMap["blank"];
 
-		for (int i = 0; i < 25; i++)
-		{
-			float width = rand() % 1000 + 300;
-			float height = rand() % 1000 + 300;
+		//for (int i = 0; i < 25; i++)
+		//{
+		//	float width = rand() % 1000 + 300;
+		//	float height = rand() % 1000 + 300;
 
-			Entity* platform = CreateEntity(0, "floor");
-			ECS::main.RegisterComponent(new PositionComponent(platform, true, true, rand() % 5000, rand() % 5000, 0), platform);
-			ECS::main.RegisterComponent(new PhysicsComponent(platform, true, (PositionComponent*)platform->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 0.1f, 0.0f), platform);
-			ECS::main.RegisterComponent(new ColliderComponent(platform, true, (PositionComponent*)platform->componentIDMap[positionComponentID], true, false, true, false, false, false, EntityClass::object, 1000.0f, 0.0f, 1.0f, width, height, 0.0f, 0.0f), platform);
-			ECS::main.RegisterComponent(new StaticSpriteComponent(platform, true, (PositionComponent*)platform->componentIDMap[positionComponentID], width, height, tex3, false), platform);
-		}
+		//	Entity* platform = CreateEntity(0, "floor");
+		//	ECS::main.RegisterComponent(new PositionComponent(platform, true, true, rand() % 5000, rand() % 5000, 0), platform);
+		//	ECS::main.RegisterComponent(new PhysicsComponent(platform, true, (PositionComponent*)platform->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 0.1f, 0.0f), platform);
+		//	ECS::main.RegisterComponent(new ColliderComponent(platform, true, (PositionComponent*)platform->componentIDMap[positionComponentID], true, false, true, false, false, false, EntityClass::object, 1000.0f, 0.0f, 1.0f, width, height, 0.0f, 0.0f), platform);
+		//	ECS::main.RegisterComponent(new StaticSpriteComponent(platform, true, (PositionComponent*)platform->componentIDMap[positionComponentID], width, height, tex3, false), platform);
+		//}
 
-		for (int i = 0; i < 50; i++)
-		{
-			Entity* floor = CreateEntity(0, "floor");
-			ECS::main.RegisterComponent(new PositionComponent(floor, true, true, i * 500, -200, 0.0f), floor);
-			ECS::main.RegisterComponent(new PhysicsComponent(floor, true, (PositionComponent*)floor->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 0.1f, 0.0f), floor);
-			ECS::main.RegisterComponent(new ColliderComponent(floor, true, (PositionComponent*)floor->componentIDMap[positionComponentID], true, false, true, false, false, false, EntityClass::object, 1000.0f, 0.0f, 1.0f, 540.0f, 80.0f, 0.0f, 0.0f), floor);
-			ECS::main.RegisterComponent(new StaticSpriteComponent(floor, true, (PositionComponent*)floor->componentIDMap[positionComponentID], 540.0f, 80.0f, tex3, false), floor);
+		//for (int i = 0; i < 50; i++)
+		//{
+		//	Entity* floor = CreateEntity(0, "floor");
+		//	ECS::main.RegisterComponent(new PositionComponent(floor, true, true, i * 500, -200, 0.0f), floor);
+		//	ECS::main.RegisterComponent(new PhysicsComponent(floor, true, (PositionComponent*)floor->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 0.1f, 0.0f), floor);
+		//	ECS::main.RegisterComponent(new ColliderComponent(floor, true, (PositionComponent*)floor->componentIDMap[positionComponentID], true, false, true, false, false, false, EntityClass::object, 1000.0f, 0.0f, 1.0f, 540.0f, 80.0f, 0.0f, 0.0f), floor);
+		//	ECS::main.RegisterComponent(new StaticSpriteComponent(floor, true, (PositionComponent*)floor->componentIDMap[positionComponentID], 540.0f, 80.0f, tex3, false), floor);
 
-			Entity* earth = CreateEntity(0, "floor");
-			ECS::main.RegisterComponent(new PositionComponent(earth, true, true, i * 500, -1000, 0.0f), earth);
-			ECS::main.RegisterComponent(new StaticSpriteComponent(earth, true, (PositionComponent*)earth->componentIDMap[positionComponentID], tex3->width * 35, tex3->height * 100.0f, tex3, false), earth);
-		}
+		//	Entity* earth = CreateEntity(0, "floor");
+		//	ECS::main.RegisterComponent(new PositionComponent(earth, true, true, i * 500, -1000, 0.0f), earth);
+		//	ECS::main.RegisterComponent(new StaticSpriteComponent(earth, true, (PositionComponent*)earth->componentIDMap[positionComponentID], tex3->width * 35, tex3->height * 100.0f, tex3, false), earth);
+		//}
 
 		// Do this after we instantiate objects so that it can properly sort out which nodes
 		// are blocked and which aren't.
@@ -786,7 +785,7 @@ void StaticRenderingSystem::Update(int activeScene, float deltaTime)
 				pos->y + (s->height / 2.0f) > screenBottom && pos->y - (s->height / 2.0f) < screenTop &&
 				pos->z < screenElev)
 			{
-				Game::main.renderer->prepareQuad(pos, s->width, s->height, s->sprite->width, s->sprite->height, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), s->sprite->ID, s->tiled);
+				Game::main.renderer->prepareQuad(pos, s->width, s->height, s->sprite->width, s->sprite->height, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), s->sprite->ID, s->sprite->mapID, s->tiled);
 			}
 		}
 	}
@@ -1283,7 +1282,7 @@ bool ColliderSystem::RaycastDown(float size, float distance, ColliderComponent* 
 		}
 	}
 
-	Game::main.renderer->prepareQuad(aTopRight, aBottomRight, aBottomLeft, aTopLeft, glm::vec4(0.0f, 1.0f, 0.0f, 1.0f), Game::main.textureMap["blank"]->ID);
+	// Game::main.renderer->prepareQuad(aTopRight, aBottomRight, aBottomLeft, aTopLeft, glm::vec4(0.0f, 1.0f, 0.0f, 1.0f), Game::main.textureMap["blank"]->ID);
 	return false;
 }
 
@@ -2035,7 +2034,7 @@ void InputSystem::CalculateProjection(PhysicsComponent* phys, InputComponent* m,
 				projPos.y + (s->height / 2.0f) > screenBottom && projPos.y - (s->height / 2.0f) < screenTop)
 			{
 
-				Game::main.renderer->prepareQuad(projPos, s->width / 2.0f, s->height / 2.0f, glm::vec4(1.0f, 1.0f, 1.0f, 0.5f), s->ID);
+				Game::main.renderer->prepareQuad(projPos, s->width / 2.0f, s->height / 2.0f, glm::vec4(1.0f, 1.0f, 1.0f, 0.5f), s->ID, s->mapID);
 			}
 		}
 	}
@@ -2299,7 +2298,7 @@ void AnimationSystem::Update(int activeScene, float deltaTime)
 				pos->z < screenElev)
 			{
 				// std::cout << std::to_string(activeAnimation->width) + "/" + std::to_string(activeAnimation->height) + "\n";
-				Game::main.renderer->prepareQuad(pos, activeAnimation->width, activeAnimation->height, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), activeAnimation->ID, cellX, cellY, activeAnimation->columns, activeAnimation->rows, a->flipped);
+				Game::main.renderer->prepareQuad(pos, activeAnimation->width, activeAnimation->height, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), activeAnimation->ID, activeAnimation->mapID, cellX, cellY, activeAnimation->columns, activeAnimation->rows, a->flipped);
 			}
 
 		}

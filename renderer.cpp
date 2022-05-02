@@ -36,9 +36,12 @@ Renderer::Renderer(GLuint whiteTexture) : batches(1), shader("assets/shaders/qua
     // s and t coordinates for texture
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, sCoord));
     glEnableVertexAttribArray(2);
-    // Texture index
+    // Texture Index
     glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, textureIndex));
     glEnableVertexAttribArray(3);
+    // Map Index
+    glVertexAttribPointer(4, 1, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, mapIndex));
+    glEnableVertexAttribArray(4);
 
     glCheckError();
 
@@ -84,7 +87,7 @@ Renderer::Renderer(GLuint whiteTexture) : batches(1), shader("assets/shaders/qua
 }
 
 void Renderer::prepareQuad(glm::vec2 position, float width, float height,
-    glm::vec4 rgb, int textureID)
+    glm::vec4 rgb, int textureID, int mapID)
 {
     // Figure out which batch should be written to
     // -------------------------------------------
@@ -100,8 +103,21 @@ void Renderer::prepareQuad(glm::vec2 position, float width, float height,
         location = result - textureIDs.begin();
     }
 
+    auto mResult = std::find(textureIDs.begin(), textureIDs.end(), mapID);
+    int mLocation;
+    if (mResult == textureIDs.end())
+    {
+        mLocation = textureIDs.size();
+        textureIDs.push_back(mapID);
+    }
+    else
+    {
+        mLocation = mResult - textureIDs.begin();
+    }
+
     int batchIndex = location / MAX_TEXTURES_PER_BATCH;
     float glTextureIndex = location % MAX_TEXTURES_PER_BATCH;
+    float glMapIndex = mLocation % MAX_TEXTURES_PER_BATCH;
     Batch& batch = batches[batchIndex];
 
     // Initialize the data for the quad
@@ -119,14 +135,14 @@ void Renderer::prepareQuad(glm::vec2 position, float width, float height,
     const float b = rgb.b;
     const float a = rgb.a;
 
-    quad.topRight = { rightX, topY,      r, g, b, a,   1.0, 1.0,    glTextureIndex };
-    quad.bottomRight = { rightX, bottomY,   r, g, b, a,   1.0, 0.0,    glTextureIndex };
-    quad.bottomLeft = { leftX,  bottomY,   r, g, b, a,   0.0, 0.0,    glTextureIndex };
-    quad.topLeft = { leftX,  topY,      r, g, b, a,   0.0, 1.0,    glTextureIndex };
+    quad.topRight = { rightX, topY,      r, g, b, a,   1.0, 1.0,    glTextureIndex, glMapIndex };
+    quad.bottomRight = { rightX, bottomY,   r, g, b, a,   1.0, 0.0,    glTextureIndex, glMapIndex };
+    quad.bottomLeft = { leftX,  bottomY,   r, g, b, a,   0.0, 0.0,    glTextureIndex, glMapIndex };
+    quad.topLeft = { leftX,  topY,      r, g, b, a,   0.0, 1.0,    glTextureIndex, glMapIndex };
 }
 
 void Renderer::prepareQuad(PositionComponent* pos, float width, float height, float tWidth, float tHeight,
-    glm::vec4 rgb, int textureID, bool tiled)
+    glm::vec4 rgb, int textureID, int mapID, bool tiled)
 {
     // Figure out which batch should be written to
     // -------------------------------------------
@@ -143,8 +159,21 @@ void Renderer::prepareQuad(PositionComponent* pos, float width, float height, fl
         location = result - textureIDs.begin();
     }
 
+    auto mResult = std::find(textureIDs.begin(), textureIDs.end(), mapID);
+    int mLocation;
+    if (mResult == textureIDs.end())
+    {
+        mLocation = textureIDs.size();
+        textureIDs.push_back(mapID);
+    }
+    else
+    {
+        mLocation = mResult - textureIDs.begin();
+    }
+
     int batchIndex = location / MAX_TEXTURES_PER_BATCH;
     float glTextureIndex = location % MAX_TEXTURES_PER_BATCH;
+    float glMapIndex = mLocation % MAX_TEXTURES_PER_BATCH;
     Batch& batch = batches[batchIndex];
 
     // Initialize the data for the quad
@@ -172,23 +201,23 @@ void Renderer::prepareQuad(PositionComponent* pos, float width, float height, fl
         const float xMod = fmod(width, tWidth);
         const float yMod = fmod(height, tHeight);
 
-        quad.topRight = { topRight.x, topRight.y,      r, g, b, a,   xMod, yMod,    glTextureIndex };
-        quad.bottomRight = { bottomRight.x, bottomRight.y,   r, g, b, a,   xMod, 0.0,    glTextureIndex };
-        quad.bottomLeft = { bottomLeft.x,  bottomLeft.y,   r, g, b, a,   0.0, 0.0,    glTextureIndex };
-        quad.topLeft = { topLeft.x,  topLeft.y,      r, g, b, a,   0.0, yMod,    glTextureIndex };
+        quad.topRight = { topRight.x, topRight.y,      r, g, b, a,   xMod, yMod,    glTextureIndex, glMapIndex };
+        quad.bottomRight = { bottomRight.x, bottomRight.y,   r, g, b, a,   xMod, 0.0,    glTextureIndex, glMapIndex };
+        quad.bottomLeft = { bottomLeft.x,  bottomLeft.y,   r, g, b, a,   0.0, 0.0,    glTextureIndex, glMapIndex };
+        quad.topLeft = { topLeft.x,  topLeft.y,      r, g, b, a,   0.0, yMod,    glTextureIndex, glMapIndex };
     }
     else
     {
-        quad.topRight = { topRight.x, topRight.y,      r, g, b, a,   1.0, 1.0,    glTextureIndex };
-        quad.bottomRight = { bottomRight.x, bottomRight.y,   r, g, b, a,   1.0, 0.0,    glTextureIndex };
-        quad.bottomLeft = { bottomLeft.x,  bottomLeft.y,   r, g, b, a,   0.0, 0.0,    glTextureIndex };
-        quad.topLeft = { topLeft.x,  topLeft.y,      r, g, b, a,   0.0, 1.0,    glTextureIndex };
+        quad.topRight = { topRight.x, topRight.y,      r, g, b, a,   1.0, 1.0,    glTextureIndex, glMapIndex };
+        quad.bottomRight = { bottomRight.x, bottomRight.y,   r, g, b, a,   1.0, 0.0,    glTextureIndex, glMapIndex };
+        quad.bottomLeft = { bottomLeft.x,  bottomLeft.y,   r, g, b, a,   0.0, 0.0,    glTextureIndex, glMapIndex };
+        quad.topLeft = { topLeft.x,  topLeft.y,      r, g, b, a,   0.0, 1.0,    glTextureIndex, glMapIndex };
     }
 }
 
 
 void Renderer::prepareQuad(PositionComponent* pos, float width, float height,
-    glm::vec4 rgb, int animID, int cellX, int cellY, int cols, int rows, bool flipped)
+    glm::vec4 rgb, int animID, int mapID, int cellX, int cellY, int cols, int rows, bool flipped)
 {
     // Figure out which batch should be written to
     // -------------------------------------------
@@ -203,9 +232,22 @@ void Renderer::prepareQuad(PositionComponent* pos, float width, float height,
     {
         location = result - textureIDs.begin();
     }
+    
+    auto mResult = std::find(textureIDs.begin(), textureIDs.end(), mapID);
+    int mLocation;
+    if (mResult == textureIDs.end())
+    {
+        mLocation = textureIDs.size();
+        textureIDs.push_back(mapID);
+    }
+    else
+    {
+        mLocation = mResult - textureIDs.begin();
+    }
 
     int batchIndex = location / MAX_TEXTURES_PER_BATCH;
     float glTextureIndex = location % MAX_TEXTURES_PER_BATCH;
+    float glMapIndex = mLocation % MAX_TEXTURES_PER_BATCH;
     Batch& batch = batches[batchIndex];
 
     
@@ -251,15 +293,15 @@ void Renderer::prepareQuad(PositionComponent* pos, float width, float height,
     const float b = rgb.b;
     const float a = rgb.a;
 
-    quad.topRight = { topRight.x, topRight.y,      r, g, b, a,   uvX1, uvY1,    glTextureIndex };
-    quad.bottomRight = { bottomRight.x, bottomRight.y,   r, g, b, a,   uvX1, uvY0,    glTextureIndex };
-    quad.bottomLeft = { bottomLeft.x,  bottomLeft.y,   r, g, b, a,   uvX0, uvY0,    glTextureIndex };
-    quad.topLeft = { topLeft.x,  topLeft.y,      r, g, b, a,   uvX0, uvY1,    glTextureIndex };
+    quad.topRight = { topRight.x, topRight.y,      r, g, b, a,   uvX1, uvY1,    glTextureIndex, glMapIndex };
+    quad.bottomRight = { bottomRight.x, bottomRight.y,   r, g, b, a,   uvX1, uvY0,    glTextureIndex, glMapIndex };
+    quad.bottomLeft = { bottomLeft.x,  bottomLeft.y,   r, g, b, a,   uvX0, uvY0,    glTextureIndex, glMapIndex };
+    quad.topLeft = { topLeft.x,  topLeft.y,      r, g, b, a,   uvX0, uvY1,    glTextureIndex, glMapIndex };
 }
 
 
 void Renderer::prepareQuad(PositionComponent* pos, ColliderComponent* col, float width, float height,
-    glm::vec4 rgb, int textureID)
+    glm::vec4 rgb, int textureID, int mapID)
 {
     // Figure out which batch should be written to
     // -------------------------------------------
@@ -275,8 +317,21 @@ void Renderer::prepareQuad(PositionComponent* pos, ColliderComponent* col, float
         location = result - textureIDs.begin();
     }
 
+    auto mResult = std::find(textureIDs.begin(), textureIDs.end(), mapID);
+    int mLocation;
+    if (mResult == textureIDs.end())
+    {
+        mLocation = textureIDs.size();
+        textureIDs.push_back(mapID);
+    }
+    else
+    {
+        mLocation = mResult - textureIDs.begin();
+    }
+
     int batchIndex = location / MAX_TEXTURES_PER_BATCH;
     float glTextureIndex = location % MAX_TEXTURES_PER_BATCH;
+    float glMapIndex = mLocation % MAX_TEXTURES_PER_BATCH;
     Batch& batch = batches[batchIndex];
 
     // Initialize the data for the quad
@@ -299,14 +354,14 @@ void Renderer::prepareQuad(PositionComponent* pos, ColliderComponent* col, float
     const float b = rgb.b;
     const float a = rgb.a;
 
-    quad.topRight = { topRight.x, topRight.y,      r, g, b, a,   1.0, 1.0,    glTextureIndex };
-    quad.bottomRight = { bottomRight.x, bottomRight.y,   r, g, b, a,   1.0, 0.0,    glTextureIndex };
-    quad.bottomLeft = { bottomLeft.x,  bottomLeft.y,   r, g, b, a,   0.0, 0.0,    glTextureIndex };
-    quad.topLeft = { topLeft.x,  topLeft.y,      r, g, b, a,   0.0, 1.0,    glTextureIndex };
+    quad.topRight = { topRight.x, topRight.y,      r, g, b, a,   1.0, 1.0,    glTextureIndex, glMapIndex };
+    quad.bottomRight = { bottomRight.x, bottomRight.y,   r, g, b, a,   1.0, 0.0,    glTextureIndex, glMapIndex };
+    quad.bottomLeft = { bottomLeft.x,  bottomLeft.y,   r, g, b, a,   0.0, 0.0,    glTextureIndex, glMapIndex };
+    quad.topLeft = { topLeft.x,  topLeft.y,      r, g, b, a,   0.0, 1.0,    glTextureIndex, glMapIndex };
 }
 
 void Renderer::prepareQuad(glm::vec2 topRight, glm::vec2 bottomRight, glm::vec2 bottomLeft, glm::vec2 topLeft,
-    glm::vec4 rgb, int textureID)
+    glm::vec4 rgb, int textureID, int mapID)
 {
     // Figure out which batch should be written to
     // -------------------------------------------
@@ -322,8 +377,21 @@ void Renderer::prepareQuad(glm::vec2 topRight, glm::vec2 bottomRight, glm::vec2 
         location = result - textureIDs.begin();
     }
 
+    auto mResult = std::find(textureIDs.begin(), textureIDs.end(), mapID);
+    int mLocation;
+    if (mResult == textureIDs.end())
+    {
+        mLocation = textureIDs.size();
+        textureIDs.push_back(mapID);
+    }
+    else
+    {
+        mLocation = mResult - textureIDs.begin();
+    }
+
     int batchIndex = location / MAX_TEXTURES_PER_BATCH;
     float glTextureIndex = location % MAX_TEXTURES_PER_BATCH;
+    float glMapIndex = mLocation % MAX_TEXTURES_PER_BATCH;
     Batch& batch = batches[batchIndex];
 
     // Initialize the data for the quad
@@ -336,10 +404,10 @@ void Renderer::prepareQuad(glm::vec2 topRight, glm::vec2 bottomRight, glm::vec2 
     const float b = rgb.b;
     const float a = rgb.a;
 
-    quad.topRight = { topRight.x, topRight.y,      r, g, b, a,   1.0, 1.0,    glTextureIndex };
-    quad.bottomRight = { bottomRight.x, bottomRight.y,   r, g, b, a,   1.0, 0.0,    glTextureIndex };
-    quad.bottomLeft = { bottomLeft.x,  bottomLeft.y,   r, g, b, a,   0.0, 0.0,    glTextureIndex };
-    quad.topLeft = { topLeft.x,  topLeft.y,      r, g, b, a,   0.0, 1.0,    glTextureIndex };
+    quad.topRight = { topRight.x, topRight.y,      r, g, b, a,   1.0, 1.0,    glTextureIndex, glMapIndex };
+    quad.bottomRight = { bottomRight.x, bottomRight.y,   r, g, b, a,   1.0, 0.0,    glTextureIndex, glMapIndex };
+    quad.bottomLeft = { bottomLeft.x,  bottomLeft.y,   r, g, b, a,   0.0, 0.0,    glTextureIndex, glMapIndex };
+    quad.topLeft = { topLeft.x,  topLeft.y,      r, g, b, a,   0.0, 1.0,    glTextureIndex, glMapIndex };
 }
 
 void Renderer::prepareQuad(int batchIndex, Quad& input)

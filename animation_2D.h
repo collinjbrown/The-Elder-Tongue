@@ -6,6 +6,8 @@
 #include <GLFW/glfw3.h>
 #include <vector>
 
+#include "texture_2D.h"
+
 class Animation2D
 {
 private:
@@ -13,6 +15,7 @@ private:
 
 public:
     GLuint              ID;
+    GLuint              mapID;
     unsigned int        width;
     unsigned int        height;
     unsigned int        columns;
@@ -27,7 +30,7 @@ public:
     GLuint              filterMin;
     GLuint              filterMax;
 
-    Animation2D(const char* file, bool alpha, int columns, int rows, float speed, std::vector<int> rowsToColls, bool loop, int filter = GL_LINEAR);
+    Animation2D(const char* file, GLuint mapID, bool alpha, int columns, int rows, float speed, std::vector<int> rowsToColls, bool loop, int filter = GL_LINEAR);
 
     void bind() const;
 };

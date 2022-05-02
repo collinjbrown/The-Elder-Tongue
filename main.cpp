@@ -15,8 +15,8 @@
 #include "shader.h"
 #include "game.h"
 #include "check_error.h"
-#include "texture_2D.h"
-#include "renderer.h"
+// #include "texture_2D.h"
+// #include "renderer.h"
 #include "entity.h"
 #include "particleengine.h"
 #include "ecs.h"
@@ -98,106 +98,118 @@ int main(void)
 
     Renderer renderer{ whiteTexture->ID };
 
-    Texture2D dot{ "assets/sprites/dot.png", true, GL_NEAREST };
-    renderer.textureIDs.push_back(dot.ID);
-    Game::main.textureMap.emplace("dot", &dot);
+    // I should talk about textures. Every texture has a source and a map.
+    // The source textures are the same across all the sprites and animations for an object or character,
+    // so instead of altering a source, one creates a map for any alternative forms of sprites or animations.
+    // Each pixel in the source sprite has an r and a b value that denotes some x and y value on the map
+    // which is used to find the color of the pixel.
 
-    Texture2D test{ "assets/sprites/test.png", true, GL_NEAREST };
-    renderer.textureIDs.push_back(test.ID);
-    Game::main.textureMap.emplace("test", &test);
+    //Texture2D dot{ "assets/sprites/dot.png", true, GL_NEAREST };
+    //renderer.textureIDs.push_back(dot.ID);
+    //Game::main.textureMap.emplace("dot", &dot);
 
-    Texture2D blank{ "assets/sprites/blank.png", true, GL_NEAREST };
-    renderer.textureIDs.push_back(blank.ID);
-    Game::main.textureMap.emplace("blank", &blank);
+    //Texture2D test{ "assets/sprites/test.png", true, GL_NEAREST };
+    //renderer.textureIDs.push_back(test.ID);
+    //Game::main.textureMap.emplace("test", &test);
 
-    Texture2D aetherBullet{ "assets/sprites/bullets/aether_bullet.png", true, GL_NEAREST };
-    renderer.textureIDs.push_back(aetherBullet.ID);
-    Game::main.textureMap.emplace("aether_bullet", &aetherBullet);
+    //Texture2D blank{ "assets/sprites/blank.png", true, GL_NEAREST };
+    //renderer.textureIDs.push_back(blank.ID);
+    //Game::main.textureMap.emplace("blank", &blank);
 
-    Texture2D wall{ "assets/sprites/world/test/the_wall.png", true, GL_NEAREST };
-    renderer.textureIDs.push_back(wall.ID);
-    Game::main.textureMap.emplace("wall", &wall);
+    //Texture2D aetherBullet{ "assets/sprites/bullets/aether_bullet.png", true, GL_NEAREST };
+    //renderer.textureIDs.push_back(aetherBullet.ID);
+    //Game::main.textureMap.emplace("aether_bullet", &aetherBullet);
+
+    //Texture2D wall{ "assets/sprites/world/test/the_wall.png", true, GL_NEAREST };
+    //renderer.textureIDs.push_back(wall.ID);
+    //Game::main.textureMap.emplace("wall", &wall);
 
     #pragma region Player Animations
 
-    Animation2D baseIdle{ "assets/animations/lily/lily_idle.png", true, 3, 2, 0.5f, { 3, 3 }, true, GL_NEAREST };
+    Texture2D lilyMap{ "assets/animations/lily/lily_base_map.png", 0, true, GL_NEAREST };
+    renderer.textureIDs.push_back(lilyMap.ID);
+    Game::main.textureMap.emplace("lilyMap", &lilyMap);
+
+    Animation2D baseIdle{ "assets/animations/lily/lily_idle.png", lilyMap.ID, true, 3, 2, 0.5f, { 3, 3 }, true, GL_NEAREST };
     renderer.textureIDs.push_back(baseIdle.ID);
     Game::main.animationMap.emplace("baseIdle", &baseIdle);
 
-    Animation2D baseWalk{ "assets/animations/lily/lily_run.png", true, 3, 4, 0.05f, { 3, 3, 3, 3 }, true, GL_NEAREST };
-    renderer.textureIDs.push_back(baseWalk.ID);
-    Game::main.animationMap.emplace("baseWalk", &baseWalk);
-
-    Animation2D baseJumpUp{ "assets/animations/lily/lily_up.png", true, 1, 1, 5.0f, { 1 }, true, GL_NEAREST };
-    renderer.textureIDs.push_back(baseJumpUp.ID);
-    Game::main.animationMap.emplace("baseJumpUp", &baseJumpUp);
-
-    Animation2D baseJumpDown{ "assets/animations/lily/lily_up.png", true,  1, 1, 5.0f, { 1 }, true, GL_NEAREST };
-    renderer.textureIDs.push_back(baseJumpDown.ID);
-    Game::main.animationMap.emplace("baseJumpDown", &baseJumpDown);
-
-    Animation2D baseDeath{ "assets/animations/base/baseDying.png", true, 4, 4, 1.0f, { 2, 4, 4, 4 }, false, GL_NEAREST };
-    renderer.textureIDs.push_back(baseDeath.ID);
-    Game::main.animationMap.emplace("baseDeath", &baseDeath);
-
-
-    Animation2D swordBaseIdle{ "assets/animations/lily/lily_idle.png", true, 3, 2, 0.5f, { 3, 3 }, true, GL_NEAREST };
-    renderer.textureIDs.push_back(swordBaseIdle.ID);
-    Game::main.animationMap.emplace("sword_baseIdle", &swordBaseIdle);
-
-    Animation2D swordBaseWalk{ "assets/animations/lily/lily_run.png", true, 3, 4, 0.05f, { 3, 3, 3, 3 }, true, GL_NEAREST };
-    renderer.textureIDs.push_back(swordBaseWalk.ID);
-    Game::main.animationMap.emplace("sword_baseWalk", &swordBaseWalk);
-
-    Animation2D swordBaseJumpUp{ "assets/animations/lily/lily_up.png", true,  1, 1, 5.0f, { 1 }, true, GL_NEAREST };
-    renderer.textureIDs.push_back(swordBaseJumpUp.ID);
-    Game::main.animationMap.emplace("sword_baseJumpUp", &swordBaseJumpUp);
-
-    Animation2D swordBaseJumpDown{ "assets/animations/lily/lily_up.png", true,  1, 1, 5.0f, { 1 }, true, GL_NEAREST };
-    renderer.textureIDs.push_back(swordBaseJumpDown.ID);
-    Game::main.animationMap.emplace("sword_baseJumpDown", &swordBaseJumpDown);
-
-    Animation2D swordBaseStab{ "assets/animations/base/sword_baseStab.png", true, 2, 2, 0.05f, { 2, 2 }, false, GL_NEAREST };
-    renderer.textureIDs.push_back(swordBaseStab.ID);
-    Game::main.animationMap.emplace("sword_baseStab", &swordBaseStab);
-
-    Animation2D swordBaseAerialOne{ "assets/animations/base/sword_baseAerialOne.png", true, 2, 3, 0.05f, { 2, 2, 2 }, false, GL_NEAREST };
-    renderer.textureIDs.push_back(swordBaseAerialOne.ID);
-    Game::main.animationMap.emplace("sword_baseAerialOne", &swordBaseAerialOne);
-
-    Animation2D slashBaseAerialOne{ "assets/animations/base/slash_baseAerialOne.png", true, 2, 3, 0.05f, { 2, 2, 2 }, false, GL_NEAREST };
-    renderer.textureIDs.push_back(slashBaseAerialOne.ID);
-    Game::main.animationMap.emplace("slash_baseAerialOne", &slashBaseAerialOne);
-
     #pragma endregion
 
-    #pragma region Test Character Animations
+    //Animation2D baseWalk{ "assets/animations/lily/lily_run.png", true, 3, 4, 0.05f, { 3, 3, 3, 3 }, true, GL_NEAREST };
+    //renderer.textureIDs.push_back(baseWalk.ID);
+    //Game::main.animationMap.emplace("baseWalk", &baseWalk);
 
-    Animation2D testIdle{ "assets/animations/test/testIdle.png", true, 2, 2, 1.0f, { 2, 2 }, true, GL_NEAREST };
-    renderer.textureIDs.push_back(testIdle.ID);
-    Game::main.animationMap.emplace("testIdle", &testIdle);
+    //Animation2D baseJumpUp{ "assets/animations/lily/lily_up.png", true, 1, 1, 5.0f, { 1 }, true, GL_NEAREST };
+    //renderer.textureIDs.push_back(baseJumpUp.ID);
+    //Game::main.animationMap.emplace("baseJumpUp", &baseJumpUp);
 
-    Animation2D testWalk{ "assets/animations/test/testWalk.png", true, 3, 3, 0.1f, { 2, 3, 3 }, true, GL_NEAREST };
-    renderer.textureIDs.push_back(testWalk.ID);
-    Game::main.animationMap.emplace("testWalk", &testWalk);
+    //Animation2D baseJumpDown{ "assets/animations/lily/lily_up.png", true,  1, 1, 5.0f, { 1 }, true, GL_NEAREST };
+    //renderer.textureIDs.push_back(baseJumpDown.ID);
+    //Game::main.animationMap.emplace("baseJumpDown", &baseJumpDown);
 
-    Animation2D testJumpPrep{ "assets/animations/test/testJumpPrep.png", true, 1, 1, 5.0f, { 1 }, true, GL_NEAREST };
-    renderer.textureIDs.push_back(testJumpPrep.ID);
-    Game::main.animationMap.emplace("testJumpPrep", &testJumpPrep);
+    //Animation2D baseDeath{ "assets/animations/base/baseDying.png", true, 4, 4, 1.0f, { 2, 4, 4, 4 }, false, GL_NEAREST };
+    //renderer.textureIDs.push_back(baseDeath.ID);
+    //Game::main.animationMap.emplace("baseDeath", &baseDeath);
 
-    Animation2D testJumpUp{ "assets/animations/test/testJumpUp.png", true, 1, 1, 5.0f, { 1 }, true, GL_NEAREST };
-    renderer.textureIDs.push_back(testJumpUp.ID);
-    Game::main.animationMap.emplace("testJumpUp", &testJumpUp);
 
-    Animation2D testJumpDown{ "assets/animations/test/testJumpDown.png", true, 2, 2, 1.0f, { 2, 2 }, true, GL_NEAREST };
-    renderer.textureIDs.push_back(testJumpDown.ID);
-    Game::main.animationMap.emplace("testJumpDown", &testJumpDown);
+    //Animation2D swordBaseIdle{ "assets/animations/lily/lily_idle.png", true, 3, 2, 0.5f, { 3, 3 }, true, GL_NEAREST };
+    //renderer.textureIDs.push_back(swordBaseIdle.ID);
+    //Game::main.animationMap.emplace("sword_baseIdle", &swordBaseIdle);
 
-    Animation2D testDeath{ "assets/animations/test/testDying.png", true, 4, 4, 1.0f, { 1, 4, 4, 4 }, false, GL_NEAREST };
-    renderer.textureIDs.push_back(testDeath.ID);
-    Game::main.animationMap.emplace("testDeath", &testDeath);
+    //Animation2D swordBaseWalk{ "assets/animations/lily/lily_run.png", true, 3, 4, 0.05f, { 3, 3, 3, 3 }, true, GL_NEAREST };
+    //renderer.textureIDs.push_back(swordBaseWalk.ID);
+    //Game::main.animationMap.emplace("sword_baseWalk", &swordBaseWalk);
 
-    #pragma endregion
+    //Animation2D swordBaseJumpUp{ "assets/animations/lily/lily_up.png", true,  1, 1, 5.0f, { 1 }, true, GL_NEAREST };
+    //renderer.textureIDs.push_back(swordBaseJumpUp.ID);
+    //Game::main.animationMap.emplace("sword_baseJumpUp", &swordBaseJumpUp);
+
+    //Animation2D swordBaseJumpDown{ "assets/animations/lily/lily_up.png", true,  1, 1, 5.0f, { 1 }, true, GL_NEAREST };
+    //renderer.textureIDs.push_back(swordBaseJumpDown.ID);
+    //Game::main.animationMap.emplace("sword_baseJumpDown", &swordBaseJumpDown);
+
+    //Animation2D swordBaseStab{ "assets/animations/base/sword_baseStab.png", true, 2, 2, 0.05f, { 2, 2 }, false, GL_NEAREST };
+    //renderer.textureIDs.push_back(swordBaseStab.ID);
+    //Game::main.animationMap.emplace("sword_baseStab", &swordBaseStab);
+
+    //Animation2D swordBaseAerialOne{ "assets/animations/base/sword_baseAerialOne.png", true, 2, 3, 0.05f, { 2, 2, 2 }, false, GL_NEAREST };
+    //renderer.textureIDs.push_back(swordBaseAerialOne.ID);
+    //Game::main.animationMap.emplace("sword_baseAerialOne", &swordBaseAerialOne);
+
+    //Animation2D slashBaseAerialOne{ "assets/animations/base/slash_baseAerialOne.png", true, 2, 3, 0.05f, { 2, 2, 2 }, false, GL_NEAREST };
+    //renderer.textureIDs.push_back(slashBaseAerialOne.ID);
+    //Game::main.animationMap.emplace("slash_baseAerialOne", &slashBaseAerialOne);
+
+    //#pragma endregion
+
+    //#pragma region Test Character Animations
+
+    //Animation2D testIdle{ "assets/animations/test/testIdle.png", true, 2, 2, 1.0f, { 2, 2 }, true, GL_NEAREST };
+    //renderer.textureIDs.push_back(testIdle.ID);
+    //Game::main.animationMap.emplace("testIdle", &testIdle);
+
+    //Animation2D testWalk{ "assets/animations/test/testWalk.png", true, 3, 3, 0.1f, { 2, 3, 3 }, true, GL_NEAREST };
+    //renderer.textureIDs.push_back(testWalk.ID);
+    //Game::main.animationMap.emplace("testWalk", &testWalk);
+
+    //Animation2D testJumpPrep{ "assets/animations/test/testJumpPrep.png", true, 1, 1, 5.0f, { 1 }, true, GL_NEAREST };
+    //renderer.textureIDs.push_back(testJumpPrep.ID);
+    //Game::main.animationMap.emplace("testJumpPrep", &testJumpPrep);
+
+    //Animation2D testJumpUp{ "assets/animations/test/testJumpUp.png", true, 1, 1, 5.0f, { 1 }, true, GL_NEAREST };
+    //renderer.textureIDs.push_back(testJumpUp.ID);
+    //Game::main.animationMap.emplace("testJumpUp", &testJumpUp);
+
+    //Animation2D testJumpDown{ "assets/animations/test/testJumpDown.png", true, 2, 2, 1.0f, { 2, 2 }, true, GL_NEAREST };
+    //renderer.textureIDs.push_back(testJumpDown.ID);
+    //Game::main.animationMap.emplace("testJumpDown", &testJumpDown);
+
+    //Animation2D testDeath{ "assets/animations/test/testDying.png", true, 4, 4, 1.0f, { 1, 4, 4, 4 }, false, GL_NEAREST };
+    //renderer.textureIDs.push_back(testDeath.ID);
+    //Game::main.animationMap.emplace("testDeath", &testDeath);
+
+    //#pragma endregion
 
     Game::main.renderer = &renderer;
     #pragma endregion
