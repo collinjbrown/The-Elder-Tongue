@@ -9,7 +9,7 @@
 - ~~Add particle effects.~~
 - Lighting
 ## UI & Input
-- ~Add basic input.~~
+- ~~Add basic input.~~
 - Add buttons.
 - Add menus.
 - Make inputs mappable.
