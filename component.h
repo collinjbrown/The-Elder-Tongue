@@ -85,9 +85,11 @@ public:
 	bool tiled;
 
 	Texture2D* sprite;
+	Texture2D* map;
+
 	PositionComponent* pos;
 
-	StaticSpriteComponent(Entity* entity, bool active, PositionComponent* pos, float width, float height, Texture2D* sprite, bool tiled);
+	StaticSpriteComponent(Entity* entity, bool active, PositionComponent* pos, float width, float height, Texture2D* sprite, Texture2D* map, bool tiled);
 };
 
 class ColliderComponent : public Component
@@ -195,6 +197,8 @@ public:
 
 	std::string activeAnimation;
 	map<std::string, Animation2D*> animations;
+	Texture2D* map;
+
 	PositionComponent* pos;
 
 	float lastTick;
@@ -203,7 +207,7 @@ public:
 
 	void AddAnimation(std::string s, Animation2D* anim);
 
-	AnimationComponent(Entity* entity, bool active, PositionComponent* pos, Animation2D* idleAnimation, std::string animationName);
+	AnimationComponent(Entity* entity, bool active, PositionComponent* pos, Animation2D* idleAnimation, std::string animationName, Texture2D* map);
 };
 
 class AnimationControllerComponent : public Component

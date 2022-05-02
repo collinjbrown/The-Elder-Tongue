@@ -126,11 +126,11 @@ int main(void)
 
     #pragma region Player Animations
 
-    Texture2D lilyMap{ "assets/animations/lily/lily_base_map.png", 0, true, GL_NEAREST };
+    Texture2D lilyMap{ "assets/animations/lily/lily_base_map.png", true, GL_NEAREST };
     renderer.textureIDs.push_back(lilyMap.ID);
     Game::main.textureMap.emplace("lilyMap", &lilyMap);
 
-    Animation2D baseIdle{ "assets/animations/lily/lily_idle.png", lilyMap.ID, true, 3, 2, 0.5f, { 3, 3 }, true, GL_NEAREST };
+    Animation2D baseIdle{ "assets/animations/lily/lily_idle.png", true, 3, 2, 0.5f, { 3, 3 }, true, GL_NEAREST };
     renderer.textureIDs.push_back(baseIdle.ID);
     Game::main.animationMap.emplace("baseIdle", &baseIdle);
 
