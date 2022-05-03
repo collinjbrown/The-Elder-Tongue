@@ -136,9 +136,9 @@ int main(void)
 
     #pragma endregion
 
-    //Animation2D baseWalk{ "assets/animations/lily/lily_run.png", true, 3, 4, 0.05f, { 3, 3, 3, 3 }, true, GL_NEAREST };
-    //renderer.textureIDs.push_back(baseWalk.ID);
-    //Game::main.animationMap.emplace("baseWalk", &baseWalk);
+    Animation2D baseWalk{ "assets/animations/lily/lily_run.png", true, 3, 4, 0.05f, { 1, 3, 3, 3 }, true, GL_NEAREST };
+    renderer.textureIDs.push_back(baseWalk.ID);
+    Game::main.animationMap.emplace("baseWalk", &baseWalk);
 
     //Animation2D baseJumpUp{ "assets/animations/lily/lily_up.png", true, 1, 1, 5.0f, { 1 }, true, GL_NEAREST };
     //renderer.textureIDs.push_back(baseJumpUp.ID);
