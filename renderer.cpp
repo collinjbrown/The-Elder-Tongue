@@ -142,7 +142,7 @@ void Renderer::prepareQuad(glm::vec2 position, float width, float height,
 }
 
 void Renderer::prepareQuad(PositionComponent* pos, float width, float height, float tWidth, float tHeight,
-    glm::vec4 rgb, int textureID, int mapID, bool tiled)
+    glm::vec4 rgb, int textureID, int mapID, bool tiled, bool flipped)
 {
     // Figure out which batch should be written to
     // -------------------------------------------
@@ -176,6 +176,17 @@ void Renderer::prepareQuad(PositionComponent* pos, float width, float height, fl
     float glMapIndex = mLocation % MAX_TEXTURES_PER_BATCH;
     Batch& batch = batches[batchIndex];
 
+    float xL = 0.0f;
+    float yL = 0.0f;
+    float xR = 1.0f;
+    float yR = 1.0f;
+
+    if (flipped)
+    {
+        xL = 1.0f;
+        xR = 0.0f;
+    }
+
     // Initialize the data for the quad
     // --------------------------------
     Quad& quad = batch.quadBuffer[batch.quadIndex];
@@ -208,10 +219,10 @@ void Renderer::prepareQuad(PositionComponent* pos, float width, float height, fl
     }
     else
     {
-        quad.topRight = { topRight.x, topRight.y,      r, g, b, a,   1.0, 1.0,    glTextureIndex, glMapIndex };
-        quad.bottomRight = { bottomRight.x, bottomRight.y,   r, g, b, a,   1.0, 0.0,    glTextureIndex, glMapIndex };
-        quad.bottomLeft = { bottomLeft.x,  bottomLeft.y,   r, g, b, a,   0.0, 0.0,    glTextureIndex, glMapIndex };
-        quad.topLeft = { topLeft.x,  topLeft.y,      r, g, b, a,   0.0, 1.0,    glTextureIndex, glMapIndex };
+        quad.topRight = { topRight.x, topRight.y,      r, g, b, a,   xR, yR,    glTextureIndex, glMapIndex };
+        quad.bottomRight = { bottomRight.x, bottomRight.y,   r, g, b, a,   xR, yL,    glTextureIndex, glMapIndex };
+        quad.bottomLeft = { bottomLeft.x,  bottomLeft.y,   r, g, b, a,   xL, yL,    glTextureIndex, glMapIndex };
+        quad.topLeft = { topLeft.x,  topLeft.y,      r, g, b, a,   xL, yR,    glTextureIndex, glMapIndex };
     }
 }
 
@@ -264,7 +275,6 @@ void Renderer::prepareQuad(PositionComponent* pos, float width, float height,
     if (flipped)
     {
         float tempX0 = uvX0;
-        float tempY0 = uvY0;
 
         uvX0 = uvX1;
         uvX1 = tempX0;

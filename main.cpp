@@ -116,13 +116,41 @@ int main(void)
     //renderer.textureIDs.push_back(blank.ID);
     //Game::main.textureMap.emplace("blank", &blank);
 
-    //Texture2D aetherBullet{ "assets/sprites/bullets/aether_bullet.png", true, GL_NEAREST };
-    //renderer.textureIDs.push_back(aetherBullet.ID);
-    //Game::main.textureMap.emplace("aether_bullet", &aetherBullet);
+    Texture2D aetherBullet{ "assets/sprites/bullets/aether_bullet.png", true, GL_NEAREST };
+    renderer.textureIDs.push_back(aetherBullet.ID);
+    Game::main.textureMap.emplace("aether_bullet", &aetherBullet);
 
-    //Texture2D wall{ "assets/sprites/world/test/the_wall.png", true, GL_NEAREST };
-    //renderer.textureIDs.push_back(wall.ID);
-    //Game::main.textureMap.emplace("wall", &wall);
+    /*Texture2D wallMap{ "assets/sprites/world/test/wall_map.png", true, GL_NEAREST };
+    renderer.textureIDs.push_back(wallMap.ID);
+    Game::main.textureMap.emplace("wallMap", &wallMap);
+
+    Texture2D wall{ "assets/sprites/world/test/wall.png", true, GL_NEAREST };
+    renderer.textureIDs.push_back(wall.ID);
+    Game::main.textureMap.emplace("wall", &wall);
+
+    Texture2D test{ "assets/sprites/test.png", true, GL_NEAREST };
+    renderer.textureIDs.push_back(test.ID);
+    Game::main.textureMap.emplace("test", &test);
+
+    Texture2D testMap{ "assets/sprites/test_map.png", true, GL_NEAREST };
+    renderer.textureIDs.push_back(testMap.ID);
+    Game::main.textureMap.emplace("testMap", &testMap);*/
+
+    Texture2D blank{ "assets/sprites/blank.png", true, GL_NEAREST };
+    renderer.textureIDs.push_back(blank.ID);
+    Game::main.textureMap.emplace("blank", &blank);
+
+    Texture2D blankMap{ "assets/sprites/blank_map.png", true, GL_NEAREST };
+    renderer.textureIDs.push_back(blankMap.ID);
+    Game::main.textureMap.emplace("base_map", &blankMap);
+
+    Texture2D skull{ "assets/sprites/skull/skull.png", true, GL_NEAREST };
+    renderer.textureIDs.push_back(skull.ID);
+    Game::main.textureMap.emplace("skull", &skull);
+
+    Texture2D skullMap{ "assets/sprites/skull/skull_map.png", true, GL_NEAREST };
+    renderer.textureIDs.push_back(skullMap.ID);
+    Game::main.textureMap.emplace("skullMap", &skullMap);
 
     #pragma region Player Animations
 
@@ -140,17 +168,17 @@ int main(void)
     renderer.textureIDs.push_back(baseWalk.ID);
     Game::main.animationMap.emplace("baseWalk", &baseWalk);
 
-    //Animation2D baseJumpUp{ "assets/animations/lily/lily_up.png", true, 1, 1, 5.0f, { 1 }, true, GL_NEAREST };
-    //renderer.textureIDs.push_back(baseJumpUp.ID);
-    //Game::main.animationMap.emplace("baseJumpUp", &baseJumpUp);
+    Animation2D baseJumpUp{ "assets/animations/lily/lily_up.png", true, 1, 1, 5.0f, { 1 }, true, GL_NEAREST };
+    renderer.textureIDs.push_back(baseJumpUp.ID);
+    Game::main.animationMap.emplace("baseJumpUp", &baseJumpUp);
 
-    //Animation2D baseJumpDown{ "assets/animations/lily/lily_up.png", true,  1, 1, 5.0f, { 1 }, true, GL_NEAREST };
-    //renderer.textureIDs.push_back(baseJumpDown.ID);
-    //Game::main.animationMap.emplace("baseJumpDown", &baseJumpDown);
+    Animation2D baseJumpDown{ "assets/animations/lily/lily_down.png", true,  2, 2, 1.0f, { 2, 2 }, true, GL_NEAREST };
+    renderer.textureIDs.push_back(baseJumpDown.ID);
+    Game::main.animationMap.emplace("baseJumpDown", &baseJumpDown);
 
-    //Animation2D baseDeath{ "assets/animations/base/baseDying.png", true, 4, 4, 1.0f, { 2, 4, 4, 4 }, false, GL_NEAREST };
-    //renderer.textureIDs.push_back(baseDeath.ID);
-    //Game::main.animationMap.emplace("baseDeath", &baseDeath);
+    Animation2D baseDeath{ "assets/animations/base/baseDying.png", true, 4, 4, 1.0f, { 2, 4, 4, 4 }, false, GL_NEAREST };
+    renderer.textureIDs.push_back(baseDeath.ID);
+    Game::main.animationMap.emplace("baseDeath", &baseDeath);
 
 
     //Animation2D swordBaseIdle{ "assets/animations/lily/lily_idle.png", true, 3, 2, 0.5f, { 3, 3 }, true, GL_NEAREST };

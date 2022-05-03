@@ -67,7 +67,7 @@ public:
     GLuint whiteTextureID;
 
     Renderer(GLuint whiteTexture);
-    void prepareQuad(PositionComponent* pos, float width, float height, float tWidth, float tHeight, glm::vec4 rgb, int textureID, int mapID, bool tiled);
+    void prepareQuad(PositionComponent* pos, float width, float height, float tWidth, float tHeight, glm::vec4 rgb, int textureID, int mapID, bool tiled, bool flipped);
     void prepareQuad(PositionComponent* pos, ColliderComponent* col, float width, float height, glm::vec4 rgb, int textureID, int mapID);
     void prepareQuad(glm::vec2 topRight, glm::vec2 bottomRight, glm::vec2 bottomLeft, glm::vec2 topLeft, glm::vec4 rgb, int textureID, int mapID);
     void prepareQuad(glm::vec2 position, float width, float height, glm::vec4 rgb, int textureID, int mapID); // Specify texture ID rather than index?
