@@ -116,7 +116,11 @@ int main(void)
     //renderer.textureIDs.push_back(blank.ID);
     //Game::main.textureMap.emplace("blank", &blank);
 
-    Texture2D aetherBullet{ "assets/sprites/bullets/aether_bullet.png", true, GL_NEAREST };
+    Texture2D bullet{ "assets/sprites/bullets/bullet.png", true, GL_NEAREST };
+    renderer.textureIDs.push_back(bullet.ID);
+    Game::main.textureMap.emplace("bullet", &bullet);
+
+    Texture2D aetherBullet{ "assets/sprites/bullets/bullet_aether.png", true, GL_NEAREST };
     renderer.textureIDs.push_back(aetherBullet.ID);
     Game::main.textureMap.emplace("aether_bullet", &aetherBullet);
 

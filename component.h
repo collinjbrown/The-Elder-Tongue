@@ -291,13 +291,15 @@ public:
 	float procRange;
 	float chaseRange;
 
+	float movementSpeed;
 	float projectileSpeed;
+
 	float lastAttack;
 	float attackRate;
 
 	AIType aiType;
 
-	AIComponent(Entity* entity, bool active, bool proc, float procRange, float chaseRange, float projectileSpeed, float attackRate, AIType aiType);
+	AIComponent(Entity* entity, bool active, bool proc, float procRange, float chaseRange, float movementSpeed, float projectileSpeed, float attackRate, AIType aiType);
 };
 
 #endif

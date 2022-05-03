@@ -241,7 +241,7 @@ void ECS::Update(float deltaTime)
 		ECS::main.RegisterComponent(new PositionComponent(soul, true, false, 0.0f, 0.0f, 0.0f), soul);
 		ECS::main.RegisterComponent(new PhysicsComponent(soul, true, (PositionComponent*)soul->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), soul);
 		ECS::main.RegisterComponent(new StaticSpriteComponent(soul, true, (PositionComponent*)soul->componentIDMap[positionComponentID], soulTex->width, soulTex->height, soulTex, soulMap, false, false), soul);
-		ECS::main.RegisterComponent(new AIComponent(soul, true, false, 0.0f, 0.0f, 0.5f, 0.0f, AIType::soul), soul);
+		ECS::main.RegisterComponent(new AIComponent(soul, true, false, 1010.0f, 1000.0f, 0.5f, 0.0f, 0.0f, AIType::soul), soul);
 
 		#pragma endregion
 
@@ -254,7 +254,7 @@ void ECS::Update(float deltaTime)
 		ECS::main.RegisterComponent(new PhysicsComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 5000.0f, 2000.0f), player);
 		ECS::main.RegisterComponent(new ColliderComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], false, false, false, false, true, false, EntityClass::player, 1.0f, 1.0f, 10.0f, 20.0f, 50.0f, 0.0f, -7.75f), player);
 		ECS::main.RegisterComponent(new MovementComponent(player, true, 4000.0f, 500.0f, 2.5f, 100.0f, 0.1f, 0.5f, true, true, false), player);
-		ECS::main.RegisterComponent(new InputComponent(player, true, soul, true, 0.5f, 5000.0f, 0.5f, 2, 0.5f, 2.0f, 2000.0f), player);
+		ECS::main.RegisterComponent(new InputComponent(player, true, soul, true, 0.5f, 5000.0f, 0.5f, 2, 0.5f, 2.0f, 500.0f), player);
 		ECS::main.RegisterComponent(new CameraFollowComponent(player, true, 10.0f), player);
 		ECS::main.RegisterComponent(new HealthComponent(player, true, 1000.0f, false), player);
 		ECS::main.RegisterComponent(new DuelistComponent(player, true, true, true), player);
@@ -740,7 +740,7 @@ ParticleComponent::ParticleComponent(Entity* entity, bool active, float tickRate
 
 #pragma region AI Component
 
-AIComponent::AIComponent(Entity* entity, bool active, bool proc, float procRange, float chaseRange, float projectileSpeed, float attackRate, AIType aiType)
+AIComponent::AIComponent(Entity* entity, bool active, bool proc, float procRange, float chaseRange, float movementSpeed, float projectileSpeed, float attackRate, AIType aiType)
 {
 	this->ID = aiComponentID;
 	this->entity = entity;
@@ -750,7 +750,9 @@ AIComponent::AIComponent(Entity* entity, bool active, bool proc, float procRange
 	this->procRange = procRange;
 	this->chaseRange = chaseRange;
 
+	this->movementSpeed = movementSpeed;
 	this->projectileSpeed = projectileSpeed;
+
 	this->lastAttack = 0.0f;
 	this->attackRate = attackRate;
 
@@ -786,8 +788,7 @@ void StaticRenderingSystem::Update(int activeScene, float deltaTime)
 				pos->y + (s->height / 2.0f) > screenBottom && pos->y - (s->height / 2.0f) < screenTop &&
 				pos->z < screenElev)
 			{
-				Game::main.renderer->prepareQuad(pos, s->width, s->height, s->sprite->width, s->sprite->height, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), s->sprite->ID, s->map->ID, s->flipped, s->tiled);
-				// Game::main.renderer->prepareQuad(pos, s->width, s->height, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), s->sprite->ID, s->map->ID, 1, 1, 1, 1, false);
+				Game::main.renderer->prepareQuad(pos, s->width, s->height, s->sprite->width, s->sprite->height, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), s->sprite->ID, s->map->ID, s->tiled, s->flipped);
 			}
 		}
 	}
@@ -1738,7 +1739,8 @@ void InputSystem::Update(int activeScene, float deltaTime)
 					if (projPos.x > screenLeft && projPos.x < screenRight &&
 						projPos.y > screenBottom && projPos.y < screenTop)
 					{
-						Texture2D* s = Game::main.textureMap["aether_bullet"];
+						Texture2D* s = Game::main.textureMap["bullet"];
+						Texture2D* sMap = Game::main.textureMap["aether_bullet"];
 						m->lastProjectile = 0.0f;
 
 						Entity* projectile = ECS::main.CreateEntity(0, "Bullet");
@@ -1747,7 +1749,7 @@ void InputSystem::Update(int activeScene, float deltaTime)
 						ECS::main.RegisterComponent(new PhysicsComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], projVel.x, projVel.y, 0.0f, 0.0f, 0.0f), projectile);
 						ECS::main.RegisterComponent(new ColliderComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], false, false, false, true, false, true, EntityClass::object, 1.0f, 0.0f, 0.0f, 5.0f, 5.0f, 0.0f, 0.0f), projectile);
 						ECS::main.RegisterComponent(new DamageComponent(projectile, true, move->entity, true, 20.0f, false, true, 1, 10.0f, false, true, true), projectile);
-						ECS::main.RegisterComponent(new StaticSpriteComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], s->width, s->height, s, Game::main.textureMap["base_map"], false, false), projectile);
+						ECS::main.RegisterComponent(new StaticSpriteComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], s->width, s->height, s, sMap, false, false), projectile);
 						// ECS::main.RegisterComponent(new ParticleComponent(projectile, true, 0.01f, 0.0f, 0.0f, 10, Element::aether, 5.0f, 20.0f), projectile);
 						ParticleEngine::main.AddParticles(25, projPos.x + (projVel.x * deltaTime), projPos.y + (projVel.y * deltaTime), Element::aether, rand() % 40 + 1);
 					}
@@ -2599,7 +2601,8 @@ void AISystem::Update(int activeScene, float deltaTime)
 						{
 							a->lastAttack = 0.0f;
 
-							Texture2D* s = Game::main.textureMap["aether_bullet"];
+							Texture2D* s = Game::main.textureMap["bullet"];
+							Texture2D* sMap = Game::main.textureMap["aether_bullet"];
 
 							Entity* projectile = ECS::main.CreateEntity(0, "Bullet");
 
@@ -2609,7 +2612,7 @@ void AISystem::Update(int activeScene, float deltaTime)
 							ECS::main.RegisterComponent(new PhysicsComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], vel.x, vel.y, 0.0f, 0.0f, 0.0f), projectile);
 							ECS::main.RegisterComponent(new ColliderComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], false, false, false, true, false, true, EntityClass::object, 1.0f, 0.0f, 0.0f, 5.0f, 5.0f, 0.0f, 0.0f), projectile);
 							ECS::main.RegisterComponent(new DamageComponent(projectile, true, a->entity, true, 10.0f, false, true, 1, 10.0f, true, true, true), projectile);
-							ECS::main.RegisterComponent(new StaticSpriteComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], s->width, s->height, Game::main.textureMap["base_map"], s, false, false), projectile);
+							ECS::main.RegisterComponent(new StaticSpriteComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], s->width, s->height, s, sMap, false, false), projectile);
 						}
 						else
 						{
@@ -2645,7 +2648,7 @@ void AISystem::Update(int activeScene, float deltaTime)
 
 				// std::cout << std::to_string(r) + "\n";
 
-				if (r < 0)
+				if (r > 100 || r < -100)
 				{
 					sprite->flipped = true;
 					r += 180;
@@ -2658,16 +2661,23 @@ void AISystem::Update(int activeScene, float deltaTime)
 				posA->rotation = r;
 
 				// Move
-				if (glm::length2(position - target) > 2000.0f)
+				float dist = glm::length2(position - target);
+				if (dist > a->chaseRange)
 				{
 					glm::vec2 vel = -Normalize(position - lerp(position, target, deltaTime));
 					PhysicsComponent* physA = (PhysicsComponent*)a->entity->componentIDMap[physicsComponentID];
 
-					posA->x += vel.x * (1.0f / a->projectileSpeed);
-					posA->y += vel.y * (1.0f / a->projectileSpeed);
-
-					physA->velocityX += vel.x * a->projectileSpeed;
-					physA->velocityY += vel.y * a->projectileSpeed;
+					if (dist > a->procRange)
+					{
+						posA->x += vel.x * (1.0f / a->movementSpeed);
+						posA->y += vel.y * (1.0f / a->movementSpeed);
+					}
+					else
+					{
+						physA->velocityX += vel.x * (1.0f / a->movementSpeed);
+						physA->velocityY += vel.y * (1.0f / a->movementSpeed);
+					}
+					
 				}
 			}
 		}
