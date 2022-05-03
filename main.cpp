@@ -130,7 +130,7 @@ int main(void)
     renderer.textureIDs.push_back(lilyMap.ID);
     Game::main.textureMap.emplace("lilyMap", &lilyMap);
 
-    Animation2D baseIdle{ "assets/animations/lily/lily_idle.png", true, 3, 2, 0.5f, { 3, 3 }, true, GL_NEAREST };
+    Animation2D baseIdle{ "assets/animations/lily/lily_idle.png", true, 2, 2, 0.5f, { 2, 2 }, true, GL_NEAREST };
     renderer.textureIDs.push_back(baseIdle.ID);
     Game::main.animationMap.emplace("baseIdle", &baseIdle);
 
