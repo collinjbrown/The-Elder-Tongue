@@ -249,7 +249,7 @@ void ECS::Update(float deltaTime)
 		ECS::main.RegisterComponent(new PositionComponent(player, true, false, 0, 100, 0.0f), player);
 		ECS::main.RegisterComponent(new PhysicsComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 5000.0f, 2000.0f), player);
 		ECS::main.RegisterComponent(new ColliderComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], false, false, false, false, true, false, EntityClass::player, 1.0f, 1.0f, 10.0f, 20.0f, 50.0f, 0.0f, -7.75f), player);
-		ECS::main.RegisterComponent(new MovementComponent(player, true, 4000.0f, 500.0f, 2.5f, 0.5f, true, 0.8f, true, false, 0.9f, glm::vec2(100.0f, 0), 50.0f, 20.0f, 1.5f, 0.1f, 0.35f, 5, 3.0f), player);
+		ECS::main.RegisterComponent(new MovementComponent(player, true, 4000.0f, 500.0f, 2.5f, 0.5f, true, 0.7f, true, false, 0.9f, glm::vec2(100.0f, 0), 50.0f, 20.0f, 1.5f, 0.1f, 0.35f, 5, 3.0f), player);
 		ECS::main.RegisterComponent(new InputComponent(player, true, soul, true, 0.5f, 5000.0f, 0.5f, 2, 0.5f, 2.0f, 500.0f), player);
 		ECS::main.RegisterComponent(new CameraFollowComponent(player, true, 10.0f), player);
 		ECS::main.RegisterComponent(new HealthComponent(player, true, 1000.0f, false), player);
@@ -257,8 +257,12 @@ void ECS::Update(float deltaTime)
 		AnimationComponent* a = (AnimationComponent*)player->componentIDMap[animationComponentID];
 		ECS::main.RegisterComponent(new PlayerAnimationControllerComponent(player, true, a), player);
 		a->AddAnimation("walk", Game::main.animationMap["baseWalk"]);
+		a->AddAnimation("crouch", Game::main.animationMap["baseCrouch"]);
+		a->AddAnimation("crouchWalk", Game::main.animationMap["baseCrouchWalk"]);
 		a->AddAnimation("jumpUp", Game::main.animationMap["baseJumpUp"]);
 		a->AddAnimation("climbUp", Game::main.animationMap["baseClimbUp"]);
+		a->AddAnimation("slide", Game::main.animationMap["baseSlide"]);
+		a->AddAnimation("slideDown", Game::main.animationMap["baseSlideDown"]);
 		a->AddAnimation("jumpDown", Game::main.animationMap["baseJumpDown"]);
 		a->AddAnimation("slashOne", Game::main.animationMap["baseSlashOne"]);
 		a->AddAnimation("slashTwo", Game::main.animationMap["baseSlashTwo"]);
@@ -476,6 +480,7 @@ PhysicsComponent::PhysicsComponent(Entity* entity, bool active, PositionComponen
 	this->velocityY = vY;
 	this->rotVelocity = vR;
 	this->drag = drag;
+	this->baseDrag = drag;
 	this->gravityMod = gravityMod;
 	this->baseGravityMod = gravityMod;
 }
@@ -530,9 +535,11 @@ ColliderComponent::ColliderComponent(Entity* entity, bool active, PositionCompon
 
 	this->width = width;
 	this->height = height;
+	this->baseHeight = height;
 
 	this->offsetX = offsetX;
 	this->offsetY = offsetY;
+	this->baseOffsetY = offsetY;
 }
 
 #pragma endregion
@@ -1916,11 +1923,35 @@ void InputSystem::Update(int activeScene, float deltaTime)
 
 				if (glfwGetKey(Game::main.window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
 				{
+					if (col->height == col->baseHeight && col->offsetY == col->baseOffsetY)
+					{
+						phys->pos->y += 5.0f;
+					}
+
 					move->crouching = true;
+					col->height = col->baseHeight * 0.75f;
+					col->offsetY = col->baseOffsetY - 5.0f;
 				}
 				else
 				{
+					if (col->height == col->baseHeight * 0.75f && col->offsetY == col->baseOffsetY - 5.0f)
+					{
+						phys->pos->y += 5.0f;
+					}
+
 					move->crouching = false;
+					col->height = col->baseHeight;
+					col->offsetY = col->baseOffsetY;
+				}
+
+				if (move->crouching && abs(phys->velocityX) - 10.0f > move->maxSpeed * move->crouchMod)
+				{
+					ParticleEngine::main.AddParticles(5, phys->pos->x, phys->pos->y - 30.0f, Element::dust, rand() % 10 + 1);
+					phys->drag = phys->baseDrag * 0.1f;
+				}
+				else
+				{
+					phys->drag = phys->baseDrag;
 				}
 
 				float mod = 1.0f;
@@ -2189,15 +2220,31 @@ void AnimationControllerSystem::Update(int activeScene, float deltaTime)
 							c->animator->SetAnimation("jumpDown");
 						}
 					}
-					else if (abs(p->velocityY) > 100.0f && move->climbing && c->animator->activeAnimation != "climbUp")
+					else if (p->velocityY > 100.0f && move->climbing && c->animator->activeAnimation != "climbUp")
 					{
 						c->animator->SetAnimation("climbUp");
 					}
-					else if (abs(p->velocityX) > 100.0f && col->onPlatform && move->canMove && c->animator->activeAnimation != "walk")
+					else if (p->velocityY <= 0.0f && move->climbing && c->animator->activeAnimation != "slideDown")
+					{
+						c->animator->SetAnimation("slideDown");
+					}
+					else if (abs(p->velocityX) - 10.0f > move->maxSpeed * move->crouchMod && move->crouching && col->onPlatform && move->canMove && c->animator->activeAnimation != "slide")
+					{
+						c->animator->SetAnimation("slide");
+					}
+					else if (abs(p->velocityX) - 10.0f < move->maxSpeed * move->crouchMod && abs(p->velocityX) > 25.0f && move->crouching && col->onPlatform && move->canMove && c->animator->activeAnimation != "crouchWalk")
+					{
+						c->animator->SetAnimation("crouchWalk");
+					}
+					else if (abs(p->velocityX) < 25.0f && move->crouching && col->onPlatform && move->canMove && c->animator->activeAnimation != "crouch")
+					{
+						c->animator->SetAnimation("crouch");
+					}
+					else if (abs(p->velocityX) > 100.0f && !move->crouching && col->onPlatform && move->canMove && c->animator->activeAnimation != "walk")
 					{
 						c->animator->SetAnimation("walk");
 					}
-					else if (abs(p->velocityX) < 100.0f && col->onPlatform && move->canMove && c->animator->activeAnimation != "idle")
+					else if (abs(p->velocityX) < 100.0f && !move->crouching && col->onPlatform && move->canMove && c->animator->activeAnimation != "idle")
 					{
 						c->animator->SetAnimation("idle");
 					}

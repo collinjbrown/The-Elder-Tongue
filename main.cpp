@@ -178,7 +178,6 @@ int main(void)
     renderer.textureIDs.push_back(baseIdle.ID);
     Game::main.animationMap.emplace("baseIdle", &baseIdle);
 
-    #pragma endregion
 
     Animation2D baseWalk{ "assets/animations/lily/lily_run.png", true, 3, 4, 0.05f, { 1, 3, 3, 3 }, true, GL_NEAREST };
     renderer.textureIDs.push_back(baseWalk.ID);
@@ -192,9 +191,25 @@ int main(void)
     renderer.textureIDs.push_back(baseJumpDown.ID);
     Game::main.animationMap.emplace("baseJumpDown", &baseJumpDown);
 
-    Animation2D baseClimbUp{ "assets/animations/lily/lily_climb.png", true,  2, 2, 0.1f, { 2, 2 }, true, GL_NEAREST };
+    Animation2D baseClimbUp{ "assets/animations/lily/lily_climbUp.png", true,  2, 4, 0.1f, { 1, 2, 2, 2 }, true, GL_NEAREST };
     renderer.textureIDs.push_back(baseClimbUp.ID);
     Game::main.animationMap.emplace("baseClimbUp", &baseClimbUp);
+
+    Animation2D baseSlideDown{ "assets/animations/lily/lily_slideDown.png", true,  1, 1, 5.0f, { 1 }, true, GL_NEAREST };
+    renderer.textureIDs.push_back(baseClimbUp.ID);
+    Game::main.animationMap.emplace("baseSlideDown", &baseSlideDown);
+
+    Animation2D baseSlide{ "assets/animations/lily/lily_slide.png", true,  1, 2, 1.0f, { 1, 1 }, true, GL_NEAREST };
+    renderer.textureIDs.push_back(baseSlide.ID);
+    Game::main.animationMap.emplace("baseSlide", &baseSlide);
+
+    Animation2D baseCrouch{ "assets/animations/lily/lily_crouch.png", true, 2, 2, 0.5f, { 2, 2 }, true, GL_NEAREST };
+    renderer.textureIDs.push_back(baseCrouch.ID);
+    Game::main.animationMap.emplace("baseCrouch", &baseCrouch);
+
+    Animation2D baseCrouchWalk{ "assets/animations/lily/lily_crouchWalk.png", true, 3, 4, 0.1f, { 1, 3, 3, 3 }, true, GL_NEAREST };
+    renderer.textureIDs.push_back(baseCrouchWalk.ID);
+    Game::main.animationMap.emplace("baseCrouchWalk", &baseCrouchWalk);
 
     Animation2D baseDeath{ "assets/animations/base/baseDying.png", true, 4, 4, 1.0f, { 2, 4, 4, 4 }, false, GL_NEAREST };
     renderer.textureIDs.push_back(baseDeath.ID);
@@ -208,6 +223,7 @@ int main(void)
     renderer.textureIDs.push_back(baseSlashTwo.ID);
     Game::main.animationMap.emplace("baseSlashTwo", &baseSlashTwo);
 
+    #pragma endregion
     //Animation2D swordBaseIdle{ "assets/animations/lily/lily_idle.png", true, 3, 2, 0.5f, { 3, 3 }, true, GL_NEAREST };
     //renderer.textureIDs.push_back(swordBaseIdle.ID);
     //Game::main.animationMap.emplace("sword_baseIdle", &swordBaseIdle);

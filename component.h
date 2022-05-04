@@ -68,6 +68,8 @@ public:
 	float rotVelocity;
 
 	float drag;					// How much velocity one loses each turn.
+	float baseDrag;
+
 	float gravityMod;			// How much gravity should one experience.
 	float baseGravityMod;
 
@@ -117,9 +119,11 @@ public:
 
 	float width;
 	float height;
+	float baseHeight;
 
 	float offsetX;
 	float offsetY;
+	float baseOffsetY;
 
 	PositionComponent* pos;
 
