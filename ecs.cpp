@@ -1081,9 +1081,9 @@ void ColliderSystem::Update(int activeScene, float deltaTime)
 			PositionComponent* posA = cA->pos;
 			PhysicsComponent* physA = (PhysicsComponent*)cA->entity->componentIDMap[physicsComponentID];
 
-			/*Texture2D* t = Game::main.textureMap["blank"];
+			Texture2D* t = Game::main.textureMap["blank"];
 			Texture2D* tMap = Game::main.textureMap["base_map"];
-			Game::main.renderer->prepareQuad(glm::vec2(posA->x + cA->offsetX, posA->y + cA->offsetY), cA->width, cA->height, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), t->ID, tMap->ID);*/
+			Game::main.renderer->prepareQuad(glm::vec2(posA->x + cA->offsetX, posA->y + cA->offsetY), cA->width, cA->height, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), t->ID, tMap->ID);
 
 			std::vector<std::pair<Collision*, float>> z;
 
@@ -2773,7 +2773,7 @@ void BladeSystem::Update(int activeScene, float deltaTime)
 				}
 
 				posA->rotation = r;
-				// std::cout << std::to_string(r) + "\n";
+				std::cout << std::to_string(r) + "\n";
 
 				// Move
 				float dist = glm::length2(position - target);
@@ -2811,6 +2811,10 @@ void BladeSystem::Update(int activeScene, float deltaTime)
 					hiltPos->y = posA->y;
 					b->platformCollider->active = true;
 
+					b->platformCollider->width = 35.0f;
+					b->platformCollider->height = 5.0f;
+					b->platformCollider->platform = true;
+
 					if (sprite->flipped)
 					{
 						b->platformCollider->offsetX = 20.0f;
@@ -2819,6 +2823,18 @@ void BladeSystem::Update(int activeScene, float deltaTime)
 					{
 						b->platformCollider->offsetX = -20.0f;
 					}
+				}
+				else if (b->platformCollider->active == false && posA->rotation < -75.0f ||
+						 b->platformCollider->active == false && sprite->flipped && posA->rotation > 75.0f)
+				{
+					PositionComponent* hiltPos = (PositionComponent*)b->platformCollider->entity->componentIDMap[positionComponentID];
+					hiltPos->x = posA->x;
+					hiltPos->y = posA->y;
+					b->platformCollider->active = true;
+
+					b->platformCollider->platform = false;
+					b->platformCollider->width = 5.0f;
+					b->platformCollider->height = 70.0f;
 				}
 			}
 			else
