@@ -1944,9 +1944,10 @@ void InputSystem::Update(int activeScene, float deltaTime)
 					col->offsetY = col->baseOffsetY;
 				}
 
-				if (move->crouching && abs(phys->velocityX) - 10.0f > move->maxSpeed * move->crouchMod)
+				if (move->crouching && abs(phys->velocityX) - 10.0f > move->maxSpeed * move->crouchMod && col->onPlatform)
 				{
-					ParticleEngine::main.AddParticles(5, phys->pos->x, phys->pos->y - 30.0f, Element::dust, rand() % 10 + 1);
+					ParticleEngine::main.AddParticles(1, phys->pos->x, phys->pos->y - 30.0f, Element::dust, rand() % 10 + 1);
+
 					phys->drag = phys->baseDrag * 0.1f;
 				}
 				else
@@ -1984,7 +1985,7 @@ void InputSystem::Update(int activeScene, float deltaTime)
 				}
 				else if (glfwGetKey(Game::main.window, GLFW_KEY_S) == GLFW_PRESS && move->canMove && move->climbing)
 				{
-					ParticleEngine::main.AddParticles(10, phys->pos->x, phys->pos->y - 30.0f, Element::dust, rand() % 10 + 1);
+					ParticleEngine::main.AddParticles(1, phys->pos->x, phys->pos->y + 20.0f, Element::dust, rand() % 10 + 1);
 					if (phys->velocityY > -move->maxSpeed * mod)
 					{
 						phys->velocityY -= move->acceleration * deltaTime * mod;
