@@ -1084,6 +1084,7 @@ void ColliderSystem::Update(int activeScene, float deltaTime)
 			/*Texture2D* t = Game::main.textureMap["blank"];
 			Texture2D* tMap = Game::main.textureMap["base_map"];
 			Game::main.renderer->prepareQuad(glm::vec2(posA->x + cA->offsetX, posA->y + cA->offsetY), cA->width, cA->height, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), t->ID, tMap->ID);*/
+			
 
 			std::vector<std::pair<Collision*, float>> z;
 
