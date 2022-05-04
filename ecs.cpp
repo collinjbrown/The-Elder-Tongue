@@ -1081,9 +1081,9 @@ void ColliderSystem::Update(int activeScene, float deltaTime)
 			PositionComponent* posA = cA->pos;
 			PhysicsComponent* physA = (PhysicsComponent*)cA->entity->componentIDMap[physicsComponentID];
 
-			Texture2D* t = Game::main.textureMap["blank"];
+			/*Texture2D* t = Game::main.textureMap["blank"];
 			Texture2D* tMap = Game::main.textureMap["base_map"];
-			Game::main.renderer->prepareQuad(glm::vec2(posA->x + cA->offsetX, posA->y + cA->offsetY), cA->width, cA->height, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), t->ID, tMap->ID);
+			Game::main.renderer->prepareQuad(glm::vec2(posA->x + cA->offsetX, posA->y + cA->offsetY), cA->width, cA->height, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), t->ID, tMap->ID);*/
 
 			std::vector<std::pair<Collision*, float>> z;
 
@@ -2773,7 +2773,7 @@ void BladeSystem::Update(int activeScene, float deltaTime)
 				}
 
 				posA->rotation = r;
-				std::cout << std::to_string(r) + "\n";
+				// std::cout << std::to_string(r) + "\n";
 
 				// Move
 				float dist = glm::length2(position - target);
