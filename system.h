@@ -181,18 +181,6 @@ public:
 	void PurgeEntity(Entity* e);
 };
 
-class DuellingSystem : public System
-{
-public:
-	vector<DuelistComponent*> duels;
-
-	void Update(int activeScene, float deltaTime);
-
-	void AddComponent(Component* component);
-
-	void PurgeEntity(Entity* e);
-};
-
 class ParticleSystem : public System
 {
 public:

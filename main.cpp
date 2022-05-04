@@ -116,6 +116,18 @@ int main(void)
     //renderer.textureIDs.push_back(blank.ID);
     //Game::main.textureMap.emplace("blank", &blank);
 
+    Texture2D slashMap{ "assets/animations/slash/slash_map.png", true, GL_NEAREST };
+    renderer.textureIDs.push_back(slashMap.ID);
+    Game::main.textureMap.emplace("slashMap", &slashMap);
+
+    Animation2D slashUp{ "assets/animations/slash/slashUp.png", true, 2, 3, 0.01f, {1, 2, 2}, false, GL_NEAREST};
+    renderer.textureIDs.push_back(slashUp.ID);
+    Game::main.animationMap.emplace("slashUp", &slashUp);
+
+    Animation2D slashDown{ "assets/animations/slash/slashDown.png", true, 2, 3, 0.01f, { 1, 2, 2 }, false, GL_NEAREST };
+    renderer.textureIDs.push_back(slashDown.ID);
+    Game::main.animationMap.emplace("slashDown", &slashDown);
+
     Texture2D bullet{ "assets/sprites/bullets/bullet.png", true, GL_NEAREST };
     renderer.textureIDs.push_back(bullet.ID);
     Game::main.textureMap.emplace("bullet", &bullet);
@@ -180,10 +192,21 @@ int main(void)
     renderer.textureIDs.push_back(baseJumpDown.ID);
     Game::main.animationMap.emplace("baseJumpDown", &baseJumpDown);
 
+    Animation2D baseClimbUp{ "assets/animations/lily/lily_climb.png", true,  2, 2, 0.1f, { 2, 2 }, true, GL_NEAREST };
+    renderer.textureIDs.push_back(baseClimbUp.ID);
+    Game::main.animationMap.emplace("baseClimbUp", &baseClimbUp);
+
     Animation2D baseDeath{ "assets/animations/base/baseDying.png", true, 4, 4, 1.0f, { 2, 4, 4, 4 }, false, GL_NEAREST };
     renderer.textureIDs.push_back(baseDeath.ID);
     Game::main.animationMap.emplace("baseDeath", &baseDeath);
 
+    Animation2D baseSlashOne{ "assets/animations/lily/lily_slashOne.png", true, 2, 3, 0.01f, { 2, 2, 2 }, false, GL_NEAREST };
+    renderer.textureIDs.push_back(baseSlashOne.ID);
+    Game::main.animationMap.emplace("baseSlashOne", &baseSlashOne);
+
+    Animation2D baseSlashTwo{ "assets/animations/lily/lily_slashTwo.png", true, 2, 3, 0.01f, { 1, 2, 2 }, false, GL_NEAREST };
+    renderer.textureIDs.push_back(baseSlashTwo.ID);
+    Game::main.animationMap.emplace("baseSlashTwo", &baseSlashTwo);
 
     //Animation2D swordBaseIdle{ "assets/animations/lily/lily_idle.png", true, 3, 2, 0.5f, { 3, 3 }, true, GL_NEAREST };
     //renderer.textureIDs.push_back(swordBaseIdle.ID);
@@ -388,7 +411,7 @@ int main(void)
 
         #pragma region Update World State
 
-        if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS && glfwGetTime() > slowLastChange + 0.5f)
+        if (glfwGetKey(window, GLFW_KEY_TAB) == GLFW_PRESS && glfwGetTime() > slowLastChange + 0.5f)
         {
             slowLastChange = glfwGetTime();
 

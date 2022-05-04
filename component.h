@@ -160,24 +160,42 @@ public:
 	float acceleration;
 	float maxSpeed;
 	float maxJumpHeight;
-	float stabDepth;
 
 	bool jumping;
 	bool preparingToJump;
 	float airControl;
 
 	bool canMove;
-	float lastMoveAttempt;
-	float moveAttemptDelay;
+
+	bool crouching;
+	float crouchMod;
 
 	bool canClimb;
 	bool shouldClimb;
 	bool climbing;
+	float climbMod;
 
 	float maxClimbHeight;
 	float minClimbHeight;
 
-	MovementComponent(Entity* entity, bool active, float acceleration, float maxSpeed, float maxJumpHeight, float stabDepth, float moveAttemptDelay, float airControl, bool canMove, bool canClimb, bool shouldClimb);
+	bool isAttacking;
+	glm::vec2 attackThrust;
+	float slashSpeed;
+
+	float damage;
+	float attackMultiplier;
+	int attackNumber;
+
+	float lastAttack;
+	float minAttackDelay;
+	float maxAttackDelay;
+
+	int maxFlurry;
+	float lastFlurry;
+	float flurryDelay;
+
+	MovementComponent(Entity* entity, bool active, float acceleration, float maxSpeed, float maxJumpHeight, float airControl, bool canMove, float crouchMod, bool canClimb, bool shouldClimb, float climbMod,
+					  glm::vec2 attackThrust, float slashSpeed, float damage, float attackMultiplier, float minAttackDelay, float maxAttackDelay, int maxFlurry,  float flurryDelay);
 };
 
 class CameraFollowComponent : public Component
@@ -232,18 +250,6 @@ public:
 	bool dead;
 
 	HealthComponent(Entity* entity, bool active, float health, bool dead);
-};
-
-class DuelistComponent : public Component
-{
-public:
-	bool hasSword;
-	bool isDrawn;
-	bool isAttacking;
-
-	float lastTick;
-
-	DuelistComponent(Entity* entity, bool active, bool hasSword, bool isDrawn);
 };
 
 class DamageComponent : public Component

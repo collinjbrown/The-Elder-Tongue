@@ -201,10 +201,6 @@ void ECS::Init()
 	ComponentBlock* healthBlock = new ComponentBlock(healthSystem, healthComponentID);
 	componentBlocks.push_back(healthBlock);
 
-	DuellingSystem* duelistSystem = new DuellingSystem();
-	ComponentBlock* duelistBlock = new ComponentBlock(duelistSystem, duelistComponentID);
-	componentBlocks.push_back(duelistBlock);
-
 	PositionSystem* positionSystem = new PositionSystem();
 	ComponentBlock* positionBlock = new ComponentBlock(positionSystem, positionComponentID);
 	componentBlocks.push_back(positionBlock);
@@ -253,17 +249,19 @@ void ECS::Update(float deltaTime)
 		ECS::main.RegisterComponent(new PositionComponent(player, true, false, 0, 100, 0.0f), player);
 		ECS::main.RegisterComponent(new PhysicsComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 5000.0f, 2000.0f), player);
 		ECS::main.RegisterComponent(new ColliderComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], false, false, false, false, true, false, EntityClass::player, 1.0f, 1.0f, 10.0f, 20.0f, 50.0f, 0.0f, -7.75f), player);
-		ECS::main.RegisterComponent(new MovementComponent(player, true, 4000.0f, 500.0f, 2.5f, 100.0f, 0.1f, 0.5f, true, true, false), player);
+		ECS::main.RegisterComponent(new MovementComponent(player, true, 4000.0f, 500.0f, 2.5f, 0.5f, true, 0.8f, true, false, 0.9f, glm::vec2(100.0f, 0), 50.0f, 20.0f, 1.5f, 0.1f, 0.35f, 5, 3.0f), player);
 		ECS::main.RegisterComponent(new InputComponent(player, true, soul, true, 0.5f, 5000.0f, 0.5f, 2, 0.5f, 2.0f, 500.0f), player);
 		ECS::main.RegisterComponent(new CameraFollowComponent(player, true, 10.0f), player);
 		ECS::main.RegisterComponent(new HealthComponent(player, true, 1000.0f, false), player);
-		ECS::main.RegisterComponent(new DuelistComponent(player, true, true, true), player);
 		ECS::main.RegisterComponent(new AnimationComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], anim1, "idle", lilyMap), player);
 		AnimationComponent* a = (AnimationComponent*)player->componentIDMap[animationComponentID];
 		ECS::main.RegisterComponent(new PlayerAnimationControllerComponent(player, true, a), player);
 		a->AddAnimation("walk", Game::main.animationMap["baseWalk"]);
 		a->AddAnimation("jumpUp", Game::main.animationMap["baseJumpUp"]);
+		a->AddAnimation("climbUp", Game::main.animationMap["baseClimbUp"]);
 		a->AddAnimation("jumpDown", Game::main.animationMap["baseJumpDown"]);
+		a->AddAnimation("slashOne", Game::main.animationMap["baseSlashOne"]);
+		a->AddAnimation("slashTwo", Game::main.animationMap["baseSlashTwo"]);
 		a->AddAnimation("dead", Game::main.animationMap["baseDeath"]);
 		#pragma endregion
 
@@ -571,7 +569,8 @@ InputComponent::InputComponent(Entity* entity, bool active, Entity* soul, bool a
 
 #pragma region Movement Component
 
-MovementComponent::MovementComponent(Entity* entity, bool active, float acceleration, float maxSpeed, float maxJumpHeight, float stabDepth, float moveAttemptDelay, float airControl, bool canMove, bool canClimb, bool shouldClimb)
+MovementComponent::MovementComponent(Entity* entity, bool active, float acceleration, float maxSpeed, float maxJumpHeight, float airControl, bool canMove, float crouchMod, bool canClimb, bool shouldClimb, float climbMod,
+	glm::vec2 attackThrust, float slashSpeed, float damage, float attackMultiplier, float minAttackDelay, float maxAttackDelay, int maxFlurry, float flurryDelay)
 {
 	this->ID = movementComponentID;
 	this->entity = entity;
@@ -584,11 +583,34 @@ MovementComponent::MovementComponent(Entity* entity, bool active, float accelera
 	this->jumping = false;
 	this->preparingToJump = false;
 	this->airControl = airControl;
-	this->stabDepth = stabDepth;
+
+	this->crouching = false;
+	this->crouchMod = crouchMod;
 
 	this->canClimb = canClimb;
 	this->shouldClimb = shouldClimb;
 	this->climbing = false;
+	this->climbMod = climbMod;
+
+	this->maxClimbHeight = 0.0f;
+	this->minClimbHeight = 0.0f;
+
+	this->slashSpeed = slashSpeed;
+	this->attackThrust = attackThrust;
+
+	this->attackNumber = 0;
+	this->damage = damage;
+	this->attackMultiplier = attackMultiplier;
+
+	this->minAttackDelay = minAttackDelay;
+	this->maxAttackDelay = maxAttackDelay;
+
+	this->lastFlurry = 0.0f;
+	this->maxFlurry = maxFlurry;
+	this->flurryDelay = flurryDelay;
+
+	this->isAttacking = false;
+	this->lastAttack = 0.0f;
 }
 
 #pragma endregion
@@ -670,22 +692,6 @@ HealthComponent::HealthComponent(Entity* entity, bool active, float health, bool
 	this->health = health;
 
 	this->dead = dead;
-}
-
-#pragma endregion
-
-#pragma region Duelist Component
-
-DuelistComponent::DuelistComponent(Entity* entity, bool active, bool hasSword, bool isDrawn)
-{
-	this->ID = duelistComponentID;
-	this->entity = entity;
-	this->active = active;
-
-	this->hasSword = hasSword;
-	this->isDrawn = isDrawn;
-	this->isAttacking = false;
-	lastTick = 0;
 }
 
 #pragma endregion
@@ -1697,7 +1703,7 @@ void InputSystem::Update(int activeScene, float deltaTime)
 			PhysicsComponent* phys = (PhysicsComponent*)m->entity->componentIDMap[physicsComponentID];
 			ColliderComponent* col = (ColliderComponent*)m->entity->componentIDMap[colliderComponentID];
 			HealthComponent* health = (HealthComponent*)m->entity->componentIDMap[healthComponentID];
-			DuelistComponent* duel = (DuelistComponent*)m->entity->componentIDMap[duelistComponentID];
+			AnimationControllerComponent* animator = (AnimationControllerComponent*)m->entity->componentIDMap[animationComponentID];
 
 			m->lastTick += deltaTime;
 
@@ -1723,7 +1729,7 @@ void InputSystem::Update(int activeScene, float deltaTime)
 					move->jumping = false;
 				}
 
-				if (glfwGetMouseButton(Game::main.window, GLFW_MOUSE_BUTTON_2) == GLFW_PRESS && m->lastProjectile >= m->projectileDelay)
+				if (glfwGetMouseButton(Game::main.window, GLFW_MOUSE_BUTTON_2) == GLFW_PRESS && m->lastProjectile >= m->projectileDelay && m->soul != nullptr)
 				{
 					float screenLeft = (Game::main.camX - (Game::main.windowWidth * Game::main.zoom / 1.0f));
 					float screenRight = (Game::main.camX + (Game::main.windowWidth * Game::main.zoom / 1.0f));
@@ -1768,34 +1774,20 @@ void InputSystem::Update(int activeScene, float deltaTime)
 					move->shouldClimb = false;
 				}
 
-				if (glfwGetKey(Game::main.window, GLFW_KEY_T) == GLFW_PRESS && duel->hasSword && !duel->isAttacking && m->lastTick > 0.5f)
+				if (glfwGetMouseButton(Game::main.window, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS && move->lastAttack > move->minAttackDelay && move->lastFlurry > move->flurryDelay && move->attackNumber < move->maxFlurry)
 				{
-					m->lastTick = 0.0f;
+					move->isAttacking = true;
+					move->attackNumber++;
 
-					if (duel->isDrawn)
+					if (move->attackNumber >= move->maxFlurry)
 					{
-						duel->isDrawn = false;
+						move->lastFlurry = 0.0f;
 					}
-					else
-					{
-						duel->isDrawn = true;
-					}
-				}
 
-				if (glfwGetMouseButton(Game::main.window, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS && !duel->isAttacking && duel->hasSword && duel->isDrawn && !move->preparingToJump)
-				{
-					m->lastTick = 0.0f;
+					move->climbing = false;
+					move->shouldClimb = false;
 
-					if (Game::main.mouseX < phys->pos->x)
-					{
-						phys->velocityX -= move->stabDepth;
-						duel->isAttacking = true;
-					}
-					else
-					{
-						phys->velocityX += move->stabDepth;
-						duel->isAttacking = true;
-					}
+					move->lastAttack = 0.0f;
 
 					float screenLeft = (Game::main.camX - (Game::main.windowWidth * Game::main.zoom / 1.0f));
 					float screenRight = (Game::main.camX + (Game::main.windowWidth * Game::main.zoom / 1.0f));
@@ -1804,21 +1796,46 @@ void InputSystem::Update(int activeScene, float deltaTime)
 					float screenElev = Game::main.camZ;
 
 					glm::vec2 projPos = glm::vec2(phys->pos->x, phys->pos->y);
+					glm::vec2 projVel = Normalize(glm::vec2(Game::main.mouseX - projPos.x, Game::main.mouseY - projPos.y)) * move->slashSpeed;
 
 					if (projPos.x > screenLeft && projPos.x < screenRight &&
 						projPos.y > screenBottom && projPos.y < screenTop)
 					{
-						Texture2D* s = Game::main.textureMap["slash_baseAerialOne"];
+						Texture2D* sMap = Game::main.textureMap["slashMap"];
+						Animation2D* anim;
+
+						if (projVel.x > 0)
+						{
+							phys->velocityX += move->attackThrust.x;
+
+						}
+						else
+						{
+							phys->velocityX -= move->attackThrust.x;
+						}
+
+						phys->velocityY += move->attackThrust.y;
+
+						if (move->attackNumber % 2 == 0)
+						{
+							anim = Game::main.animationMap["slashDown"];
+						}
+						else
+						{
+							anim = Game::main.animationMap["slashUp"];
+						}
+
+						float t = anim->speed * (anim->columns * anim->rows);
+
 						m->lastProjectile = 0.0f;
 
 						Entity* projectile = ECS::main.CreateEntity(0, "Slash");
-						Animation2D* anim1 = Game::main.animationMap["slash_baseAerialOne"];
 
 						ECS::main.RegisterComponent(new PositionComponent(projectile, true, false, phys->pos->x, phys->pos->y, 0.0f), projectile);
-						ECS::main.RegisterComponent(new PhysicsComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], phys->velocityX * m->slashSpeed, phys->velocityY, 0.0f, 0.0f, 0.0f), projectile);
+						ECS::main.RegisterComponent(new PhysicsComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], phys->velocityX + projVel.x, phys->velocityY + projVel.y, 0.0f, 0.0f, 0.0f), projectile);
 						ECS::main.RegisterComponent(new ColliderComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], false, false, false, true, false, true, EntityClass::object, 1.0f, 0.0f, 0.0f, 5.0f, 5.0f, 0.0f, 0.0f), projectile);
-						ECS::main.RegisterComponent(new DamageComponent(projectile, true, move->entity, true, 0.3f, true, true, 1, 20.0f, false, true, true), projectile);
-						ECS::main.RegisterComponent(new AnimationComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], anim1, "default", Game::main.textureMap["base_map"]), projectile);
+						ECS::main.RegisterComponent(new DamageComponent(projectile, true, move->entity, true, t, true, true, 1, 20.0f, false, true, true), projectile);
+						ECS::main.RegisterComponent(new AnimationComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], anim, "default", sMap), projectile);
 
 						PhysicsComponent* p = (PhysicsComponent*)projectile->componentIDMap[physicsComponentID];
 						if (p->velocityX < 0)
@@ -1829,22 +1846,21 @@ void InputSystem::Update(int activeScene, float deltaTime)
 						}
 					}
 				}
-
-				/*if (move->preparingToJump && m->projectionTime >= m->projectionDelay && abs(phys->velocityX) < 0.5f)
+				else
 				{
-					m->projecting = true;
-					CalculateProjection(phys, m, move);
+					move->lastFlurry += deltaTime;
+					move->lastAttack += deltaTime;
 				}
-				else if (move->preparingToJump && m->projectionTime < m->projectionDelay)
-				{
-					m->projectionTime += deltaTime;
-				}*/
 
-				/*if (glfwGetKey(Game::main.window, GLFW_KEY_SPACE) == GLFW_PRESS && move->canMove && !move->preparingToJump && col->onPlatform ||
-					glfwGetKey(Game::main.window, GLFW_KEY_SPACE) == GLFW_PRESS && move->canMove && !move->preparingToJump && move->climbing)
+				if (move->lastAttack > move->maxAttackDelay)
 				{
-					move->preparingToJump = true;
-				}*/
+					move->isAttacking = false;
+
+					if (col->onPlatform)
+					{
+						move->attackNumber = 0;
+					}
+				}
 
 				if (m->coyoteTime < m->maxCoyoteTime && !col->onPlatform)
 				{
@@ -1886,37 +1902,6 @@ void InputSystem::Update(int activeScene, float deltaTime)
 
 					move->shouldClimb = false;
 					phys->velocityY += 250 * move->maxJumpHeight;
-
-					/*if (!m->projecting)
-					{
-						phys->velocityY += 200 * move->maxJumpHeight;
-					}
-					else
-					{
-						m->projecting = false;
-						float leapXVel, leapYVel;
-
-						if (Game::main.mouseX < phys->pos->x)
-						{
-							leapXVel = max(-400 * move->maxJumpHeight, (Game::main.mouseX - phys->pos->x) * move->maxJumpHeight);
-						}
-						else
-						{
-							leapXVel = min(400 * move->maxJumpHeight, (Game::main.mouseX - phys->pos->x) * move->maxJumpHeight);
-						}
-
-						if (Game::main.mouseY < phys->pos->y)
-						{
-							leapYVel = max(-400 * move->maxJumpHeight, (Game::main.mouseY - phys->pos->y) * move->maxJumpHeight);
-						}
-						else
-						{
-							leapYVel = min(400 * move->maxJumpHeight, (Game::main.mouseY - phys->pos->y) * move->maxJumpHeight);
-						}
-
-						phys->velocityX += leapXVel;
-						phys->velocityY += leapYVel;
-					}*/
 				}
 
 				if (!m->releasedJump && move->jumping && phys->velocityY > 0)
@@ -1928,35 +1913,60 @@ void InputSystem::Update(int activeScene, float deltaTime)
 					phys->gravityMod = phys->baseGravityMod;
 				}
 
+
+				if (glfwGetKey(Game::main.window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+				{
+					move->crouching = true;
+				}
+				else
+				{
+					move->crouching = false;
+				}
+
+				float mod = 1.0f;
+
+				if (move->crouching)
+				{
+					mod = move->crouchMod;
+				}
+				
+				if (move->climbing)
+				{
+					mod = move->climbMod;
+				}
+				else if (move->jumping || !col->onPlatform && abs(phys->velocityY) > 100.0f)
+				{
+					mod = move->airControl;
+				}
+
 				if (glfwGetKey(Game::main.window, GLFW_KEY_W) == GLFW_PRESS && move->canMove && move->climbing)
 				{
-					if (phys->velocityY < move->maxSpeed)
+					if (abs(phys->velocityY) < 0.5f)
 					{
-						phys->velocityY += move->acceleration * deltaTime;
+						ParticleEngine::main.AddParticles(10, phys->pos->x, phys->pos->y - 30.0f, Element::dust, rand() % 10 + 1);
+					}
+
+					if (phys->velocityY < move->maxSpeed * mod)
+					{
+						phys->velocityY += move->acceleration * deltaTime * mod;
 					}
 				}
 				else if (glfwGetKey(Game::main.window, GLFW_KEY_S) == GLFW_PRESS && move->canMove && move->climbing)
 				{
-					if (phys->velocityY > -move->maxSpeed)
+					ParticleEngine::main.AddParticles(10, phys->pos->x, phys->pos->y - 30.0f, Element::dust, rand() % 10 + 1);
+					if (phys->velocityY > -move->maxSpeed * mod)
 					{
-						phys->velocityY -= move->acceleration * deltaTime;
+						phys->velocityY -= move->acceleration * deltaTime * mod;
 					}
 				}
 
 				if (glfwGetKey(Game::main.window, GLFW_KEY_D) == GLFW_PRESS && move->canMove && !move->climbing)
 				{
-					if (phys->velocityX < move->maxSpeed)
+					if (phys->velocityX < move->maxSpeed * mod)
 					{
 						if (abs(phys->velocityX) < 0.5f && col->onPlatform)
 						{
 							ParticleEngine::main.AddParticles(10, phys->pos->x, phys->pos->y - 30.0f, Element::dust, rand() % 10 + 1);
-						}
-
-						float mod = 1.0f;
-
-						if (move->jumping || !col->onPlatform && abs(phys->velocityY) > 100.0f)
-						{
-							mod = move->airControl;
 						}
 
 						phys->velocityX += move->acceleration * deltaTime * mod;
@@ -1964,24 +1974,16 @@ void InputSystem::Update(int activeScene, float deltaTime)
 				}
 				else if (glfwGetKey(Game::main.window, GLFW_KEY_A) == GLFW_PRESS && move->canMove && !move->climbing)
 				{
-					if (phys->velocityX > -move->maxSpeed)
+					if (phys->velocityX > -move->maxSpeed * mod)
 					{
 						if (abs(phys->velocityX) < 0.5f && col->onPlatform)
 						{
 							ParticleEngine::main.AddParticles(10, phys->pos->x, phys->pos->y - 30.0f, Element::dust, rand() % 10 + 1);
 						}
 
-						float mod = 1.0f;
-
-						if (move->jumping || !col->onPlatform && abs(phys->velocityY) > 100.0f)
-						{
-							mod = move->airControl;
-						}
-
 						phys->velocityX -= move->acceleration * deltaTime * mod;
 					}
 				}
-
 			}
 			else
 			{
@@ -2124,11 +2126,11 @@ void AnimationControllerSystem::Update(int activeScene, float deltaTime)
 			{
 				// I'm thinking what we'll do is just hard code the various animation conditions
 				// into the animation controller; this will serve as the animation controller
-				// for the player and other dragon riders.
+				// for the player and other humans.
 
-				// We are going to assume that any entity with a dragon rider animation controller component
-				// (that is a long-ass name) also has a physics and collider component.
-				// I think I can safely assume this because dragonriders should basically always
+				// We are going to assume that any entity with an animation controller component
+				// also has a physics and collider component.
+				// I think I can safely assume this because characters should basically always
 				// have the same set of components, aside from the player's.
 
 				PlayerAnimationControllerComponent* d = (PlayerAnimationControllerComponent*)c;
@@ -2136,22 +2138,14 @@ void AnimationControllerSystem::Update(int activeScene, float deltaTime)
 				ColliderComponent* col = (ColliderComponent*)d->entity->componentIDMap[colliderComponentID];
 				MovementComponent* move = (MovementComponent*)d->entity->componentIDMap[movementComponentID];
 				HealthComponent* health = (HealthComponent*)d->entity->componentIDMap[healthComponentID];
-				DuelistComponent* duel = (DuelistComponent*)d->entity->componentIDMap[duelistComponentID];
-
-				std::string s = "";
-
-				/*if (duel->hasSword && duel->isDrawn)
-				{
-					s = "sword_";
-				}*/
 
 				if (!health->dead)
 				{
-					if (p->velocityX < -100.0f)
+					if (p->velocityX < -100.0f || move->isAttacking && Game::main.mouseX < p->pos->x)
 					{
 						c->animator->flipped = true;
 					}
-					else if (p->velocityX > 100.0f)
+					else if (p->velocityX > 100.0f || move->isAttacking && Game::main.mouseX >= p->pos->x)
 					{
 						c->animator->flipped = false;
 					}
@@ -2168,40 +2162,49 @@ void AnimationControllerSystem::Update(int activeScene, float deltaTime)
 						}
 					}
 
-					if (duel->isAttacking)
+					// Add climbing, sliding, crouching, and crouch-walking.
+
+					if (move->isAttacking && move->attackNumber % 2 == 0)
 					{
-						if (c->animator->activeAnimation != s + "stab" && !move->jumping)
+						if (c->animator->activeAnimation != "slashTwo")
 						{
-							c->animator->SetAnimation(s + "stab");
-						}
-						else if (c->animator->activeAnimation != s + "aerialOne" && move->jumping)
-						{
-							c->animator->SetAnimation(s + "aerialOne");
+							c->animator->SetAnimation("slashTwo");
 						}
 					}
-					else if (abs(p->velocityY) > 200.0f && !col->onPlatform || c->animator->activeAnimation == s + "aerialOne")
+					else if (move->isAttacking && move->attackNumber % 2 != 0)
 					{
-						if (c->animator->activeAnimation != s + "jumpUp" && p->velocityY > 0)
+						if (c->animator->activeAnimation != "slashOne")
 						{
-							c->animator->SetAnimation(s + "jumpUp");
-						}
-						else if (c->animator->activeAnimation != s + "jumpDown" && p->velocityY < 0)
-						{
-							c->animator->SetAnimation(s + "jumpDown");
+							c->animator->SetAnimation("slashOne");
 						}
 					}
-					else if (abs(p->velocityX) > 100.0f && col->onPlatform && move->canMove && c->animator->activeAnimation != s + "walk")
+					else if (abs(p->velocityY) > 200.0f && !col->onPlatform && !move->climbing)
 					{
-						c->animator->SetAnimation(s + "walk");
+						if (c->animator->activeAnimation != "jumpUp" && p->velocityY > 0)
+						{
+							c->animator->SetAnimation("jumpUp");
+						}
+						else if (c->animator->activeAnimation != "jumpDown" && p->velocityY < 0)
+						{
+							c->animator->SetAnimation("jumpDown");
+						}
 					}
-					else if (abs(p->velocityX) < 100.0f && col->onPlatform && move->canMove && c->animator->activeAnimation != s + "idle")
+					else if (abs(p->velocityY) > 100.0f && move->climbing && c->animator->activeAnimation != "climbUp")
 					{
-						c->animator->SetAnimation(s + "idle");
+						c->animator->SetAnimation("climbUp");
+					}
+					else if (abs(p->velocityX) > 100.0f && col->onPlatform && move->canMove && c->animator->activeAnimation != "walk")
+					{
+						c->animator->SetAnimation("walk");
+					}
+					else if (abs(p->velocityX) < 100.0f && col->onPlatform && move->canMove && c->animator->activeAnimation != "idle")
+					{
+						c->animator->SetAnimation("idle");
 					}
 				}
-				else if (c->animator->activeAnimation != s + "dead")
+				else if (c->animator->activeAnimation != "dead")
 				{
-					c->animator->SetAnimation(s + "dead");
+					c->animator->SetAnimation("dead");
 				}
 			}
 		}
@@ -2365,68 +2368,6 @@ void HealthSystem::PurgeEntity(Entity* e)
 		{
 			HealthComponent* s = healths[i];
 			healths.erase(std::remove(healths.begin(), healths.end(), s), healths.end());
-			delete s;
-		}
-	}
-}
-
-#pragma endregion
-
-#pragma region Duelist System
-
-void DuellingSystem::Update(int activeScene, float deltaTime)
-{
-	for (int i = 0; i < duels.size(); i++)
-	{
-		DuelistComponent* d = duels[i];
-
-		if (d->active && d->entity->Get_Scene() == activeScene ||
-			d->active && d->entity->Get_Scene() == 0)
-		{
-			if (d->isAttacking)
-			{
-				d->lastTick += deltaTime;
-				PhysicsComponent* p = (PhysicsComponent*)d->entity->componentIDMap[physicsComponentID];
-				MovementComponent* m = (MovementComponent*)d->entity->componentIDMap[movementComponentID];
-
-				if (!d->hasSword || !d->isDrawn)
-				{
-					// if (!m->jumping && !m->preparingToJump && abs(p->velocityX) < 0.5f && abs(p->velocityY) < 0.5f)
-					if (!m->preparingToJump && !m->climbing)
-					{
-						d->isAttacking = false;
-						m->canMove = true;
-					}
-				}
-
-				if (d->lastTick > 0.5f)
-				{
-					// if (!m->jumping && !m->preparingToJump && abs(p->velocityX) < 0.5f && abs(p->velocityY) < 0.5f)
-					if (!m->preparingToJump && !m->climbing)
-					{
-						d->lastTick = 0;
-						d->isAttacking = false;
-						m->canMove = true;
-					}
-				}
-			}
-		}
-	}
-}
-
-void DuellingSystem::AddComponent(Component* component)
-{
-	duels.push_back((DuelistComponent*)component);
-}
-
-void DuellingSystem::PurgeEntity(Entity* e)
-{
-	for (int i = 0; i < duels.size(); i++)
-	{
-		if (duels[i]->entity == e)
-		{
-			DuelistComponent* s = duels[i];
-			duels.erase(std::remove(duels.begin(), duels.end(), s), duels.end());
 			delete s;
 		}
 	}
