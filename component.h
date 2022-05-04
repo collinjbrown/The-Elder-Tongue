@@ -329,7 +329,9 @@ public:
 	float followSpeed;
 	float projectileSpeed;
 
-	BladeComponent(Entity* entity, bool active, float rushRange, float slowRange, float throwRange, float followSpeed, float projectileSpeed);
+	ColliderComponent* platformCollider;
+
+	BladeComponent(Entity* entity, bool active, float rushRange, float slowRange, float throwRange, float followSpeed, float projectileSpeed, ColliderComponent* platformCollider);
 };
 
 #endif

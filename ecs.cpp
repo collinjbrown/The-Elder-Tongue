@@ -245,7 +245,13 @@ void ECS::Update(float deltaTime)
 		// ECS::main.RegisterComponent(new AIComponent(moonlightBlade, true, false, 1010.0f, 1000.0f, 0.5f, 0.0f, 0.0f, AIType::moonlight_blade), moonlightBlade);
 		ECS::main.RegisterComponent(new ColliderComponent(moonlightBlade, false, (PositionComponent*)moonlightBlade->componentIDMap[positionComponentID], false, false, false, true, false, true, EntityClass::object, 1.0f, 0.0f, 0.0f, 5.0f, 5.0f, 0.0f, 0.0f), moonlightBlade);
 		ECS::main.RegisterComponent(new DamageComponent(moonlightBlade, true, player, false, 0.0f, true, false, 100, 20.0f, false, true, true, true), moonlightBlade);
-		ECS::main.RegisterComponent(new BladeComponent(moonlightBlade, true, 1010.0f, 1000.0f, 10000.0f, 0.5f, 1000.0f), moonlightBlade);
+
+		Entity* hilt = CreateEntity(0, "Moonlight Blade Hilt");
+		ECS::main.RegisterComponent(new PositionComponent(hilt, true, false, 0.0f, 0.0f, 0.0f), hilt);
+		ECS::main.RegisterComponent(new PhysicsComponent(hilt, true, (PositionComponent*)hilt->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), hilt);
+		ColliderComponent* platformCollider = new ColliderComponent(hilt, false, (PositionComponent*)hilt->componentIDMap[positionComponentID], true, false, false, false, false, false, EntityClass::object, 1.0f, 0.0f, 0.0f, 35.0f, 5.0f, 0.0f, 0.0f);
+		ECS::main.RegisterComponent(platformCollider, hilt);
+		ECS::main.RegisterComponent(new BladeComponent(moonlightBlade, true, 1010.0f, 1000.0f, 30000.0f, 0.5f, 1000.0f, platformCollider), moonlightBlade);
 
 		#pragma endregion
 
@@ -786,7 +792,7 @@ AIComponent::AIComponent(Entity* entity, bool active, bool proc, float procRange
 
 #pragma region Blade Component
 
-BladeComponent::BladeComponent(Entity* entity, bool active, float rushRange, float slowRange, float throwRange, float followSpeed, float projectileSpeed)
+BladeComponent::BladeComponent(Entity* entity, bool active, float rushRange, float slowRange, float throwRange, float followSpeed, float projectileSpeed, ColliderComponent* platformCollider)
 {
 	this->ID = bladeComponentID;
 	this->entity = entity;
@@ -802,6 +808,8 @@ BladeComponent::BladeComponent(Entity* entity, bool active, float rushRange, flo
 
 	this->followSpeed = followSpeed;
 	this->projectileSpeed = projectileSpeed;
+
+	this->platformCollider = platformCollider;
 }
 
 #pragma endregion
@@ -1213,47 +1221,50 @@ void ColliderSystem::Update(int activeScene, float deltaTime)
 					{
 						DamageComponent* bDamage = (DamageComponent*)cB->entity->componentIDMap[damageComponentID];
 
-						if (bDamage->lodges)
-						{
-							bDamage->lodged = true;
-
-							ParticleEngine::main.AddParticles(5, physB->pos->x, physB->pos->y, Element::dust, rand() % 10 + 1);
-							cB->active = false;
-
-							physB->velocityX = 0.0f;
-							physB->velocityY = 0.0f;
-							physB->gravityMod = 0.0f;
-						}
-
 						if (bDamage->creator != cA->entity)
 						{
-							if (cA->takesDamage)
+							if (bDamage->lodges)
 							{
-								if (cA->entityClass == EntityClass::player && bDamage->damagesPlayers ||
-									cA->entityClass == EntityClass::enemy && bDamage->damagesEnemies ||
-									cA->entityClass == EntityClass::object && bDamage->damagesObjects)
-								{
-									HealthComponent* aHealth = (HealthComponent*)cA->entity->componentIDMap[healthComponentID];
-									aHealth->health -= bDamage->damage;
-									bDamage->uses -= 1;
-								}
-							}
-							else
-							{
-								bDamage->uses -= 1;
-							}
+								bDamage->lodged = true;
 
-							if (bDamage->uses <= 0)
-							{
+								ParticleEngine::main.AddParticles(5, physB->pos->x, physB->pos->y, Element::dust, rand() % 10 + 1);
 								cB->active = false;
 
-								if (!bDamage->showAfterUses)
-								{
-									ECS::main.AddDeadEntity(bDamage->entity);
-								}
+								physB->velocityX = 0.0f;
+								physB->velocityY = 0.0f;
+								physB->gravityMod = 0.0f;
 							}
 
-							bDamage->lifetime -= deltaTime;
+							if (bDamage->creator != cA->entity)
+							{
+								if (cA->takesDamage)
+								{
+									if (cA->entityClass == EntityClass::player && bDamage->damagesPlayers ||
+										cA->entityClass == EntityClass::enemy && bDamage->damagesEnemies ||
+										cA->entityClass == EntityClass::object && bDamage->damagesObjects)
+									{
+										HealthComponent* aHealth = (HealthComponent*)cA->entity->componentIDMap[healthComponentID];
+										aHealth->health -= bDamage->damage;
+										bDamage->uses -= 1;
+									}
+								}
+								else
+								{
+									bDamage->uses -= 1;
+								}
+
+								if (bDamage->uses <= 0)
+								{
+									cB->active = false;
+
+									if (!bDamage->showAfterUses)
+									{
+										ECS::main.AddDeadEntity(bDamage->entity);
+									}
+								}
+
+								bDamage->lifetime -= deltaTime;
+							}
 						}	// Bin gar keine Russin, stamm’ aus Litauen, echt deutsch.
 					}	// And when we were children, staying at the arch-duke's,
 				}	// My cousin's, he took me out on a sled,
@@ -1865,7 +1876,7 @@ void InputSystem::Update(int activeScene, float deltaTime)
 					if (playerPos.x > screenLeft && playerPos.x < screenRight &&
 						playerPos.y > screenBottom && playerPos.y < screenTop)
 					{
-						Texture2D* sMap = Game::main.textureMap["slashMap"];
+						Texture2D* sMap = Game::main.textureMap["moonlightSlashMap"];
 						Animation2D* anim;
 
 						if (projVel.x > 0)
@@ -2707,6 +2718,8 @@ void BladeSystem::Update(int activeScene, float deltaTime)
 			ColliderComponent* colA = (ColliderComponent*)b->entity->componentIDMap[colliderComponentID];
 			DamageComponent* damA = (DamageComponent*)b->entity->componentIDMap[damageComponentID];
 			PhysicsComponent* physA = (PhysicsComponent*)b->entity->componentIDMap[physicsComponentID];
+			PositionComponent* posA = (PositionComponent*)b->entity->componentIDMap[positionComponentID];
+			StaticSpriteComponent* sprite = (StaticSpriteComponent*)b->entity->componentIDMap[spriteComponentID];
 			Entity* player = ECS::main.player;
 
 			if (damA->lodged)
@@ -2718,11 +2731,12 @@ void BladeSystem::Update(int activeScene, float deltaTime)
 			{
 				colA->active = false;
 				damA->active = false;
+				b->platformCollider->active = false;
 
-				PositionComponent* posA = (PositionComponent*)b->entity->componentIDMap[positionComponentID];
 				PositionComponent* posB = (PositionComponent*)player->componentIDMap[positionComponentID];
 				PhysicsComponent* physB = (PhysicsComponent*)player->componentIDMap[physicsComponentID];
 				ColliderComponent* colB = (ColliderComponent*)player->componentIDMap[colliderComponentID];
+				MovementComponent* moveB = (MovementComponent*)player->componentIDMap[movementComponentID];
 
 				glm::vec2 position = glm::vec2(posA->x, posA->y);
 				glm::vec2 mouse = glm::vec2(Game::main.mouseX, Game::main.mouseY);
@@ -2737,10 +2751,14 @@ void BladeSystem::Update(int activeScene, float deltaTime)
 					target = glm::vec2(posB->x + (colB->width), posB->y + (colB->height));
 				}
 
+				if (moveB->climbing)
+				{
+					target.y = posB->y - colB->height + colB->offsetY - 10.0f;
+				}
+
 				// Look
 				// I'll need to change this later if I want this to handle animations.
 				float r = std::atan2(mouse.y - position.y, mouse.x - position.x) * (180 / M_PI);
-				StaticSpriteComponent* sprite = (StaticSpriteComponent*)b->entity->componentIDMap[spriteComponentID];
 
 				// std::cout << std::to_string(r) + "\n";
 
@@ -2755,6 +2773,7 @@ void BladeSystem::Update(int activeScene, float deltaTime)
 				}
 
 				posA->rotation = r;
+				// std::cout << std::to_string(r) + "\n";
 
 				// Move
 				float dist = glm::length2(position - target);
@@ -2784,11 +2803,29 @@ void BladeSystem::Update(int activeScene, float deltaTime)
 				physA->gravityMod = 0;
 				// Act as a grappling hook?
 
+				if (b->platformCollider->active == false && posA->rotation < 15.0f && posA->rotation > -15.0f ||
+					b->platformCollider->active == false && posA->rotation > 345.0f)
+				{
+					PositionComponent* hiltPos = (PositionComponent*)b->platformCollider->entity->componentIDMap[positionComponentID];
+					hiltPos->x = posA->x;
+					hiltPos->y = posA->y;
+					b->platformCollider->active = true;
+
+					if (sprite->flipped)
+					{
+						b->platformCollider->offsetX = 20.0f;
+					}
+					else
+					{
+						b->platformCollider->offsetX = -20.0f;
+					}
+				}
 			}
 			else
 			{
 				// We are in flight.
 				ParticleEngine::main.AddParticles(1, physA->pos->x, physA->pos->y, Element::aether, rand() % 10 + 1);
+				b->platformCollider->active = false;
 				colA->active = true;
 				damA->active = true;
 			}

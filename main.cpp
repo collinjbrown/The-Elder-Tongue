@@ -116,6 +116,10 @@ int main(void)
     //renderer.textureIDs.push_back(blank.ID);
     //Game::main.textureMap.emplace("blank", &blank);
 
+    Texture2D moonlightSlashMap{ "assets/animations/slash/moonlight_slash_map.png", true, GL_NEAREST };
+    renderer.textureIDs.push_back(moonlightSlashMap.ID);
+    Game::main.textureMap.emplace("moonlightSlashMap", &moonlightSlashMap);
+
     Texture2D slashMap{ "assets/animations/slash/slash_map.png", true, GL_NEAREST };
     renderer.textureIDs.push_back(slashMap.ID);
     Game::main.textureMap.emplace("slashMap", &slashMap);
