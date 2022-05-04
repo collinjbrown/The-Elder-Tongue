@@ -28,6 +28,8 @@ struct Vertex
 
     float textureIndex;
     float mapIndex;
+
+    float lod;
 };
 
 struct Quad

@@ -1,6 +1,7 @@
 #version 330 core
 in vec4 rgbaColor;
 in vec2 texCoords;
+in float mLod;
 in float texIndex;
 in float mapIndex;
 out vec4 color;
@@ -14,8 +15,9 @@ void main()
 {
     int tIndex = int(texIndex);
     int mIndex = int(mapIndex);
+    int lod = int(mLod);
     
-    vec2 mapSize = textureSize(batchQuadTextures[mIndex], 2);
+    vec2 mapSize = textureSize(batchQuadTextures[mIndex], lod);
 
     vec4 sourceColor = texture(batchQuadTextures[tIndex], texCoords);
     vec2 mapCoord;

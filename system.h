@@ -24,6 +24,7 @@ class DuelistComponent;
 class DamageComponent;
 class ParticleComponent;
 class AIComponent;
+class BladeComponent;
 class Entity;
 
 struct Collision
@@ -209,6 +210,18 @@ class AISystem : public System
 {
 public:
 	vector<AIComponent*> ai;
+
+	void Update(int activeScene, float deltaTime);
+
+	void AddComponent(Component* component);
+
+	void PurgeEntity(Entity* e);
+};
+
+class BladeSystem : public System
+{
+public:
+	vector<BladeComponent*> blades;
 
 	void Update(int activeScene, float deltaTime);
 

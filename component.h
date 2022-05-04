@@ -25,6 +25,7 @@ static int duelistComponentID = 11;
 static int damageComponentID = 12;
 static int particleComponentID = 13;
 static int aiComponentID = 14;
+static int bladeComponentID = 15;
 
 static int lilyAnimControllerSubID = 1;
 
@@ -133,7 +134,7 @@ public:
 class InputComponent : public Component
 {
 public:
-	Entity* soul;
+	Entity* moonlightBlade;
 	bool acceptInput;
 
 	bool projecting;
@@ -155,7 +156,7 @@ public:
 	float slashSpeed;
 	float projectileSpeed;
 
-	InputComponent(Entity* entity, bool active, Entity* soul, bool acceptInput, float projectionDelay, float projectionDepth, float maxCoyoteTime, int maxJumps, float projectileDelay, float slashSpeed, float projectileSpeed);
+	InputComponent(Entity* entity, bool active, Entity* moonlightBlade, bool acceptInput, float projectionDelay, float projectionDepth, float maxCoyoteTime, int maxJumps, float projectileDelay, float slashSpeed, float projectileSpeed);
 };
 
 class MovementComponent : public Component
@@ -267,6 +268,8 @@ public:
 	bool limitedUses;
 	int uses;
 	float damage;
+	bool lodges;
+	bool lodged;
 
 	// There's definitely a more elegant way to handle this,
 	// but I wonder if it would be worth it to implement it.
@@ -274,7 +277,7 @@ public:
 	bool damagesEnemies;
 	bool damagesObjects;
 
-	DamageComponent(Entity* entity, bool active, Entity* creator, bool hasLifetime, float lifetime, bool showAfterUses, bool limitedUses, int uses, float damage, bool damagesPlayers, bool damagesEnemies, bool damagesObjects);
+	DamageComponent(Entity* entity, bool active, Entity* creator, bool hasLifetime, float lifetime, bool showAfterUses, bool limitedUses, int uses, float damage, bool damagesPlayers, bool damagesEnemies, bool damagesObjects, bool lodges);
 };
 
 class ParticleComponent : public Component
@@ -293,7 +296,7 @@ public:
 	ParticleComponent(Entity* entity, bool active, float tickRate, float xOffset, float yOffset, int number, Element element, float minLifetime, float maxLifetime);
 };
 
-enum class AIType { aerial, ground, soul };
+enum class AIType { aerial, ground };
 class AIComponent : public Component
 {
 public:
@@ -310,6 +313,23 @@ public:
 	AIType aiType;
 
 	AIComponent(Entity* entity, bool active, bool proc, float procRange, float chaseRange, float movementSpeed, float projectileSpeed, float attackRate, AIType aiType);
+};
+
+class BladeComponent : public Component
+{
+public:
+	bool attacking;
+	bool thrown;
+	bool lodged;
+
+	float rushRange;
+	float slowRange;
+	float throwRange;
+
+	float followSpeed;
+	float projectileSpeed;
+
+	BladeComponent(Entity* entity, bool active, float rushRange, float slowRange, float throwRange, float followSpeed, float projectileSpeed);
 };
 
 #endif

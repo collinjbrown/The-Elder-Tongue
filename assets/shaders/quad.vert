@@ -4,9 +4,11 @@ layout (location = 1) in vec4 vertRgbaColor;
 layout (location = 2) in vec2 vertTexCoords;
 layout (location = 3) in float vertTexIndex;
 layout (location = 4) in float vertMapIndex;
+layout (location = 5) in float vertLod;
 
 out vec4 rgbaColor;
 out vec2 texCoords;
+out float mLod;
 out float texIndex;
 out float mapIndex;
 
@@ -18,6 +20,7 @@ void main()
     texCoords = vertTexCoords;
     texIndex = vertTexIndex;
     mapIndex = vertMapIndex;
+    mLod = vertLod;
     
     gl_Position = MVP * vec4(posCoords, 0.0, 1.0);
 }

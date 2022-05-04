@@ -181,6 +181,10 @@ void ECS::Init()
 	ComponentBlock* inputBlock = new ComponentBlock(inputSystem, inputComponentID);
 	componentBlocks.push_back(inputBlock);
 
+	BladeSystem* bladeSystem = new BladeSystem();
+	ComponentBlock* bladeBlock = new ComponentBlock(bladeSystem, bladeComponentID);
+	componentBlocks.push_back(bladeBlock);
+
 	PhysicsSystem* physicsSystem = new PhysicsSystem();
 	ComponentBlock* physicsBlock = new ComponentBlock(physicsSystem, physicsComponentID);
 	componentBlocks.push_back(physicsBlock);
@@ -228,21 +232,24 @@ void ECS::Update(float deltaTime)
 
 	if (round == 1)
 	{
-		#pragma region Soul Instantiation
+		#pragma region Moonlight Blade Instantiation
 
-		Entity* soul = CreateEntity(0, "Soul");
-		Texture2D* soulTex = Game::main.textureMap["skull"];
-		Texture2D* soulMap = Game::main.textureMap["skullMap"];
+		player = CreateEntity(0, "The Player");
+		Entity* moonlightBlade = CreateEntity(0, "Moonlight Blade");
+		Texture2D* moonlightBladeTex = Game::main.textureMap["moonlightBlade"];
+		Texture2D* moonlightBladeMap = Game::main.textureMap["moonlightBladeMap"];
 
-		ECS::main.RegisterComponent(new PositionComponent(soul, true, false, 0.0f, 0.0f, 0.0f), soul);
-		ECS::main.RegisterComponent(new PhysicsComponent(soul, true, (PositionComponent*)soul->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), soul);
-		ECS::main.RegisterComponent(new StaticSpriteComponent(soul, true, (PositionComponent*)soul->componentIDMap[positionComponentID], soulTex->width, soulTex->height, soulTex, soulMap, false, false), soul);
-		ECS::main.RegisterComponent(new AIComponent(soul, true, false, 1010.0f, 1000.0f, 0.5f, 0.0f, 0.0f, AIType::soul), soul);
+		ECS::main.RegisterComponent(new PositionComponent(moonlightBlade, true, false, 0.0f, 0.0f, 0.0f), moonlightBlade);
+		ECS::main.RegisterComponent(new PhysicsComponent(moonlightBlade, true, (PositionComponent*)moonlightBlade->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), moonlightBlade);
+		ECS::main.RegisterComponent(new StaticSpriteComponent(moonlightBlade, true, (PositionComponent*)moonlightBlade->componentIDMap[positionComponentID], moonlightBladeTex->width, moonlightBladeTex->height, moonlightBladeTex, moonlightBladeMap, false, false), moonlightBlade);
+		// ECS::main.RegisterComponent(new AIComponent(moonlightBlade, true, false, 1010.0f, 1000.0f, 0.5f, 0.0f, 0.0f, AIType::moonlight_blade), moonlightBlade);
+		ECS::main.RegisterComponent(new ColliderComponent(moonlightBlade, false, (PositionComponent*)moonlightBlade->componentIDMap[positionComponentID], false, false, false, true, false, true, EntityClass::object, 1.0f, 0.0f, 0.0f, 5.0f, 5.0f, 0.0f, 0.0f), moonlightBlade);
+		ECS::main.RegisterComponent(new DamageComponent(moonlightBlade, true, player, false, 0.0f, true, false, 100, 20.0f, false, true, true, true), moonlightBlade);
+		ECS::main.RegisterComponent(new BladeComponent(moonlightBlade, true, 1010.0f, 1000.0f, 10000.0f, 0.5f, 1000.0f), moonlightBlade);
 
 		#pragma endregion
 
 		#pragma region Player Instantiation
-		player = CreateEntity(0, "The Player");
 		Texture2D* lilyMap = Game::main.textureMap["lilyMap"];
 		Animation2D* anim1 = Game::main.animationMap["baseIdle"];
 
@@ -250,7 +257,7 @@ void ECS::Update(float deltaTime)
 		ECS::main.RegisterComponent(new PhysicsComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 5000.0f, 2000.0f), player);
 		ECS::main.RegisterComponent(new ColliderComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], false, false, false, false, true, false, EntityClass::player, 1.0f, 1.0f, 10.0f, 20.0f, 50.0f, 0.0f, -7.75f), player);
 		ECS::main.RegisterComponent(new MovementComponent(player, true, 4000.0f, 500.0f, 2.5f, 0.5f, true, 0.7f, true, false, 0.9f, glm::vec2(100.0f, 0), 50.0f, 20.0f, 1.5f, 0.1f, 0.35f, 5, 3.0f), player);
-		ECS::main.RegisterComponent(new InputComponent(player, true, soul, true, 0.5f, 5000.0f, 0.5f, 2, 0.5f, 2.0f, 500.0f), player);
+		ECS::main.RegisterComponent(new InputComponent(player, true, moonlightBlade, true, 0.5f, 5000.0f, 0.5f, 2, 0.5f, 2.0f, 500.0f), player);
 		ECS::main.RegisterComponent(new CameraFollowComponent(player, true, 10.0f), player);
 		ECS::main.RegisterComponent(new HealthComponent(player, true, 1000.0f, false), player);
 		ECS::main.RegisterComponent(new AnimationComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], anim1, "idle", lilyMap), player);
@@ -546,13 +553,13 @@ ColliderComponent::ColliderComponent(Entity* entity, bool active, PositionCompon
 
 #pragma region Input Component
 
-InputComponent::InputComponent(Entity* entity, bool active, Entity* soul, bool acceptInput, float projectionDelay, float projectionDepth, float maxCoyoteTime, int maxJumps, float projectileDelay, float slashSpeed, float projectileSpeed)
+InputComponent::InputComponent(Entity* entity, bool active, Entity* moonlightBlade, bool acceptInput, float projectionDelay, float projectionDepth, float maxCoyoteTime, int maxJumps, float projectileDelay, float slashSpeed, float projectileSpeed)
 {
 	this->ID = inputComponentID;
 	this->active = active;
 	this->entity = entity;
 
-	this->soul = soul;
+	this->moonlightBlade = moonlightBlade;
 	this->acceptInput = acceptInput;
 	this->projectionDelay = projectionDelay;
 	this->projectionDepth = projectionDepth;
@@ -705,7 +712,7 @@ HealthComponent::HealthComponent(Entity* entity, bool active, float health, bool
 
 #pragma region Damage Component
 
-DamageComponent::DamageComponent(Entity* entity, bool active, Entity* creator, bool hasLifetime, float lifetime, bool showAfterUses, bool limitedUses, int uses, float damage, bool damagesPlayers, bool damagesEnemies, bool damagesObjects)
+DamageComponent::DamageComponent(Entity* entity, bool active, Entity* creator, bool hasLifetime, float lifetime, bool showAfterUses, bool limitedUses, int uses, float damage, bool damagesPlayers, bool damagesEnemies, bool damagesObjects, bool lodges)
 {
 	this->ID = damageComponentID;
 	this->entity = entity;
@@ -723,6 +730,9 @@ DamageComponent::DamageComponent(Entity* entity, bool active, Entity* creator, b
 	this->damagesPlayers = damagesPlayers;
 	this->damagesEnemies = damagesEnemies;
 	this->damagesObjects = damagesObjects;
+
+	this->lodges = lodges;
+	this->lodged = false;
 }
 
 #pragma endregion
@@ -770,6 +780,28 @@ AIComponent::AIComponent(Entity* entity, bool active, bool proc, float procRange
 	this->attackRate = attackRate;
 
 	this->aiType = aiType;
+}
+
+#pragma endregion
+
+#pragma region Blade Component
+
+BladeComponent::BladeComponent(Entity* entity, bool active, float rushRange, float slowRange, float throwRange, float followSpeed, float projectileSpeed)
+{
+	this->ID = bladeComponentID;
+	this->entity = entity;
+	this->active = active;
+
+	this->attacking = false;
+	this->thrown = false;
+	this->lodged = false;
+
+	this->rushRange = rushRange;
+	this->slowRange = slowRange;
+	this->throwRange = throwRange;
+
+	this->followSpeed = followSpeed;
+	this->projectileSpeed = projectileSpeed;
 }
 
 #pragma endregion
@@ -1051,7 +1083,7 @@ void ColliderSystem::Update(int activeScene, float deltaTime)
 			{
 				ColliderComponent* cB = colls[j];
 
-				if (cB->entity->Get_ID() != cA->entity->Get_ID())
+				if (cB->active && cB->entity->Get_ID() != cA->entity->Get_ID())
 				{
 					PositionComponent* posB = (PositionComponent*)cB->entity->componentIDMap[positionComponentID];
 					PhysicsComponent* physB = (PhysicsComponent*)cB->entity->componentIDMap[physicsComponentID];
@@ -1060,22 +1092,19 @@ void ColliderSystem::Update(int activeScene, float deltaTime)
 					float combSize = glm::length2(glm::vec2((cA->width + cB->width) / 2.0f, (cA->height + cB->height) / 2.0f));
 					float dist = glm::length2(glm::vec2(posA->x + cA->offsetX, posA->y + cA->offsetY) - glm::vec2(posB->x + cB->offsetX, posB->y + cB->offsetY));
 
-					if (dist <= combVel + combSize)
+					if (!cA->platform && dist <= combVel + combSize)
 					{
-						if (!cA->platform)
+						glm::vec2 contactPoint, contactNormal;
+						float time;
+
+						Collision* c = DynamicArbitraryRectangleCollision(cA, posA, physA, cB, posB, physB, deltaTime);
+
+						if (c != nullptr)
 						{
-							glm::vec2 contactPoint, contactNormal;
-							float time;
+							cA->collidedLastTick = true;
+							cB->collidedLastTick = true;
 
-							Collision* c = DynamicArbitraryRectangleCollision(cA, posA, physA, cB, posB, physB, deltaTime);
-
-							if (c != nullptr)
-							{
-								cA->collidedLastTick = true;
-								cB->collidedLastTick = true;
-
-								z.push_back(std::pair(c, c->time));
-							}
+							z.push_back(std::pair(c, c->time));
 						}
 					}
 				}
@@ -1139,6 +1168,18 @@ void ColliderSystem::Update(int activeScene, float deltaTime)
 
 						if (aDamage->creator != cB->entity)
 						{
+							if (aDamage->lodges)
+							{
+								ParticleEngine::main.AddParticles(5, physA->pos->x, physA->pos->y, Element::dust, rand() % 10 + 1);
+								aDamage->lodged = true;
+
+								cA->active = false;
+
+								physA->velocityX = 0.0f;
+								physA->velocityY = 0.0f;
+								physA->gravityMod = 0.0f;
+							}
+
 							if (cB->takesDamage)
 							{
 								if (cB->entityClass == EntityClass::player && aDamage->damagesPlayers ||
@@ -1171,6 +1212,18 @@ void ColliderSystem::Update(int activeScene, float deltaTime)
 					if (cB->trigger && cB->doesDamage)
 					{
 						DamageComponent* bDamage = (DamageComponent*)cB->entity->componentIDMap[damageComponentID];
+
+						if (bDamage->lodges)
+						{
+							bDamage->lodged = true;
+
+							ParticleEngine::main.AddParticles(5, physB->pos->x, physB->pos->y, Element::dust, rand() % 10 + 1);
+							cB->active = false;
+
+							physB->velocityX = 0.0f;
+							physB->velocityY = 0.0f;
+							physB->gravityMod = 0.0f;
+						}
 
 						if (bDamage->creator != cA->entity)
 						{
@@ -1637,7 +1690,6 @@ Collision* ColliderSystem::ArbitraryRectangleCollision(ColliderComponent* colA, 
 
 Collision* ColliderSystem::DynamicArbitraryRectangleCollision(ColliderComponent* colA, PositionComponent* posA, PhysicsComponent* physA, ColliderComponent* colB, PositionComponent* posB, PhysicsComponent* physB, float deltaTime)
 {
-
 	glm::vec2 rayOrigin = glm::vec2(posA->x + colA->offsetX, posA->y + colA->offsetY);
 	glm::vec2 rayDir =  glm::vec2(physA->velocityX, physA->velocityY) - glm::vec2(physB->velocityX, physB->velocityY);
 
@@ -1712,6 +1764,8 @@ void InputSystem::Update(int activeScene, float deltaTime)
 			HealthComponent* health = (HealthComponent*)m->entity->componentIDMap[healthComponentID];
 			AnimationControllerComponent* animator = (AnimationControllerComponent*)m->entity->componentIDMap[animationComponentID];
 
+			glm::vec2 playerPos = glm::vec2(phys->pos->x, phys->pos->y);
+
 			m->lastTick += deltaTime;
 
 			if (!health->dead)
@@ -1736,36 +1790,36 @@ void InputSystem::Update(int activeScene, float deltaTime)
 					move->jumping = false;
 				}
 
-				if (glfwGetMouseButton(Game::main.window, GLFW_MOUSE_BUTTON_2) == GLFW_PRESS && m->lastProjectile >= m->projectileDelay && m->soul != nullptr)
+				BladeComponent* blade = (BladeComponent*)m->moonlightBlade->componentIDMap[bladeComponentID];
+				PositionComponent* bladePosComp = (PositionComponent*)m->moonlightBlade->componentIDMap[positionComponentID];
+				PhysicsComponent* bladePhys = (PhysicsComponent*)blade->entity->componentIDMap[physicsComponentID];
+				BladeComponent* bladeComponent = (BladeComponent*)blade->entity->componentIDMap[bladeComponentID];
+				glm::vec2 bladePos = glm::vec2(bladePosComp->x, bladePosComp->y);
+
+				float bladeDist = glm::length2(bladePos - playerPos);
+
+				if (glfwGetMouseButton(Game::main.window, GLFW_MOUSE_BUTTON_2) == GLFW_PRESS && m->lastProjectile >= m->projectileDelay && !blade->thrown && bladeDist <= blade->throwRange && !bladeComponent->attacking)
 				{
-					float screenLeft = (Game::main.camX - (Game::main.windowWidth * Game::main.zoom / 1.0f));
-					float screenRight = (Game::main.camX + (Game::main.windowWidth * Game::main.zoom / 1.0f));
-					float screenBottom = (Game::main.camY - (Game::main.windowHeight * Game::main.zoom / 1.0f));
-					float screenTop = (Game::main.camY + (Game::main.windowHeight * Game::main.zoom / 1.0f));
-					float screenElev = Game::main.camZ;
-					
-					PositionComponent* soulPos = (PositionComponent*)m->soul->componentIDMap[positionComponentID];
+					glm::vec2 projVel = Normalize(glm::vec2(Game::main.mouseX - bladePos.x, Game::main.mouseY - bladePos.y)) * bladeComponent->projectileSpeed;
+					m->lastProjectile = 0.0f;
+					blade->thrown = true;
 
-					glm::vec2 projPos = glm::vec2(soulPos->x, soulPos->y);
-					glm::vec2 projVel = Normalize(glm::vec2(Game::main.mouseX - projPos.x, Game::main.mouseY - projPos.y)) * m->projectileSpeed;
+					bladePhys->velocityX = projVel.x;
+					bladePhys->velocityY = projVel.y;
+				}
+				else if (glfwGetMouseButton(Game::main.window, GLFW_MOUSE_BUTTON_2) == GLFW_PRESS && m->lastProjectile >= m->projectileDelay && blade->thrown && !bladeComponent->attacking)
+				{
+					bladePhys->velocityX = 0.0f;
+					bladePhys->velocityY = 0.0f;
+					bladePhys->gravityMod = bladePhys->baseGravityMod;
 
-					if (projPos.x > screenLeft && projPos.x < screenRight &&
-						projPos.y > screenBottom && projPos.y < screenTop)
-					{
-						Texture2D* s = Game::main.textureMap["bullet"];
-						Texture2D* sMap = Game::main.textureMap["aether_bullet"];
-						m->lastProjectile = 0.0f;
+					m->lastProjectile = 0.0f;
 
-						Entity* projectile = ECS::main.CreateEntity(0, "Bullet");
+					DamageComponent* bladeDamage = (DamageComponent*)blade->entity->componentIDMap[damageComponentID];
 
-						ECS::main.RegisterComponent(new PositionComponent(projectile, true, false, projPos.x, projPos.y, 0.0f), projectile);
-						ECS::main.RegisterComponent(new PhysicsComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], projVel.x, projVel.y, 0.0f, 0.0f, 0.0f), projectile);
-						ECS::main.RegisterComponent(new ColliderComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], false, false, false, true, false, true, EntityClass::object, 1.0f, 0.0f, 0.0f, 5.0f, 5.0f, 0.0f, 0.0f), projectile);
-						ECS::main.RegisterComponent(new DamageComponent(projectile, true, move->entity, true, 20.0f, false, true, 1, 10.0f, false, true, true), projectile);
-						ECS::main.RegisterComponent(new StaticSpriteComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], s->width, s->height, s, sMap, false, false), projectile);
-						// ECS::main.RegisterComponent(new ParticleComponent(projectile, true, 0.01f, 0.0f, 0.0f, 10, Element::aether, 5.0f, 20.0f), projectile);
-						ParticleEngine::main.AddParticles(25, projPos.x + (projVel.x * deltaTime), projPos.y + (projVel.y * deltaTime), Element::aether, rand() % 40 + 1);
-					}
+					bladeDamage->lodged = false;
+					blade->lodged = false;
+					blade->thrown = false;
 				}
 				else
 				{
@@ -1781,8 +1835,12 @@ void InputSystem::Update(int activeScene, float deltaTime)
 					move->shouldClimb = false;
 				}
 
-				if (glfwGetMouseButton(Game::main.window, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS && move->lastAttack > move->minAttackDelay && move->lastFlurry > move->flurryDelay && move->attackNumber < move->maxFlurry)
+				StaticSpriteComponent* bladeSprite = (StaticSpriteComponent*)blade->entity->componentIDMap[spriteComponentID];
+				if (glfwGetMouseButton(Game::main.window, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS && move->lastAttack > move->minAttackDelay && move->lastFlurry > move->flurryDelay && move->attackNumber < move->maxFlurry && !blade->thrown && bladeDist <= blade->throwRange)
 				{
+					bladeSprite->active = false;
+					bladeComponent->attacking = true;
+
 					move->isAttacking = true;
 					move->attackNumber++;
 
@@ -1802,11 +1860,10 @@ void InputSystem::Update(int activeScene, float deltaTime)
 					float screenTop = (Game::main.camY + (Game::main.windowHeight * Game::main.zoom / 1.0f));
 					float screenElev = Game::main.camZ;
 
-					glm::vec2 projPos = glm::vec2(phys->pos->x, phys->pos->y);
-					glm::vec2 projVel = Normalize(glm::vec2(Game::main.mouseX - projPos.x, Game::main.mouseY - projPos.y)) * move->slashSpeed;
+					glm::vec2 projVel = Normalize(glm::vec2(Game::main.mouseX - playerPos.x, Game::main.mouseY - playerPos.y)) * move->slashSpeed;
 
-					if (projPos.x > screenLeft && projPos.x < screenRight &&
-						projPos.y > screenBottom && projPos.y < screenTop)
+					if (playerPos.x > screenLeft && playerPos.x < screenRight &&
+						playerPos.y > screenBottom && playerPos.y < screenTop)
 					{
 						Texture2D* sMap = Game::main.textureMap["slashMap"];
 						Animation2D* anim;
@@ -1838,10 +1895,10 @@ void InputSystem::Update(int activeScene, float deltaTime)
 
 						Entity* projectile = ECS::main.CreateEntity(0, "Slash");
 
-						ECS::main.RegisterComponent(new PositionComponent(projectile, true, false, phys->pos->x, phys->pos->y, 0.0f), projectile);
+						ECS::main.RegisterComponent(new PositionComponent(projectile, true, false, playerPos.x, playerPos.y, 0.0f), projectile);
 						ECS::main.RegisterComponent(new PhysicsComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], phys->velocityX + projVel.x, phys->velocityY + projVel.y, 0.0f, 0.0f, 0.0f), projectile);
 						ECS::main.RegisterComponent(new ColliderComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], false, false, false, true, false, true, EntityClass::object, 1.0f, 0.0f, 0.0f, 5.0f, 5.0f, 0.0f, 0.0f), projectile);
-						ECS::main.RegisterComponent(new DamageComponent(projectile, true, move->entity, true, t, true, true, 1, 20.0f, false, true, true), projectile);
+						ECS::main.RegisterComponent(new DamageComponent(projectile, true, move->entity, true, t, true, true, 1, 20.0f, false, true, true, false), projectile);
 						ECS::main.RegisterComponent(new AnimationComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], anim, "default", sMap), projectile);
 
 						PhysicsComponent* p = (PhysicsComponent*)projectile->componentIDMap[physicsComponentID];
@@ -1861,6 +1918,8 @@ void InputSystem::Update(int activeScene, float deltaTime)
 
 				if (move->lastAttack > move->maxAttackDelay)
 				{
+					bladeSprite->active = true;
+					bladeComponent->attacking = false;
 					move->isAttacking = false;
 
 					if (col->onPlatform)
@@ -2600,7 +2659,7 @@ void AISystem::Update(int activeScene, float deltaTime)
 							ECS::main.RegisterComponent(new PositionComponent(projectile, true, false, posA->x, posA->y, 0.0f), projectile);
 							ECS::main.RegisterComponent(new PhysicsComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], vel.x, vel.y, 0.0f, 0.0f, 0.0f), projectile);
 							ECS::main.RegisterComponent(new ColliderComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], false, false, false, true, false, true, EntityClass::object, 1.0f, 0.0f, 0.0f, 5.0f, 5.0f, 0.0f, 0.0f), projectile);
-							ECS::main.RegisterComponent(new DamageComponent(projectile, true, a->entity, true, 10.0f, false, true, 1, 10.0f, true, true, true), projectile);
+							ECS::main.RegisterComponent(new DamageComponent(projectile, true, a->entity, true, 10.0f, false, true, 1, 10.0f, true, true, true, false), projectile);
 							ECS::main.RegisterComponent(new StaticSpriteComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], s->width, s->height, s, sMap, false, false), projectile);
 						}
 						else
@@ -2608,65 +2667,6 @@ void AISystem::Update(int activeScene, float deltaTime)
 							a->lastAttack += deltaTime;
 						}
 					}
-				}
-			}
-			else if (a->aiType == AIType::soul)
-			{
-				PositionComponent* posA = (PositionComponent*)a->entity->componentIDMap[positionComponentID];
-				PositionComponent* posB = (PositionComponent*)player->componentIDMap[positionComponentID];
-				PhysicsComponent* physB = (PhysicsComponent*)player->componentIDMap[physicsComponentID];
-				ColliderComponent* colB = (ColliderComponent*)player->componentIDMap[colliderComponentID];
-				
-				glm::vec2 position = glm::vec2(posA->x, posA->y);
-				glm::vec2 mouse = glm::vec2(Game::main.mouseX, Game::main.mouseY);
-				glm::vec2 target;
-
-				if (physB->velocityX >= 0)
-				{
-					target = glm::vec2(posB->x - (colB->width), posB->y + (colB->height));
-				}
-				else
-				{
-					target = glm::vec2(posB->x + (colB->width), posB->y + (colB->height));
-				}
-
-				// Look
-				// I'll need to change this later if I want this to handle animations.
-				float r = std::atan2(mouse.y - position.y, mouse.x - position.x) * (180 / M_PI);
-				StaticSpriteComponent* sprite = (StaticSpriteComponent*)a->entity->componentIDMap[spriteComponentID];
-
-				// std::cout << std::to_string(r) + "\n";
-
-				if (r > 100 || r < -100)
-				{
-					sprite->flipped = true;
-					r += 180;
-				}
-				else
-				{
-					sprite->flipped = false;
-				}
-
-				posA->rotation = r;
-
-				// Move
-				float dist = glm::length2(position - target);
-				if (dist > a->chaseRange)
-				{
-					glm::vec2 vel = -Normalize(position - lerp(position, target, deltaTime));
-					PhysicsComponent* physA = (PhysicsComponent*)a->entity->componentIDMap[physicsComponentID];
-
-					if (dist > a->procRange)
-					{
-						posA->x += vel.x * (1.0f / a->movementSpeed);
-						posA->y += vel.y * (1.0f / a->movementSpeed);
-					}
-					else
-					{
-						physA->velocityX += vel.x * (1.0f / a->movementSpeed);
-						physA->velocityY += vel.y * (1.0f / a->movementSpeed);
-					}
-					
 				}
 			}
 		}
@@ -2686,6 +2686,129 @@ void AISystem::PurgeEntity(Entity* e)
 		{
 			AIComponent* s = ai[i];
 			ai.erase(std::remove(ai.begin(), ai.end(), s), ai.end());
+			delete s;
+		}
+	}
+}
+
+#pragma endregion
+
+#pragma region Blade System
+
+void BladeSystem::Update(int activeScene, float deltaTime)
+{
+	for (int i = 0; i < blades.size(); i++)
+	{
+		BladeComponent* b = blades[i];
+
+		if (b->active && b->entity->Get_Scene() == activeScene ||
+			b->active && b->entity->Get_Scene() == 0)
+		{
+			ColliderComponent* colA = (ColliderComponent*)b->entity->componentIDMap[colliderComponentID];
+			DamageComponent* damA = (DamageComponent*)b->entity->componentIDMap[damageComponentID];
+			PhysicsComponent* physA = (PhysicsComponent*)b->entity->componentIDMap[physicsComponentID];
+			Entity* player = ECS::main.player;
+
+			if (damA->lodged)
+			{
+				b->lodged = true;
+			}
+
+			if (!b->thrown)
+			{
+				colA->active = false;
+				damA->active = false;
+
+				PositionComponent* posA = (PositionComponent*)b->entity->componentIDMap[positionComponentID];
+				PositionComponent* posB = (PositionComponent*)player->componentIDMap[positionComponentID];
+				PhysicsComponent* physB = (PhysicsComponent*)player->componentIDMap[physicsComponentID];
+				ColliderComponent* colB = (ColliderComponent*)player->componentIDMap[colliderComponentID];
+
+				glm::vec2 position = glm::vec2(posA->x, posA->y);
+				glm::vec2 mouse = glm::vec2(Game::main.mouseX, Game::main.mouseY);
+				glm::vec2 target;
+
+				if (physB->velocityX >= 0)
+				{
+					target = glm::vec2(posB->x - (colB->width), posB->y + (colB->height));
+				}
+				else
+				{
+					target = glm::vec2(posB->x + (colB->width), posB->y + (colB->height));
+				}
+
+				// Look
+				// I'll need to change this later if I want this to handle animations.
+				float r = std::atan2(mouse.y - position.y, mouse.x - position.x) * (180 / M_PI);
+				StaticSpriteComponent* sprite = (StaticSpriteComponent*)b->entity->componentIDMap[spriteComponentID];
+
+				// std::cout << std::to_string(r) + "\n";
+
+				if (r > 100 || r < -100)
+				{
+					sprite->flipped = true;
+					r += 180;
+				}
+				else
+				{
+					sprite->flipped = false;
+				}
+
+				posA->rotation = r;
+
+				// Move
+				float dist = glm::length2(position - target);
+				if (dist > b->slowRange)
+				{
+					glm::vec2 vel = -Normalize(position - lerp(position, target, deltaTime));
+
+					if (dist > b->rushRange)
+					{
+						posA->x += vel.x * (1.0f / b->followSpeed);
+						posA->y += vel.y * (1.0f / b->followSpeed);
+					}
+					else
+					{
+						physA->velocityX += vel.x * (1.0f / b->followSpeed);
+						physA->velocityY += vel.y * (1.0f / b->followSpeed);
+					}
+				}
+			}
+			else if (b->lodged)
+			{
+				colA->active = false;
+				damA->active = false;
+
+				physA->velocityX = 0;
+				physA->velocityY = 0;
+				physA->gravityMod = 0;
+				// Act as a grappling hook?
+
+			}
+			else
+			{
+				// We are in flight.
+				ParticleEngine::main.AddParticles(1, physA->pos->x, physA->pos->y, Element::aether, rand() % 10 + 1);
+				colA->active = true;
+				damA->active = true;
+			}
+		}
+	}
+}
+
+void BladeSystem::AddComponent(Component* component)
+{
+	blades.push_back((BladeComponent*)component);
+}
+
+void BladeSystem::PurgeEntity(Entity* e)
+{
+	for (int i = 0; i < blades.size(); i++)
+	{
+		if (blades[i]->entity == e)
+		{
+			BladeComponent* s = blades[i];
+			blades.erase(std::remove(blades.begin(), blades.end(), s), blades.end());
 			delete s;
 		}
 	}
