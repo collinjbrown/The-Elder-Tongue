@@ -39,6 +39,22 @@ void WindowPosCallback(GLFWwindow* window, int xpos, int ypos)
     windowMoved = 1;
 }
 
+
+void MessageCallback(GLenum source,
+    GLenum type,
+    GLuint id,
+    GLenum severity,
+    GLsizei length,
+    const GLchar* message,
+    const void* userParam)
+{
+    fprintf(stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
+        (type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : ""),
+        type, severity, message);
+
+    std::cout << "\n";
+}
+
 int main(void)
 {
     #pragma region GL Rendering Setup
@@ -78,7 +94,13 @@ int main(void)
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+    glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
+    glEnable(GL_DEBUG_OUTPUT);
+    glDebugMessageCallback(MessageCallback, 0);
+
     Game::main.window = window;
+    
+    printf("OpenGL version supported by this platform (%s): \n", glGetString(GL_VERSION));
     #pragma endregion
 
     #pragma region World Setup

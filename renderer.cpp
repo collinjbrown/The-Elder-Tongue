@@ -9,10 +9,15 @@
 #include "game.h"
 #include "component.h"
 
+float Renderer::CalculateModifier(float i)
+{
+    return (256.0f * (1.0f / i));
+}
+
 Renderer::Renderer(GLuint whiteTexture) : batches(1), shader("assets/shaders/quad.vert", "assets/shaders/quad.frag"), whiteTextureID(whiteTexture)
 {
     GLuint quadIBO;
-    glCheckError();
+
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
 
@@ -42,8 +47,8 @@ Renderer::Renderer(GLuint whiteTexture) : batches(1), shader("assets/shaders/qua
     // Map Index
     glVertexAttribPointer(4, 1, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, mapIndex));
     glEnableVertexAttribArray(4);
-    // LOD
-    glVertexAttribPointer(5, 1, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, lod));
+    // Dimensions Mod = 256 * (1 / [height or width])
+    glVertexAttribPointer(5, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, widthMod));
     glEnableVertexAttribArray(5);
     glCheckError();
 
@@ -137,10 +142,10 @@ void Renderer::prepareQuad(glm::vec2 position, float width, float height,
     const float b = rgb.b;
     const float a = rgb.a;
 
-    quad.topRight = { rightX, topY,      r, g, b, a,   1.0, 1.0,    glTextureIndex, glMapIndex, width / 16 };
-    quad.bottomRight = { rightX, bottomY,   r, g, b, a,   1.0, 0.0,    glTextureIndex, glMapIndex, width / 16 };
-    quad.bottomLeft = { leftX,  bottomY,   r, g, b, a,   0.0, 0.0,    glTextureIndex, glMapIndex, width / 16 };
-    quad.topLeft = { leftX,  topY,      r, g, b, a,   0.0, 1.0,    glTextureIndex, glMapIndex, width / 16 };
+    quad.topRight = { rightX, topY,      r, g, b, a,   1.0, 1.0,    glTextureIndex, glMapIndex, CalculateModifier(width), CalculateModifier(height) };
+    quad.bottomRight = { rightX, bottomY,   r, g, b, a,   1.0, 0.0,    glTextureIndex, glMapIndex, CalculateModifier(width), CalculateModifier(height) };
+    quad.bottomLeft = { leftX,  bottomY,   r, g, b, a,   0.0, 0.0,    glTextureIndex, glMapIndex, CalculateModifier(width), CalculateModifier(height) };
+    quad.topLeft = { leftX,  topY,      r, g, b, a,   0.0, 1.0,    glTextureIndex, glMapIndex, CalculateModifier(width), CalculateModifier(height) };
 }
 
 void Renderer::prepareQuad(PositionComponent* pos, float width, float height, float tWidth, float tHeight,
@@ -214,17 +219,17 @@ void Renderer::prepareQuad(PositionComponent* pos, float width, float height, fl
         const float xMod = fmod(width, tWidth);
         const float yMod = fmod(height, tHeight);
 
-        quad.topRight = { topRight.x, topRight.y,      r, g, b, a,   xMod, yMod,    glTextureIndex, glMapIndex, width / 16 };
-        quad.bottomRight = { bottomRight.x, bottomRight.y,   r, g, b, a,   xMod, 0.0,    glTextureIndex, glMapIndex, width / 16 };
-        quad.bottomLeft = { bottomLeft.x,  bottomLeft.y,   r, g, b, a,   0.0, 0.0,    glTextureIndex, glMapIndex, width / 16 };
-        quad.topLeft = { topLeft.x,  topLeft.y,      r, g, b, a,   0.0, yMod,    glTextureIndex, glMapIndex, width / 16 };
+        quad.topRight = { topRight.x, topRight.y,      r, g, b, a,   xMod, yMod,    glTextureIndex, glMapIndex, CalculateModifier(width), CalculateModifier(height) };
+        quad.bottomRight = { bottomRight.x, bottomRight.y,   r, g, b, a,   xMod, 0.0,    glTextureIndex, glMapIndex, CalculateModifier(width), CalculateModifier(height) };
+        quad.bottomLeft = { bottomLeft.x,  bottomLeft.y,   r, g, b, a,   0.0, 0.0,    glTextureIndex, glMapIndex, CalculateModifier(width), CalculateModifier(height) };
+        quad.topLeft = { topLeft.x,  topLeft.y,      r, g, b, a,   0.0, yMod,    glTextureIndex, glMapIndex, CalculateModifier(width), CalculateModifier(height) };
     }
     else
     {
-        quad.topRight = { topRight.x, topRight.y,      r, g, b, a,   xR, yR,    glTextureIndex, glMapIndex, width / 16 };
-        quad.bottomRight = { bottomRight.x, bottomRight.y,   r, g, b, a,   xR, yL,    glTextureIndex, glMapIndex, width / 16 };
-        quad.bottomLeft = { bottomLeft.x,  bottomLeft.y,   r, g, b, a,   xL, yL,    glTextureIndex, glMapIndex, width / 16 };
-        quad.topLeft = { topLeft.x,  topLeft.y,      r, g, b, a,   xL, yR,    glTextureIndex, glMapIndex, width / 16 };
+        quad.topRight = { topRight.x, topRight.y,      r, g, b, a,   xR, yR,    glTextureIndex, glMapIndex, CalculateModifier(width), CalculateModifier(height) };
+        quad.bottomRight = { bottomRight.x, bottomRight.y,   r, g, b, a,   xR, yL,    glTextureIndex, glMapIndex, CalculateModifier(width), CalculateModifier(height) };
+        quad.bottomLeft = { bottomLeft.x,  bottomLeft.y,   r, g, b, a,   xL, yL,    glTextureIndex, glMapIndex, CalculateModifier(width), CalculateModifier(height) };
+        quad.topLeft = { topLeft.x,  topLeft.y,      r, g, b, a,   xL, yR,    glTextureIndex, glMapIndex, CalculateModifier(width), CalculateModifier(height) };
     }
 }
 
@@ -306,11 +311,12 @@ void Renderer::prepareQuad(PositionComponent* pos, float width, float height,
     const float a = rgb.a;
 
     float w = width / cols;
+    float h = height / rows;
 
-    quad.topRight = { topRight.x, topRight.y,      r, g, b, a,   uvX1, uvY1,    glTextureIndex, glMapIndex, w / 16 };
-    quad.bottomRight = { bottomRight.x, bottomRight.y,   r, g, b, a,   uvX1, uvY0,    glTextureIndex, glMapIndex, w / 16 };
-    quad.bottomLeft = { bottomLeft.x,  bottomLeft.y,   r, g, b, a,   uvX0, uvY0,    glTextureIndex, glMapIndex, w / 16 };
-    quad.topLeft = { topLeft.x,  topLeft.y,      r, g, b, a,   uvX0, uvY1,    glTextureIndex, glMapIndex, w / 16 };
+    quad.topRight = { topRight.x, topRight.y,      r, g, b, a,   uvX1, uvY1,    glTextureIndex, glMapIndex, CalculateModifier(w), CalculateModifier(h) };
+    quad.bottomRight = { bottomRight.x, bottomRight.y,   r, g, b, a,   uvX1, uvY0,    glTextureIndex, glMapIndex, CalculateModifier(w), CalculateModifier(h) };
+    quad.bottomLeft = { bottomLeft.x,  bottomLeft.y,   r, g, b, a,   uvX0, uvY0,    glTextureIndex, glMapIndex, CalculateModifier(w), CalculateModifier(h) };
+    quad.topLeft = { topLeft.x,  topLeft.y,      r, g, b, a,   uvX0, uvY1,    glTextureIndex, glMapIndex, CalculateModifier(w), CalculateModifier(h) };
 }
 
 
@@ -368,10 +374,10 @@ void Renderer::prepareQuad(PositionComponent* pos, ColliderComponent* col, float
     const float b = rgb.b;
     const float a = rgb.a;
 
-    quad.topRight = { topRight.x, topRight.y,      r, g, b, a,   1.0, 1.0,    glTextureIndex, glMapIndex, width / 16 };
-    quad.bottomRight = { bottomRight.x, bottomRight.y,   r, g, b, a,   1.0, 0.0,    glTextureIndex, glMapIndex, width / 16 };
-    quad.bottomLeft = { bottomLeft.x,  bottomLeft.y,   r, g, b, a,   0.0, 0.0,    glTextureIndex, glMapIndex, width / 16 };
-    quad.topLeft = { topLeft.x,  topLeft.y,      r, g, b, a,   0.0, 1.0,    glTextureIndex, glMapIndex, width / 16 };
+    quad.topRight = { topRight.x, topRight.y,      r, g, b, a,   1.0, 1.0,    glTextureIndex, glMapIndex, CalculateModifier(width), CalculateModifier(height) };
+    quad.bottomRight = { bottomRight.x, bottomRight.y,   r, g, b, a,   1.0, 0.0,    glTextureIndex, glMapIndex, CalculateModifier(width), CalculateModifier(height) };
+    quad.bottomLeft = { bottomLeft.x,  bottomLeft.y,   r, g, b, a,   0.0, 0.0,    glTextureIndex, glMapIndex, CalculateModifier(width), CalculateModifier(height) };
+    quad.topLeft = { topLeft.x,  topLeft.y,      r, g, b, a,   0.0, 1.0,    glTextureIndex, glMapIndex, CalculateModifier(width), CalculateModifier(height) };
 }
 
 void Renderer::prepareQuad(glm::vec2 topRight, glm::vec2 bottomRight, glm::vec2 bottomLeft, glm::vec2 topLeft,
@@ -419,11 +425,12 @@ void Renderer::prepareQuad(glm::vec2 topRight, glm::vec2 bottomRight, glm::vec2 
     const float a = rgb.a;
 
     float width = topRight.x - topLeft.x;
+    float height = topRight.y - bottomRight.y;
 
-    quad.topRight = { topRight.x, topRight.y,      r, g, b, a,   1.0, 1.0,    glTextureIndex, glMapIndex, width / 16 };
-    quad.bottomRight = { bottomRight.x, bottomRight.y,   r, g, b, a,   1.0, 0.0,    glTextureIndex, glMapIndex, width / 16 };
-    quad.bottomLeft = { bottomLeft.x,  bottomLeft.y,   r, g, b, a,   0.0, 0.0,    glTextureIndex, glMapIndex, width / 16 };
-    quad.topLeft = { topLeft.x,  topLeft.y,      r, g, b, a,   0.0, 1.0,    glTextureIndex, glMapIndex, width / 16 };
+    quad.topRight = { topRight.x, topRight.y,      r, g, b, a,   1.0, 1.0,    glTextureIndex, glMapIndex, CalculateModifier(width), CalculateModifier(height) };
+    quad.bottomRight = { bottomRight.x, bottomRight.y,   r, g, b, a,   1.0, 0.0,    glTextureIndex, glMapIndex, CalculateModifier(width), CalculateModifier(height) };
+    quad.bottomLeft = { bottomLeft.x,  bottomLeft.y,   r, g, b, a,   0.0, 0.0,    glTextureIndex, glMapIndex, CalculateModifier(width), CalculateModifier(height) };
+    quad.topLeft = { topLeft.x,  topLeft.y,      r, g, b, a,   0.0, 1.0,    glTextureIndex, glMapIndex, CalculateModifier(width), CalculateModifier(height) };
 }
 
 void Renderer::prepareQuad(int batchIndex, Quad& input)
@@ -440,10 +447,10 @@ void Renderer::sendToGL()
 
     int currentBatch = 0;
     int texUnit = 0;
+
     for (int i = 0; i < textureIDs.size(); i++)
     {
         // std::cout << "texUnit: " << texUnit << std::endl;
-
         glActiveTexture(GL_TEXTURE0 + texUnit);
         glBindTexture(GL_TEXTURE_2D, textureIDs[i]);
 
@@ -467,10 +474,10 @@ void Renderer::prepareDownLine(float x, float y, float height)
 {
     constexpr float halfWidth = 0.5f;
     Quad quad;
-    quad.topRight = { x + halfWidth, y,            1.0f, 1.0f, 1.0f, 1.0f,   1.0f, 0.0f,    whiteTextureIndex, 2 };
-    quad.bottomRight = { x + halfWidth, y - height,   1.0f, 1.0f, 1.0f, 1.0f,   1.0f, 0.0f,    whiteTextureIndex, 2 };
-    quad.bottomLeft = { x - halfWidth, y - height,   1.0f, 1.0f, 1.0f, 1.0f,   0.0f, 0.0f,    whiteTextureIndex, 2 };
-    quad.topLeft = { x - halfWidth, y,            1.0f, 1.0f, 1.0f, 1.0f,   0.0f, 1.0f,    whiteTextureIndex, 2 };
+    quad.topRight = { x + halfWidth, y,            1.0f, 1.0f, 1.0f, 1.0f,   1.0f, 0.0f,    whiteTextureIndex, whiteTextureIndex, 8, 8 };
+    quad.bottomRight = { x + halfWidth, y - height,   1.0f, 1.0f, 1.0f, 1.0f,   1.0f, 0.0f,    whiteTextureIndex, whiteTextureIndex, 8, 8 };
+    quad.bottomLeft = { x - halfWidth, y - height,   1.0f, 1.0f, 1.0f, 1.0f,   0.0f, 0.0f,    whiteTextureIndex, whiteTextureIndex, 8, 8 };
+    quad.topLeft = { x - halfWidth, y,            1.0f, 1.0f, 1.0f, 1.0f,   0.0f, 1.0f,    whiteTextureIndex, whiteTextureIndex, 8, 8 };
     prepareQuad(0, quad);
 }
 
@@ -478,13 +485,12 @@ void Renderer::prepareRightLine(float x, float y, float width)
 {
     constexpr float halfHeight = 0.5f;
     Quad quad;
-    quad.topRight = { x + width, y + halfHeight, 1.0f, 1.0f, 1.0f, 1.0f,   1.0f, 0.0f,    whiteTextureIndex, 2 };
-    quad.bottomRight = { x + width, y - halfHeight, 1.0f, 1.0f, 1.0f, 1.0f,   1.0f, 0.0f,    whiteTextureIndex, 2 };
-    quad.bottomLeft = { x        , y - halfHeight, 1.0f, 1.0f, 1.0f, 1.0f,   0.0f, 0.0f,    whiteTextureIndex, 2 };
-    quad.topLeft = { x        , y + halfHeight, 1.0f, 1.0f, 1.0f, 1.0f,   0.0f, 1.0f,    whiteTextureIndex, 2 };
+    quad.topRight = { x + width, y + halfHeight, 1.0f, 1.0f, 1.0f, 1.0f,   1.0f, 0.0f,    whiteTextureIndex, whiteTextureIndex, 8, 8 };
+    quad.bottomRight = { x + width, y - halfHeight, 1.0f, 1.0f, 1.0f, 1.0f,   1.0f, 0.0f,    whiteTextureIndex, whiteTextureIndex, 8, 8 };
+    quad.bottomLeft = { x        , y - halfHeight, 1.0f, 1.0f, 1.0f, 1.0f,   0.0f, 0.0f,    whiteTextureIndex, whiteTextureIndex, 8, 8 };
+    quad.topLeft = { x        , y + halfHeight, 1.0f, 1.0f, 1.0f, 1.0f,   0.0f, 1.0f,    whiteTextureIndex, whiteTextureIndex, 8, 8 };
     prepareQuad(0, quad);
 }
-
 
 void Renderer::flush(const Batch& batch)
 {

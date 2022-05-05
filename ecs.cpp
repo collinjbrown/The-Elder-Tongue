@@ -1085,7 +1085,6 @@ void ColliderSystem::Update(int activeScene, float deltaTime)
 			Texture2D* tMap = Game::main.textureMap["base_map"];
 			Game::main.renderer->prepareQuad(glm::vec2(posA->x + cA->offsetX, posA->y + cA->offsetY), cA->width, cA->height, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), t->ID, tMap->ID);*/
 			
-
 			std::vector<std::pair<Collision*, float>> z;
 
 			for (int j = 0; j < colls.size(); j++)
@@ -2833,7 +2832,7 @@ void BladeSystem::Update(int activeScene, float deltaTime)
 					hiltPos->y = posA->y;
 					b->platformCollider->active = true;
 
-					b->platformCollider->platform = false;
+					b->platformCollider->platform = true;
 					b->platformCollider->width = 5.0f;
 					b->platformCollider->height = 70.0f;
 				}

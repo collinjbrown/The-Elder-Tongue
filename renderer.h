@@ -29,7 +29,8 @@ struct Vertex
     float textureIndex;
     float mapIndex;
 
-    float lod;
+    float widthMod;
+    float heightMod;
 };
 
 struct Quad
@@ -40,12 +41,19 @@ struct Quad
     Vertex topLeft;
 };
 
+class Bundle
+{
+public:
+    std::vector<int> textureIDs;
+};
+
 // Store the quads before a draw call
 class Batch
 {
 public:
     static constexpr int MAX_QUADS = 10000;
 
+    Bundle bundle;
     // TODO: Look into decoupling # of quads that can be rendered with # of textures that can be rendered in one batch
     std::array<Quad, MAX_QUADS> quadBuffer;
     int quadIndex = 0;
@@ -58,7 +66,7 @@ public:
     // Should be GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS for release, but
     // would need to figure out how to use that value in the fragment shader.
     // NOTE: Fragment shader also has hard-coded value that must match this.
-    static constexpr int MAX_TEXTURES_PER_BATCH = 48;
+    static constexpr int MAX_TEXTURES_PER_BATCH = 32;
 
     std::vector<GLuint> textureIDs;
     float whiteTextureIndex;
@@ -69,6 +77,7 @@ public:
     GLuint whiteTextureID;
 
     Renderer(GLuint whiteTexture);
+    float CalculateModifier(float i);
     void prepareQuad(PositionComponent* pos, float width, float height, float tWidth, float tHeight, glm::vec4 rgb, int textureID, int mapID, bool tiled, bool flipped);
     void prepareQuad(PositionComponent* pos, ColliderComponent* col, float width, float height, glm::vec4 rgb, int textureID, int mapID);
     void prepareQuad(glm::vec2 topRight, glm::vec2 bottomRight, glm::vec2 bottomLeft, glm::vec2 topLeft, glm::vec4 rgb, int textureID, int mapID);
