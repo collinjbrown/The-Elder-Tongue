@@ -43,7 +43,7 @@ Renderer::Renderer(GLuint whiteTexture) : batches(1), shader("assets/shaders/qua
     glVertexAttribPointer(4, 1, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, mapIndex));
     glEnableVertexAttribArray(4);
     // LOD
-    glVertexAttribPointer(5, 1, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, lod));
+    glVertexAttribPointer(5, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, width));
     glEnableVertexAttribArray(5);
     glCheckError();
 
@@ -88,7 +88,7 @@ Renderer::Renderer(GLuint whiteTexture) : batches(1), shader("assets/shaders/qua
     whiteTextureIndex = 0.0f;
 }
 
-void Renderer::prepareQuad(glm::vec2 position, float width, float height,
+void Renderer::prepareQuad(glm::vec2 position, float width, float height, float mWidth, float mHeight,
     glm::vec4 rgb, int textureID, int mapID)
 {
     // Figure out which batch should be written to
@@ -137,13 +137,13 @@ void Renderer::prepareQuad(glm::vec2 position, float width, float height,
     const float b = rgb.b;
     const float a = rgb.a;
 
-    quad.topRight = { rightX, topY,      r, g, b, a,   1.0, 1.0,    glTextureIndex, glMapIndex, width / 16 };
-    quad.bottomRight = { rightX, bottomY,   r, g, b, a,   1.0, 0.0,    glTextureIndex, glMapIndex, width / 16 };
-    quad.bottomLeft = { leftX,  bottomY,   r, g, b, a,   0.0, 0.0,    glTextureIndex, glMapIndex, width / 16 };
-    quad.topLeft = { leftX,  topY,      r, g, b, a,   0.0, 1.0,    glTextureIndex, glMapIndex, width / 16 };
+    quad.topRight = { rightX, topY,      r, g, b, a,   1.0, 1.0,    glTextureIndex, glMapIndex, mWidth, mHeight };
+    quad.bottomRight = { rightX, bottomY,   r, g, b, a,   1.0, 0.0,    glTextureIndex, glMapIndex, mWidth, mHeight };
+    quad.bottomLeft = { leftX,  bottomY,   r, g, b, a,   0.0, 0.0,    glTextureIndex, glMapIndex, mWidth, mHeight };
+    quad.topLeft = { leftX,  topY,      r, g, b, a,   0.0, 1.0,    glTextureIndex, glMapIndex, mWidth, mHeight };
 }
 
-void Renderer::prepareQuad(PositionComponent* pos, float width, float height, float tWidth, float tHeight,
+void Renderer::prepareQuad(PositionComponent* pos, float width, float height, float tWidth, float tHeight, float mWidth, float mHeight,
     glm::vec4 rgb, int textureID, int mapID, bool tiled, bool flipped)
 {
     // Figure out which batch should be written to
@@ -214,22 +214,22 @@ void Renderer::prepareQuad(PositionComponent* pos, float width, float height, fl
         const float xMod = fmod(width, tWidth);
         const float yMod = fmod(height, tHeight);
 
-        quad.topRight = { topRight.x, topRight.y,      r, g, b, a,   xMod, yMod,    glTextureIndex, glMapIndex, width / 16 };
-        quad.bottomRight = { bottomRight.x, bottomRight.y,   r, g, b, a,   xMod, 0.0,    glTextureIndex, glMapIndex, width / 16 };
-        quad.bottomLeft = { bottomLeft.x,  bottomLeft.y,   r, g, b, a,   0.0, 0.0,    glTextureIndex, glMapIndex, width / 16 };
-        quad.topLeft = { topLeft.x,  topLeft.y,      r, g, b, a,   0.0, yMod,    glTextureIndex, glMapIndex, width / 16 };
+        quad.topRight = { topRight.x, topRight.y,      r, g, b, a,   xMod, yMod,    glTextureIndex, glMapIndex, mWidth, mHeight };
+        quad.bottomRight = { bottomRight.x, bottomRight.y,   r, g, b, a,   xMod, 0.0,    glTextureIndex, glMapIndex, mWidth, mHeight };
+        quad.bottomLeft = { bottomLeft.x,  bottomLeft.y,   r, g, b, a,   0.0, 0.0,    glTextureIndex, glMapIndex, mWidth, mHeight };
+        quad.topLeft = { topLeft.x,  topLeft.y,      r, g, b, a,   0.0, yMod,    glTextureIndex, glMapIndex, mWidth, mHeight };
     }
     else
     {
-        quad.topRight = { topRight.x, topRight.y,      r, g, b, a,   xR, yR,    glTextureIndex, glMapIndex, width / 16 };
-        quad.bottomRight = { bottomRight.x, bottomRight.y,   r, g, b, a,   xR, yL,    glTextureIndex, glMapIndex, width / 16 };
-        quad.bottomLeft = { bottomLeft.x,  bottomLeft.y,   r, g, b, a,   xL, yL,    glTextureIndex, glMapIndex, width / 16 };
-        quad.topLeft = { topLeft.x,  topLeft.y,      r, g, b, a,   xL, yR,    glTextureIndex, glMapIndex, width / 16 };
+        quad.topRight = { topRight.x, topRight.y,      r, g, b, a,   xR, yR,    glTextureIndex, glMapIndex, mWidth, mHeight };
+        quad.bottomRight = { bottomRight.x, bottomRight.y,   r, g, b, a,   xR, yL,    glTextureIndex, glMapIndex, mWidth, mHeight };
+        quad.bottomLeft = { bottomLeft.x,  bottomLeft.y,   r, g, b, a,   xL, yL,    glTextureIndex, glMapIndex, mWidth, mHeight };
+        quad.topLeft = { topLeft.x,  topLeft.y,      r, g, b, a,   xL, yR,    glTextureIndex, glMapIndex, mWidth, mHeight };
     }
 }
 
 
-void Renderer::prepareQuad(PositionComponent* pos, float width, float height,
+void Renderer::prepareQuad(PositionComponent* pos, float width, float height, float mWidth, float mHeight,
     glm::vec4 rgb, int animID, int mapID, int cellX, int cellY, int cols, int rows, bool flipped)
 {
     // Figure out which batch should be written to
@@ -305,16 +305,14 @@ void Renderer::prepareQuad(PositionComponent* pos, float width, float height,
     const float b = rgb.b;
     const float a = rgb.a;
 
-    float w = width / cols;
-
-    quad.topRight = { topRight.x, topRight.y,      r, g, b, a,   uvX1, uvY1,    glTextureIndex, glMapIndex, w / 16 };
-    quad.bottomRight = { bottomRight.x, bottomRight.y,   r, g, b, a,   uvX1, uvY0,    glTextureIndex, glMapIndex, w / 16 };
-    quad.bottomLeft = { bottomLeft.x,  bottomLeft.y,   r, g, b, a,   uvX0, uvY0,    glTextureIndex, glMapIndex, w / 16 };
-    quad.topLeft = { topLeft.x,  topLeft.y,      r, g, b, a,   uvX0, uvY1,    glTextureIndex, glMapIndex, w / 16 };
+    quad.topRight = { topRight.x, topRight.y,      r, g, b, a,   uvX1, uvY1,    glTextureIndex, glMapIndex, mWidth, mHeight };
+    quad.bottomRight = { bottomRight.x, bottomRight.y,   r, g, b, a,   uvX1, uvY0,    glTextureIndex, glMapIndex, mWidth, mHeight };
+    quad.bottomLeft = { bottomLeft.x,  bottomLeft.y,   r, g, b, a,   uvX0, uvY0,    glTextureIndex, glMapIndex, mWidth, mHeight };
+    quad.topLeft = { topLeft.x,  topLeft.y,      r, g, b, a,   uvX0, uvY1,    glTextureIndex, glMapIndex, mWidth, mHeight };
 }
 
 
-void Renderer::prepareQuad(PositionComponent* pos, ColliderComponent* col, float width, float height,
+void Renderer::prepareQuad(PositionComponent* pos, ColliderComponent* col, float width, float height, float mWidth, float mHeight,
     glm::vec4 rgb, int textureID, int mapID)
 {
     // Figure out which batch should be written to
@@ -368,13 +366,13 @@ void Renderer::prepareQuad(PositionComponent* pos, ColliderComponent* col, float
     const float b = rgb.b;
     const float a = rgb.a;
 
-    quad.topRight = { topRight.x, topRight.y,      r, g, b, a,   1.0, 1.0,    glTextureIndex, glMapIndex, width / 16 };
-    quad.bottomRight = { bottomRight.x, bottomRight.y,   r, g, b, a,   1.0, 0.0,    glTextureIndex, glMapIndex, width / 16 };
-    quad.bottomLeft = { bottomLeft.x,  bottomLeft.y,   r, g, b, a,   0.0, 0.0,    glTextureIndex, glMapIndex, width / 16 };
-    quad.topLeft = { topLeft.x,  topLeft.y,      r, g, b, a,   0.0, 1.0,    glTextureIndex, glMapIndex, width / 16 };
+    quad.topRight = { topRight.x, topRight.y,      r, g, b, a,   1.0, 1.0,    glTextureIndex, glMapIndex, mWidth, mHeight };
+    quad.bottomRight = { bottomRight.x, bottomRight.y,   r, g, b, a,   1.0, 0.0,    glTextureIndex, glMapIndex, mWidth, mHeight };
+    quad.bottomLeft = { bottomLeft.x,  bottomLeft.y,   r, g, b, a,   0.0, 0.0,    glTextureIndex, glMapIndex, mWidth, mHeight };
+    quad.topLeft = { topLeft.x,  topLeft.y,      r, g, b, a,   0.0, 1.0,    glTextureIndex, glMapIndex, mWidth, mHeight };
 }
 
-void Renderer::prepareQuad(glm::vec2 topRight, glm::vec2 bottomRight, glm::vec2 bottomLeft, glm::vec2 topLeft,
+void Renderer::prepareQuad(glm::vec2 topRight, glm::vec2 bottomRight, glm::vec2 bottomLeft, glm::vec2 topLeft, float mWidth, float mHeight,
     glm::vec4 rgb, int textureID, int mapID)
 {
     // Figure out which batch should be written to
@@ -420,10 +418,10 @@ void Renderer::prepareQuad(glm::vec2 topRight, glm::vec2 bottomRight, glm::vec2 
 
     float width = topRight.x - topLeft.x;
 
-    quad.topRight = { topRight.x, topRight.y,      r, g, b, a,   1.0, 1.0,    glTextureIndex, glMapIndex, width / 16 };
-    quad.bottomRight = { bottomRight.x, bottomRight.y,   r, g, b, a,   1.0, 0.0,    glTextureIndex, glMapIndex, width / 16 };
-    quad.bottomLeft = { bottomLeft.x,  bottomLeft.y,   r, g, b, a,   0.0, 0.0,    glTextureIndex, glMapIndex, width / 16 };
-    quad.topLeft = { topLeft.x,  topLeft.y,      r, g, b, a,   0.0, 1.0,    glTextureIndex, glMapIndex, width / 16 };
+    quad.topRight = { topRight.x, topRight.y,      r, g, b, a,   1.0, 1.0,    glTextureIndex, glMapIndex, mWidth, mHeight };
+    quad.bottomRight = { bottomRight.x, bottomRight.y,   r, g, b, a,   1.0, 0.0,    glTextureIndex, glMapIndex, mWidth, mHeight };
+    quad.bottomLeft = { bottomLeft.x,  bottomLeft.y,   r, g, b, a,   0.0, 0.0,    glTextureIndex, glMapIndex, mWidth, mHeight };
+    quad.topLeft = { topLeft.x,  topLeft.y,      r, g, b, a,   0.0, 1.0,    glTextureIndex, glMapIndex, mWidth, mHeight };
 }
 
 void Renderer::prepareQuad(int batchIndex, Quad& input)
@@ -467,10 +465,10 @@ void Renderer::prepareDownLine(float x, float y, float height)
 {
     constexpr float halfWidth = 0.5f;
     Quad quad;
-    quad.topRight = { x + halfWidth, y,            1.0f, 1.0f, 1.0f, 1.0f,   1.0f, 0.0f,    whiteTextureIndex, 2 };
-    quad.bottomRight = { x + halfWidth, y - height,   1.0f, 1.0f, 1.0f, 1.0f,   1.0f, 0.0f,    whiteTextureIndex, 2 };
-    quad.bottomLeft = { x - halfWidth, y - height,   1.0f, 1.0f, 1.0f, 1.0f,   0.0f, 0.0f,    whiteTextureIndex, 2 };
-    quad.topLeft = { x - halfWidth, y,            1.0f, 1.0f, 1.0f, 1.0f,   0.0f, 1.0f,    whiteTextureIndex, 2 };
+    quad.topRight = { x + halfWidth, y,            1.0f, 1.0f, 1.0f, 1.0f,   1.0f, 0.0f,    whiteTextureIndex, whiteTextureIndex, 32, 32 };
+    quad.bottomRight = { x + halfWidth, y - height,   1.0f, 1.0f, 1.0f, 1.0f,   1.0f, 0.0f,    whiteTextureIndex, whiteTextureIndex, 32, 32 };
+    quad.bottomLeft = { x - halfWidth, y - height,   1.0f, 1.0f, 1.0f, 1.0f,   0.0f, 0.0f,    whiteTextureIndex, whiteTextureIndex, 32, 32 };
+    quad.topLeft = { x - halfWidth, y,            1.0f, 1.0f, 1.0f, 1.0f,   0.0f, 1.0f,    whiteTextureIndex, whiteTextureIndex, 32, 32 };
     prepareQuad(0, quad);
 }
 
@@ -478,10 +476,10 @@ void Renderer::prepareRightLine(float x, float y, float width)
 {
     constexpr float halfHeight = 0.5f;
     Quad quad;
-    quad.topRight = { x + width, y + halfHeight, 1.0f, 1.0f, 1.0f, 1.0f,   1.0f, 0.0f,    whiteTextureIndex, 2 };
-    quad.bottomRight = { x + width, y - halfHeight, 1.0f, 1.0f, 1.0f, 1.0f,   1.0f, 0.0f,    whiteTextureIndex, 2 };
-    quad.bottomLeft = { x        , y - halfHeight, 1.0f, 1.0f, 1.0f, 1.0f,   0.0f, 0.0f,    whiteTextureIndex, 2 };
-    quad.topLeft = { x        , y + halfHeight, 1.0f, 1.0f, 1.0f, 1.0f,   0.0f, 1.0f,    whiteTextureIndex, 2 };
+    quad.topRight = { x + width, y + halfHeight, 1.0f, 1.0f, 1.0f, 1.0f,   1.0f, 0.0f,    whiteTextureIndex, whiteTextureIndex, 32, 32 };
+    quad.bottomRight = { x + width, y - halfHeight, 1.0f, 1.0f, 1.0f, 1.0f,   1.0f, 0.0f,    whiteTextureIndex, whiteTextureIndex, 32, 32 };
+    quad.bottomLeft = { x        , y - halfHeight, 1.0f, 1.0f, 1.0f, 1.0f,   0.0f, 0.0f,    whiteTextureIndex, whiteTextureIndex, 32, 32 };
+    quad.topLeft = { x        , y + halfHeight, 1.0f, 1.0f, 1.0f, 1.0f,   0.0f, 1.0f,    whiteTextureIndex, whiteTextureIndex, 32, 32 };
     prepareQuad(0, quad);
 }
 

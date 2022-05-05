@@ -1,9 +1,9 @@
 #version 330 core
 in vec4 rgbaColor;
 in vec2 texCoords;
-in float mLod;
 in float texIndex;
 in float mapIndex;
+in vec2 texSize;
 out vec4 color;
 
 // The size of this array is hard-coded,
@@ -15,9 +15,12 @@ void main()
 {
     int tIndex = int(texIndex);
     int mIndex = int(mapIndex);
-    int lod = int(mLod);
+    // int lod = int(mLod);
     
-    vec2 mapSize = textureSize(batchQuadTextures[mIndex], lod);
+    // ivec2 mapSize = textureSize(batchQuadTextures[mIndex], 2);
+    vec2 mapSize;
+    mapSize.x = texSize.x;
+    mapSize.y = texSize.y;
 
     vec4 sourceColor = texture(batchQuadTextures[tIndex], texCoords);
     vec2 mapCoord;
