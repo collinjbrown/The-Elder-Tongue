@@ -841,7 +841,7 @@ void StaticRenderingSystem::Update(int activeScene, float deltaTime)
 				pos->y + (s->height / 2.0f) > screenBottom && pos->y - (s->height / 2.0f) < screenTop &&
 				pos->z < screenElev)
 			{
-				Game::main.renderer->prepareQuad(pos, s->width, s->height, s->sprite->width, s->sprite->height, s->map->width, s->map->height, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), s->sprite->ID, s->map->ID, s->tiled, s->flipped);
+				Game::main.renderer->prepareQuad(pos, s->width, s->height, s->sprite->width, s->sprite->height, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), s->sprite->ID, s->map->ID, s->tiled, s->flipped);
 			}
 		}
 	}
@@ -2142,8 +2142,8 @@ void InputSystem::CalculateProjection(PhysicsComponent* phys, InputComponent* m,
 			if (projPos.x + (s->width / 2.0f) > screenLeft && projPos.x - (s->width / 2.0f) < screenRight &&
 				projPos.y + (s->height / 2.0f) > screenBottom && projPos.y - (s->height / 2.0f) < screenTop)
 			{
-				Texture2D* map = Game::main.textureMap["blank"];
-				Game::main.renderer->prepareQuad(projPos, s->width / 2.0f, s->height / 2.0f, map->width, map->height, glm::vec4(1.0f, 1.0f, 1.0f, 0.5f), s->ID, map->ID);
+
+				Game::main.renderer->prepareQuad(projPos, s->width / 2.0f, s->height / 2.0f, glm::vec4(1.0f, 1.0f, 1.0f, 0.5f), s->ID, Game::main.textureMap["blank"]->ID);
 			}
 		}
 	}
@@ -2424,7 +2424,7 @@ void AnimationSystem::Update(int activeScene, float deltaTime)
 				pos->z < screenElev)
 			{
 				// std::cout << std::to_string(activeAnimation->width) + "/" + std::to_string(activeAnimation->height) + "\n";
-				Game::main.renderer->prepareQuad(pos, activeAnimation->width, activeAnimation->height, a->map->width, a->map->height, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), activeAnimation->ID, a->map->ID, cellX, cellY, activeAnimation->columns, activeAnimation->rows, a->flipped);
+				Game::main.renderer->prepareQuad(pos, activeAnimation->width, activeAnimation->height, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), activeAnimation->ID, a->map->ID, cellX, cellY, activeAnimation->columns, activeAnimation->rows, a->flipped);
 			}
 
 		}
