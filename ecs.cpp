@@ -252,7 +252,7 @@ void ECS::Update(float deltaTime)
 		ECS::main.RegisterComponent(new PhysicsComponent(hilt, true, (PositionComponent*)hilt->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), hilt);
 		ColliderComponent* platformCollider = new ColliderComponent(hilt, false, (PositionComponent*)hilt->componentIDMap[positionComponentID], true, false, false, false, false, false, EntityClass::object, 1.0f, 0.0f, 0.0f, 35.0f, 5.0f, 0.0f, 0.0f);
 		ECS::main.RegisterComponent(platformCollider, hilt);
-		ECS::main.RegisterComponent(new BladeComponent(moonlightBlade, true, 1010.0f, 1000.0f, 30000.0f, 0.5f, 1000.0f, platformCollider, moonlightBladeMap, moonlightBladeIncorporealMap), moonlightBlade);
+		ECS::main.RegisterComponent(new BladeComponent(moonlightBlade, true, 1010.0f, 1000.0f, 30000.0f, 0.5f, 1000.0f, platformCollider, moonlightBladeMap, moonlightBladeIncorporealMap, 0.5f), moonlightBlade);
 
 		#pragma endregion
 
@@ -796,7 +796,7 @@ AIComponent::AIComponent(Entity* entity, bool active, bool proc, float procRange
 
 #pragma region Blade Component
 
-BladeComponent::BladeComponent(Entity* entity, bool active, float rushRange, float slowRange, float throwRange, float followSpeed, float projectileSpeed, ColliderComponent* platformCollider, Texture2D* corporealMap, Texture2D* incorporealMap)
+BladeComponent::BladeComponent(Entity* entity, bool active, float rushRange, float slowRange, float throwRange, float followSpeed, float projectileSpeed, ColliderComponent* platformCollider, Texture2D* corporealMap, Texture2D* incorporealMap, float minTargetSetDelay)
 {
 	this->ID = bladeComponentID;
 	this->entity = entity;
@@ -817,6 +817,11 @@ BladeComponent::BladeComponent(Entity* entity, bool active, float rushRange, flo
 
 	this->corporealMap = corporealMap;
 	this->incorporealMap = incorporealMap;
+
+	manualTarget = glm::vec2(0, 0);
+
+	this->lastTargetSet = 0.0f;
+	this->minTargetSetDelay = minTargetSetDelay;
 }
 
 #pragma endregion
@@ -1836,9 +1841,21 @@ void InputSystem::Update(int activeScene, float deltaTime)
 				BladeComponent* bladeComponent = (BladeComponent*)blade->entity->componentIDMap[bladeComponentID];
 				glm::vec2 bladePos = glm::vec2(bladePosComp->x, bladePosComp->y);
 
+				blade->lastTargetSet += deltaTime;
+				if (glfwGetMouseButton(Game::main.window, GLFW_MOUSE_BUTTON_3) == GLFW_PRESS && blade->manualTarget.x == 0 && blade->manualTarget.y == 0 && blade->lastTargetSet > blade->minTargetSetDelay)
+				{
+					blade->lastTargetSet = 0.0f;
+					blade->manualTarget = glm::vec2(Game::main.mouseX, Game::main.mouseY);
+				}
+				else if (glfwGetMouseButton(Game::main.window, GLFW_MOUSE_BUTTON_3) == GLFW_PRESS && blade->lastTargetSet > blade->minTargetSetDelay)
+				{
+					blade->lastTargetSet = 0.0f;
+					blade->manualTarget = glm::vec2(0, 0);
+				}
+
 				float bladeDist = glm::length2(bladePos - playerPos);
 
-				if (glfwGetMouseButton(Game::main.window, GLFW_MOUSE_BUTTON_2) == GLFW_PRESS && m->lastProjectile >= m->projectileDelay && !blade->thrown && bladeDist <= blade->throwRange && !bladeComponent->attacking)
+				if (glfwGetMouseButton(Game::main.window, GLFW_MOUSE_BUTTON_2) == GLFW_PRESS && m->lastProjectile >= m->projectileDelay && !blade->thrown && !bladeComponent->attacking)
 				{
 					glm::vec2 projVel = Normalize(glm::vec2(Game::main.mouseX - bladePos.x, Game::main.mouseY - bladePos.y)) * bladeComponent->projectileSpeed;
 					m->lastProjectile = 0.0f;
@@ -1860,6 +1877,8 @@ void InputSystem::Update(int activeScene, float deltaTime)
 					bladeDamage->lodged = false;
 					blade->lodged = false;
 					blade->thrown = false;
+
+					blade->manualTarget = glm::vec2(0, 0);
 				}
 				else
 				{
@@ -2772,6 +2791,11 @@ void BladeSystem::Update(int activeScene, float deltaTime)
 				if (moveB->climbing)
 				{
 					target.y = posB->y - colB->height + colB->offsetY - 10.0f;
+				}
+
+				if (b->manualTarget.x != 0 && b->manualTarget.y != 0)
+				{
+					target = b->manualTarget;
 				}
 
 				// Look

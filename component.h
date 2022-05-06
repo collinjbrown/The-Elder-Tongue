@@ -337,7 +337,11 @@ public:
 	Texture2D* corporealMap;
 	Texture2D* incorporealMap;
 
-	BladeComponent(Entity* entity, bool active, float rushRange, float slowRange, float throwRange, float followSpeed, float projectileSpeed, ColliderComponent* platformCollider, Texture2D* corporealMap, Texture2D* incorporealMap);
+	glm::vec2 manualTarget;
+	float lastTargetSet;
+	float minTargetSetDelay;
+
+	BladeComponent(Entity* entity, bool active, float rushRange, float slowRange, float throwRange, float followSpeed, float projectileSpeed, ColliderComponent* platformCollider, Texture2D* corporealMap, Texture2D* incorporealMap, float minTargetSetDelay);
 };
 
 #endif
