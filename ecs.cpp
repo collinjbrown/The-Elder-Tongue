@@ -1168,7 +1168,7 @@ void ColliderSystem::Update(int activeScene, float deltaTime)
 						if (!moveA->wallRunning)
 						{
 							moveA->wallRunning = true;
-							moveA->maxWallRun = cB->pos->y - (cB->height / 2.0f);
+							moveA->maxWallRun = cB->pos->y + (cB->height / 2.0f);
 							// physA->velocityY += physA->velocityX * 0.5f;
 							physA->velocityX = 0;
 						}
@@ -1814,7 +1814,13 @@ void InputSystem::Update(int activeScene, float deltaTime)
 				}
 				else if (move->wallRunning)
 				{
+					std::cout << "Jumps: " + std::to_string(m->jumps) + "\n";
 					phys->gravityMod = phys->baseGravityMod * 0.6f;
+
+					if (m->jumps >= m->maxJumps)
+					{
+						m->jumps = m->maxJumps - 1;
+					}
 				}
 
 				if (move->climbing && !move->shouldClimb ||
