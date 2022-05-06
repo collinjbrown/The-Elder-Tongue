@@ -178,6 +178,14 @@ int main(void)
     renderer.textureIDs.push_back(testMap.ID);
     Game::main.textureMap.emplace("testMap", &testMap);*/
 
+    Texture2D alphaWatermark{ "assets/sprites/alpha_watermark/alpha_watermark.png", true, GL_NEAREST };
+    renderer.textureIDs.push_back(alphaWatermark.ID);
+    Game::main.textureMap.emplace("watermark", &alphaWatermark);
+
+    Texture2D alphaWatermarkMark{ "assets/sprites/alpha_watermark/alpha_watermark_map.png", true, GL_NEAREST };
+    renderer.textureIDs.push_back(alphaWatermarkMark.ID);
+    Game::main.textureMap.emplace("watermarkMap", &alphaWatermarkMark);
+
     Texture2D blank{ "assets/sprites/blank.png", true, GL_NEAREST };
     renderer.textureIDs.push_back(blank.ID);
     Game::main.textureMap.emplace("blank", &blank);

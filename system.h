@@ -25,6 +25,7 @@ class DamageComponent;
 class ParticleComponent;
 class AIComponent;
 class BladeComponent;
+class ImageComponent;
 class Entity;
 
 struct Collision
@@ -230,4 +231,15 @@ public:
 	void PurgeEntity(Entity* e);
 };
 
+class ImageSystem : public System
+{
+public:
+	vector<ImageComponent*> images;
+
+	void Update(int activeScene, float deltaTime);
+
+	void AddComponent(Component* component);
+
+	void PurgeEntity(Entity* e);
+};
 #endif

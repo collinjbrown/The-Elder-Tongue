@@ -209,6 +209,10 @@ void ECS::Init()
 	ComponentBlock* positionBlock = new ComponentBlock(positionSystem, positionComponentID);
 	componentBlocks.push_back(positionBlock);
 
+	ImageSystem* imageSystem = new ImageSystem();
+	ComponentBlock* imageBlock = new ComponentBlock(imageSystem, imageComponentID);
+	componentBlocks.push_back(imageBlock);
+
 	StaticRenderingSystem* renderingSystem = new StaticRenderingSystem();
 	ComponentBlock* renderingBlock = new ComponentBlock(renderingSystem, spriteComponentID);
 	componentBlocks.push_back(renderingBlock);
@@ -232,6 +236,18 @@ void ECS::Update(float deltaTime)
 
 	if (round == 1)
 	{
+		#pragma region UI Instantiation
+
+		Entity* alphaWatermark = CreateEntity(0, "Alpha Watermark");
+		Texture2D* watermark = Game::main.textureMap["watermark"];
+		Texture2D* watermarkMap = Game::main.textureMap["watermarkMap"];
+
+		ECS::main.RegisterComponent(new PositionComponent(alphaWatermark, true, true, 0, 0, 100, 0), alphaWatermark);
+		ECS::main.RegisterComponent(new StaticSpriteComponent(alphaWatermark, true, (PositionComponent*)alphaWatermark->componentIDMap[positionComponentID], watermark->width, watermark->height, watermark, watermarkMap, false, false), alphaWatermark);
+		ECS::main.RegisterComponent(new ImageComponent(alphaWatermark, true, Anchor::topRight, -1, -1), alphaWatermark);
+
+		#pragma endregion
+
 		#pragma region Moonlight Blade Instantiation
 
 		player = CreateEntity(0, "The Player");
@@ -240,7 +256,7 @@ void ECS::Update(float deltaTime)
 		Texture2D* moonlightBladeMap = Game::main.textureMap["moonlightBladeMap"];
 		Texture2D* moonlightBladeIncorporealMap = Game::main.textureMap["moonlightBladeIncorporealMap"];
 
-		ECS::main.RegisterComponent(new PositionComponent(moonlightBlade, true, false, 0.0f, 0.0f, 0.0f), moonlightBlade);
+		ECS::main.RegisterComponent(new PositionComponent(moonlightBlade, true, false, 0, 0, 0, 0.0f), moonlightBlade);
 		ECS::main.RegisterComponent(new PhysicsComponent(moonlightBlade, true, (PositionComponent*)moonlightBlade->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), moonlightBlade);
 		ECS::main.RegisterComponent(new StaticSpriteComponent(moonlightBlade, true, (PositionComponent*)moonlightBlade->componentIDMap[positionComponentID], moonlightBladeTex->width, moonlightBladeTex->height, moonlightBladeTex, moonlightBladeMap, false, false), moonlightBlade);
 		// ECS::main.RegisterComponent(new AIComponent(moonlightBlade, true, false, 1010.0f, 1000.0f, 0.5f, 0.0f, 0.0f, AIType::moonlight_blade), moonlightBlade);
@@ -248,7 +264,7 @@ void ECS::Update(float deltaTime)
 		ECS::main.RegisterComponent(new DamageComponent(moonlightBlade, true, player, false, 0.0f, true, false, 100, 20.0f, false, true, true, true), moonlightBlade);
 
 		Entity* hilt = CreateEntity(0, "Moonlight Blade Hilt");
-		ECS::main.RegisterComponent(new PositionComponent(hilt, true, false, 0.0f, 0.0f, 0.0f), hilt);
+		ECS::main.RegisterComponent(new PositionComponent(hilt, true, false, 0, 0, 0, 0.0f), hilt);
 		ECS::main.RegisterComponent(new PhysicsComponent(hilt, true, (PositionComponent*)hilt->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), hilt);
 		ColliderComponent* platformCollider = new ColliderComponent(hilt, false, (PositionComponent*)hilt->componentIDMap[positionComponentID], true, false, false, false, false, false, EntityClass::object, 1.0f, 0.0f, 0.0f, 35.0f, 5.0f, 0.0f, 0.0f);
 		ECS::main.RegisterComponent(platformCollider, hilt);
@@ -260,7 +276,7 @@ void ECS::Update(float deltaTime)
 		Texture2D* lilyMap = Game::main.textureMap["lilyMap"];
 		Animation2D* anim1 = Game::main.animationMap["baseIdle"];
 
-		ECS::main.RegisterComponent(new PositionComponent(player, true, false, 0, 100, 0.0f), player);
+		ECS::main.RegisterComponent(new PositionComponent(player, true, false, 0, 100, 0, 0.0f), player);
 		ECS::main.RegisterComponent(new PhysicsComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 5000.0f, 2000.0f), player);
 		ECS::main.RegisterComponent(new ColliderComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], false, false, false, false, true, false, EntityClass::player, 1.0f, 1.0f, 10.0f, 20.0f, 50.0f, 0.0f, -7.75f), player);
 		ECS::main.RegisterComponent(new MovementComponent(player, true, 4000.0f, 500.0f, 2.5f, 0.5f, true, 0.7f, true, false, 0.9f, 2.0f, glm::vec2(100.0f, 0), 50.0f, 20.0f, 1.5f, 0.1f, 0.35f, 5, 3.0f), player);
@@ -322,7 +338,7 @@ void ECS::Update(float deltaTime)
 			float height = rand() % 1000 + 300;
 
 			Entity* platform = CreateEntity(0, "floor");
-			ECS::main.RegisterComponent(new PositionComponent(platform, true, true, rand() % 5000, rand() % 5000, 0), platform);
+			ECS::main.RegisterComponent(new PositionComponent(platform, true, true, rand() % 5000, rand() % 5000, 0, 0), platform);
 			ECS::main.RegisterComponent(new PhysicsComponent(platform, true, (PositionComponent*)platform->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 0.1f, 0.0f), platform);
 			ECS::main.RegisterComponent(new ColliderComponent(platform, true, (PositionComponent*)platform->componentIDMap[positionComponentID], true, false, true, false, false, false, EntityClass::object, 1000.0f, 0.0f, 1.0f, width, height, 0.0f, 0.0f), platform);
 			ECS::main.RegisterComponent(new StaticSpriteComponent(platform, true, (PositionComponent*)platform->componentIDMap[positionComponentID], width, height, tex3, tex3Map, false, false), platform);
@@ -331,13 +347,13 @@ void ECS::Update(float deltaTime)
 		for (int i = 0; i < 50; i++)
 		{
 			Entity* floor = CreateEntity(0, "floor");
-			ECS::main.RegisterComponent(new PositionComponent(floor, true, true, i * 500, -200, 0.0f), floor);
+			ECS::main.RegisterComponent(new PositionComponent(floor, true, true, i * 500, -200, 0, 0.0f), floor);
 			ECS::main.RegisterComponent(new PhysicsComponent(floor, true, (PositionComponent*)floor->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 0.1f, 0.0f), floor);
 			ECS::main.RegisterComponent(new ColliderComponent(floor, true, (PositionComponent*)floor->componentIDMap[positionComponentID], true, false, true, false, false, false, EntityClass::object, 1000.0f, 0.0f, 1.0f, 540.0f, 80.0f, 0.0f, 0.0f), floor);
 			ECS::main.RegisterComponent(new StaticSpriteComponent(floor, true, (PositionComponent*)floor->componentIDMap[positionComponentID], 540.0f, 80.0f, tex3, tex3Map, false, false), floor);
 
 			Entity* earth = CreateEntity(0, "floor");
-			ECS::main.RegisterComponent(new PositionComponent(earth, true, true, i * 500, -1000, 0.0f), earth);
+			ECS::main.RegisterComponent(new PositionComponent(earth, true, true, i * 500, -1000, 0, 0.0f), earth);
 			ECS::main.RegisterComponent(new StaticSpriteComponent(earth, true, (PositionComponent*)earth->componentIDMap[positionComponentID], tex3->width * 35, tex3->height * 100.0f, tex3, tex3Map, false, false), earth);
 		}
 
@@ -468,7 +484,7 @@ glm::vec2 PositionComponent::RelativeLocation(glm::vec2 p, glm::vec2 up, glm::ve
 	return glm::vec2((p.x * right.x) + (p.y * up.x), (p.x * right.y) + (p.y * up.y));
 }
 
-PositionComponent::PositionComponent(Entity* entity, bool active, bool stat, float x, float y, float rotation)
+PositionComponent::PositionComponent(Entity* entity, bool active, bool stat, float x, float y, float z, float rotation)
 {
 	ID = positionComponentID;
 	this->active = active;
@@ -476,7 +492,7 @@ PositionComponent::PositionComponent(Entity* entity, bool active, bool stat, flo
 	this->stat = stat;
 	this->x = x;
 	this->y = y;
-	this->z = 0;
+	this->z = z;
 	this->rotation = rotation;
 }
 #pragma endregion
@@ -826,6 +842,22 @@ BladeComponent::BladeComponent(Entity* entity, bool active, float rushRange, flo
 
 #pragma endregion
 
+#pragma region Image Component
+
+ImageComponent::ImageComponent(Entity* entity, bool active, Anchor anchor, float x, float y)
+{
+	this->ID = imageComponentID;
+	this->entity = entity;
+	this->active = active;
+	
+	this->anchor = anchor;
+	this->x = x;
+	this->y = y;
+}
+
+#pragma endregion
+
+
 #pragma endregion
 
 #pragma region Systems
@@ -834,11 +866,10 @@ BladeComponent::BladeComponent(Entity* entity, bool active, float rushRange, flo
 
 void StaticRenderingSystem::Update(int activeScene, float deltaTime)
 {
-	float screenLeft = (Game::main.camX - (Game::main.windowWidth * Game::main.zoom / 1.0f));
-	float screenRight = (Game::main.camX + (Game::main.windowWidth * Game::main.zoom / 1.0f));
-	float screenBottom = (Game::main.camY - (Game::main.windowHeight * Game::main.zoom / 1.0f));
-	float screenTop = (Game::main.camY + (Game::main.windowHeight * Game::main.zoom / 1.0f));
-	float screenElev = Game::main.camZ;
+	std::sort(sprites.begin(), sprites.end(), [](StaticSpriteComponent* a, StaticSpriteComponent* b)
+		{
+			return a->pos->z < b->pos->z;
+		});
 
 	for (int i = 0; i < sprites.size(); i++)
 	{
@@ -849,9 +880,9 @@ void StaticRenderingSystem::Update(int activeScene, float deltaTime)
 		{
 			PositionComponent* pos = s->pos;
 
-			if (pos->x + (s->width / 2.0f) > screenLeft && pos->x - (s->width / 2.0f) < screenRight &&
-				pos->y + (s->height / 2.0f) > screenBottom && pos->y - (s->height / 2.0f) < screenTop &&
-				pos->z < screenElev)
+			if (pos->x + (s->width / 2.0f) > Game::main.leftX && pos->x - (s->width / 2.0f) < Game::main.rightX &&
+				pos->y + (s->height / 2.0f) > Game::main.bottomY && pos->y - (s->height / 2.0f) < Game::main.topY &&
+				pos->z < Game::main.camZ)
 			{
 				Game::main.renderer->prepareQuad(pos, s->width, s->height, s->sprite->width, s->sprite->height, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), s->sprite->ID, s->map->ID, s->tiled, s->flipped);
 			}
@@ -1798,7 +1829,7 @@ void InputSystem::Update(int activeScene, float deltaTime)
 			HealthComponent* health = (HealthComponent*)m->entity->componentIDMap[healthComponentID];
 			AnimationControllerComponent* animator = (AnimationControllerComponent*)m->entity->componentIDMap[animationComponentID];
 
-			glm::vec2 playerPos = glm::vec2(phys->pos->x, phys->pos->y);
+			glm::vec3 playerPos = glm::vec3(phys->pos->x, phys->pos->y, phys->pos->z);
 
 			m->lastTick += deltaTime;
 
@@ -1814,13 +1845,7 @@ void InputSystem::Update(int activeScene, float deltaTime)
 				}
 				else if (move->wallRunning)
 				{
-					std::cout << "Jumps: " + std::to_string(m->jumps) + "\n";
 					phys->gravityMod = phys->baseGravityMod * 0.6f;
-
-					if (m->jumps >= m->maxJumps)
-					{
-						m->jumps = m->maxJumps - 1;
-					}
 				}
 
 				if (move->climbing && !move->shouldClimb ||
@@ -1859,7 +1884,7 @@ void InputSystem::Update(int activeScene, float deltaTime)
 					blade->manualTarget = glm::vec2(0, 0);
 				}
 
-				float bladeDist = glm::length2(bladePos - playerPos);
+				float bladeDist = glm::length2(bladePos - glm::vec2(playerPos.x, playerPos.y));
 
 				if (glfwGetMouseButton(Game::main.window, GLFW_MOUSE_BUTTON_2) == GLFW_PRESS && m->lastProjectile >= m->projectileDelay && !blade->thrown && !bladeComponent->attacking)
 				{
@@ -1919,16 +1944,10 @@ void InputSystem::Update(int activeScene, float deltaTime)
 
 					move->lastAttack = 0.0f;
 
-					float screenLeft = (Game::main.camX - (Game::main.windowWidth * Game::main.zoom / 1.0f));
-					float screenRight = (Game::main.camX + (Game::main.windowWidth * Game::main.zoom / 1.0f));
-					float screenBottom = (Game::main.camY - (Game::main.windowHeight * Game::main.zoom / 1.0f));
-					float screenTop = (Game::main.camY + (Game::main.windowHeight * Game::main.zoom / 1.0f));
-					float screenElev = Game::main.camZ;
-
 					glm::vec2 projVel = Normalize(glm::vec2(Game::main.mouseX - playerPos.x, Game::main.mouseY - playerPos.y)) * move->slashSpeed;
 
-					if (playerPos.x > screenLeft && playerPos.x < screenRight &&
-						playerPos.y > screenBottom && playerPos.y < screenTop)
+					if (playerPos.x > Game::main.leftX && playerPos.x < Game::main.rightX &&
+						playerPos.y > Game::main.bottomY && playerPos.y < Game::main.topY)
 					{
 						Texture2D* sMap = Game::main.textureMap["moonlightSlashMap"];
 						Animation2D* anim;
@@ -1960,7 +1979,7 @@ void InputSystem::Update(int activeScene, float deltaTime)
 
 						Entity* projectile = ECS::main.CreateEntity(0, "Slash");
 
-						ECS::main.RegisterComponent(new PositionComponent(projectile, true, false, playerPos.x, playerPos.y, 0.0f), projectile);
+						ECS::main.RegisterComponent(new PositionComponent(projectile, true, false, playerPos.x, playerPos.y, playerPos.z, 0.0f), projectile);
 						ECS::main.RegisterComponent(new PhysicsComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], phys->velocityX + projVel.x, phys->velocityY + projVel.y, 0.0f, 0.0f, 0.0f), projectile);
 						ECS::main.RegisterComponent(new ColliderComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], false, false, false, true, false, true, EntityClass::object, 1.0f, 0.0f, 0.0f, 5.0f, 5.0f, 0.0f, 0.0f), projectile);
 						ECS::main.RegisterComponent(new DamageComponent(projectile, true, move->entity, true, t, true, true, 1, 20.0f, false, true, true, false), projectile);
@@ -2005,7 +2024,8 @@ void InputSystem::Update(int activeScene, float deltaTime)
 
 				if (glfwGetKey(Game::main.window, GLFW_KEY_SPACE) == GLFW_PRESS && move->canMove && col->onPlatform && m->releasedJump
 					|| glfwGetKey(Game::main.window, GLFW_KEY_SPACE) == GLFW_PRESS && move->canMove && m->releasedJump && m->coyoteTime < m->maxCoyoteTime
-					|| glfwGetKey(Game::main.window, GLFW_KEY_SPACE) == GLFW_PRESS && move->canMove && m->releasedJump && !col->onPlatform && m->maxJumps > 1 && m->jumps < m->maxJumps)
+					|| glfwGetKey(Game::main.window, GLFW_KEY_SPACE) == GLFW_PRESS && move->canMove && m->releasedJump && !col->onPlatform && m->maxJumps > 1 && m->jumps < m->maxJumps
+					|| glfwGetKey(Game::main.window, GLFW_KEY_SPACE) == GLFW_PRESS && move->canMove && m->releasedJump && move->wallRunning)
 				{
 					if (!col->onPlatform && m->jumps == 0 && m->coyoteTime > m->maxCoyoteTime)
 					{
@@ -2033,6 +2053,19 @@ void InputSystem::Update(int activeScene, float deltaTime)
 
 					move->shouldClimb = false;
 					phys->velocityY += 250 * move->maxJumpHeight;
+
+					AnimationComponent* anComp = (AnimationComponent*)m->entity->componentIDMap[animationComponentID];
+
+					if (move->wallRunning && anComp->flipped)
+					{
+						phys->velocityX += 150 * move->maxJumpHeight;
+					}
+					else if (move->wallRunning)
+					{
+						phys->velocityX -= 150 * move->maxJumpHeight;
+					}
+
+					move->wallRunning = false;
 				}
 
 				if (!m->releasedJump && move->jumping && phys->velocityY > 0)
@@ -2143,12 +2176,6 @@ void InputSystem::CalculateProjection(PhysicsComponent* phys, InputComponent* m,
 
 	Texture2D* s = Game::main.textureMap["dot"];
 
-	float screenLeft = (Game::main.camX - (Game::main.windowWidth * Game::main.zoom / 1.0f));
-	float screenRight = (Game::main.camX + (Game::main.windowWidth * Game::main.zoom / 1.0f));
-	float screenBottom = (Game::main.camY - (Game::main.windowHeight * Game::main.zoom / 1.0f));
-	float screenTop = (Game::main.camY + (Game::main.windowHeight * Game::main.zoom / 1.0f));
-	float screenElev = Game::main.camZ;
-
 	float leapXVel, leapYVel;
 
 	if (Game::main.mouseX < phys->pos->x)
@@ -2180,8 +2207,8 @@ void InputSystem::CalculateProjection(PhysicsComponent* phys, InputComponent* m,
 
 		if (i % 25 == 0 && i != 0)
 		{
-			if (projPos.x + (s->width / 2.0f) > screenLeft && projPos.x - (s->width / 2.0f) < screenRight &&
-				projPos.y + (s->height / 2.0f) > screenBottom && projPos.y - (s->height / 2.0f) < screenTop)
+			if (projPos.x + (s->width / 2.0f) > Game::main.leftX && projPos.x - (s->width / 2.0f) < Game::main.rightX &&
+				projPos.y + (s->height / 2.0f) > Game::main.bottomY && projPos.y - (s->height / 2.0f) < Game::main.topY)
 			{
 
 				Game::main.renderer->prepareQuad(projPos, s->width / 2.0f, s->height / 2.0f, glm::vec4(1.0f, 1.0f, 1.0f, 0.5f), s->ID, Game::main.textureMap["blank"]->ID);
@@ -2333,7 +2360,7 @@ void AnimationControllerSystem::Update(int activeScene, float deltaTime)
 							c->animator->SetAnimation("jumpDown");
 						}
 					}
-					else if (move->wallRunning && c->animator->activeAnimation != "wallRun")
+					else if (move->wallRunning && abs(p->velocityX) < 100.0f && c->animator->activeAnimation != "wallRun")
 					{
 						c->animator->SetAnimation("wallRun");
 					}
@@ -2395,11 +2422,10 @@ void AnimationControllerSystem::PurgeEntity(Entity* e)
 
 void AnimationSystem::Update(int activeScene, float deltaTime)
 {
-	float screenLeft = (Game::main.camX - (Game::main.windowWidth * Game::main.zoom / 1.0f));
-	float screenRight = (Game::main.camX + (Game::main.windowWidth * Game::main.zoom / 1.0f));
-	float screenBottom = (Game::main.camY - (Game::main.windowHeight * Game::main.zoom / 1.0f));
-	float screenTop = (Game::main.camY + (Game::main.windowHeight * Game::main.zoom / 1.0f));
-	float screenElev = Game::main.camZ;
+	std::sort(anims.begin(), anims.end(), [](AnimationComponent* a, AnimationComponent* b)
+		{
+			return a->pos->z < b->pos->z;
+		});
 
 	for (int i = 0; i < anims.size(); i++)
 	{
@@ -2460,9 +2486,9 @@ void AnimationSystem::Update(int activeScene, float deltaTime)
 
 			PositionComponent* pos = a->pos;
 
-			if (pos->x + ((activeAnimation->width / activeAnimation->columns) / 2.0f) > screenLeft && pos->x - ((activeAnimation->width / activeAnimation->columns) / 2.0f) < screenRight &&
-				pos->y + ((activeAnimation->height / activeAnimation->rows) / 2.0f) > screenBottom && pos->y - ((activeAnimation->height / activeAnimation->rows) / 2.0f) < screenTop &&
-				pos->z < screenElev)
+			if (pos->x + ((activeAnimation->width / activeAnimation->columns) / 2.0f) > Game::main.leftX && pos->x - ((activeAnimation->width / activeAnimation->columns) / 2.0f) < Game::main.rightX &&
+				pos->y + ((activeAnimation->height / activeAnimation->rows) / 2.0f) > Game::main.bottomY && pos->y - ((activeAnimation->height / activeAnimation->rows) / 2.0f) < Game::main.topY &&
+				pos->z < Game::main.camZ)
 			{
 				// std::cout << std::to_string(activeAnimation->width) + "/" + std::to_string(activeAnimation->height) + "\n";
 				Game::main.renderer->prepareQuad(pos, activeAnimation->width, activeAnimation->height, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), activeAnimation->ID, a->map->ID, cellX, cellY, activeAnimation->columns, activeAnimation->rows, a->flipped);
@@ -2709,7 +2735,7 @@ void AISystem::Update(int activeScene, float deltaTime)
 
 							glm::vec2 vel = -Normalize(lookRay) * a->projectileSpeed;
 
-							ECS::main.RegisterComponent(new PositionComponent(projectile, true, false, posA->x, posA->y, 0.0f), projectile);
+							ECS::main.RegisterComponent(new PositionComponent(projectile, true, false, posA->x, posA->y, posA->z, 0.0f), projectile);
 							ECS::main.RegisterComponent(new PhysicsComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], vel.x, vel.y, 0.0f, 0.0f, 0.0f), projectile);
 							ECS::main.RegisterComponent(new ColliderComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], false, false, false, true, false, true, EntityClass::object, 1.0f, 0.0f, 0.0f, 5.0f, 5.0f, 0.0f, 0.0f), projectile);
 							ECS::main.RegisterComponent(new DamageComponent(projectile, true, a->entity, true, 10.0f, false, true, 1, 10.0f, true, true, true, false), projectile);
@@ -2916,6 +2942,65 @@ void BladeSystem::PurgeEntity(Entity* e)
 		{
 			BladeComponent* s = blades[i];
 			blades.erase(std::remove(blades.begin(), blades.end(), s), blades.end());
+			delete s;
+		}
+	}
+}
+
+#pragma endregion
+
+#pragma region Image System
+
+void ImageSystem::Update(int activeScene, float deltaTime)
+{
+	for (int i = 0; i < images.size(); i++)
+	{
+		ImageComponent* img = images[i];
+
+		if (img->active && img->entity->Get_Scene() == activeScene ||
+			img->active && img->entity->Get_Scene() == 0)
+		{
+			PositionComponent* pos = (PositionComponent*)img->entity->componentIDMap[positionComponentID];
+			StaticSpriteComponent* sprite = (StaticSpriteComponent*)img->entity->componentIDMap[spriteComponentID];
+
+			glm::vec2 anchorPos;
+
+			if (img->anchor == Anchor::topLeft)
+			{
+				anchorPos = glm::vec2(Game::main.leftX, Game::main.topY) - glm::vec2(-sprite->sprite->width, sprite->sprite->height);
+			}
+			else if (img->anchor == Anchor::topRight)
+			{
+				anchorPos = glm::vec2(Game::main.rightX, Game::main.topY) - glm::vec2(sprite->sprite->width, sprite->sprite->height);;
+			}
+			else if (img->anchor == Anchor::bottomLeft)
+			{
+				anchorPos = glm::vec2(Game::main.leftX, Game::main.bottomY) + glm::vec2(sprite->sprite->width, sprite->sprite->height);;
+			}
+			else // if (img->anchor == Anchor::bottomRight)
+			{
+				anchorPos = glm::vec2(Game::main.rightX, Game::main.bottomY) + glm::vec2(-sprite->sprite->width, sprite->sprite->height);;
+			}
+
+			pos->x = anchorPos.x + img->x;
+			pos->y = anchorPos.y + img->y;
+		}
+	}
+}
+
+void ImageSystem::AddComponent(Component* component)
+{
+	images.push_back((ImageComponent*)component);
+}
+
+void ImageSystem::PurgeEntity(Entity* e)
+{
+	for (int i = 0; i < images.size(); i++)
+	{
+		if (images[i]->entity == e)
+		{
+			ImageComponent* s = images[i];
+			images.erase(std::remove(images.begin(), images.end(), s), images.end());
 			delete s;
 		}
 	}

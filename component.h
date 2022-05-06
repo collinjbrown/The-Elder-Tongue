@@ -26,6 +26,7 @@ static int damageComponentID = 12;
 static int particleComponentID = 13;
 static int aiComponentID = 14;
 static int bladeComponentID = 15;
+static int imageComponentID = 16;
 
 static int lilyAnimControllerSubID = 1;
 
@@ -57,7 +58,7 @@ public:
 
 	glm::vec2 RelativeLocation(glm::vec2 p, glm::vec2 up, glm::vec2 right);
 
-	PositionComponent(Entity* entity, bool active, bool stat, float x, float y, float rotation);
+	PositionComponent(Entity* entity, bool active, bool stat, float x, float y, float z, float rotation);
 };
 
 class PhysicsComponent : public Component
@@ -342,6 +343,17 @@ public:
 	float minTargetSetDelay;
 
 	BladeComponent(Entity* entity, bool active, float rushRange, float slowRange, float throwRange, float followSpeed, float projectileSpeed, ColliderComponent* platformCollider, Texture2D* corporealMap, Texture2D* incorporealMap, float minTargetSetDelay);
+};
+
+enum class Anchor { topLeft, bottomLeft, topRight, bottomRight };
+class ImageComponent : public Component
+{
+public:
+	Anchor anchor;
+	float x;
+	float y;
+
+	ImageComponent(Entity* entity, bool active, Anchor anchor, float x, float y);
 };
 
 #endif
