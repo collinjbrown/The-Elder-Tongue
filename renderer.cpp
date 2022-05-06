@@ -14,6 +14,135 @@ float Renderer::CalculateModifier(float i)
     return (256.0f * (1.0f / i));
 }
 
+void Renderer::CloseOffBatch()
+{
+    int diff = texturesUsed.size() % MAX_TEXTURES_PER_BATCH + 1;
+
+    for (int i = 0; i < diff; i++)
+    {
+        texturesUsed.push_back(0);
+    }
+}
+
+Bundle Renderer::DetermineBatch(int textureID, int mapID)
+{
+    auto result = std::find(texturesUsed.rbegin(), texturesUsed.rend(), textureID);
+    int location;
+    if (result != texturesUsed.rend())
+    {
+        // The texture has been used.
+        location = texturesUsed.rend() - result;
+    }
+    else
+    {
+        // The texture has not yet been used.
+        location = -1;
+    }
+
+    auto resultMap = std::find(texturesUsed.rbegin(), texturesUsed.rend(), mapID);
+    int locationMap;
+    if (resultMap != texturesUsed.rend())
+    {
+        // The map has been used.
+        locationMap = texturesUsed.rend() - resultMap;
+    }
+    else
+    {
+        // The map has not yet been used.
+        locationMap = -1;
+    }
+
+    int textureBatch = floor(location / MAX_TEXTURES_PER_BATCH);
+    int mapBatch = floor(locationMap / MAX_TEXTURES_PER_BATCH);
+
+    Bundle bundle;
+    int currentBatch = floor(texturesUsed.size() / MAX_TEXTURES_PER_BATCH);
+    // std::cout << std::to_string(currentBatch) + "\n";
+
+    if (textureBatch == mapBatch && location != -1 && locationMap != -1)
+    {
+        // They're both already used and in the same batch.
+        return bundle = { textureBatch, (float)(static_cast<int>(location - 1) % MAX_TEXTURES_PER_BATCH), (float)(static_cast<int>(locationMap - 1) % MAX_TEXTURES_PER_BATCH) };
+    }
+    else if (textureBatch != mapBatch && location != -1 && locationMap != -1)
+    {
+        // They're both already used and in different batches.
+
+        if (texturesUsed.size() % MAX_TEXTURES_PER_BATCH > MAX_TEXTURES_PER_BATCH - 2)
+        {
+            // They're both already used and in different batches and the current batch lacks space for them.
+            CloseOffBatch();
+            int newBatch = floor(texturesUsed.size() / MAX_TEXTURES_PER_BATCH);
+            texturesUsed.push_back(textureID);
+            texturesUsed.push_back(mapID);
+            return bundle = { newBatch, 0, 1 };
+        }
+        else
+        {
+            // They're both already used and in different batches and the current batch has space for them.
+            texturesUsed.push_back(textureID);
+            texturesUsed.push_back(mapID);
+            return bundle = { currentBatch, static_cast<float>(texturesUsed.size()) - 2 % MAX_TEXTURES_PER_BATCH, static_cast<float>(texturesUsed.size()) - 1 % MAX_TEXTURES_PER_BATCH };
+
+        }
+    }
+    else if (textureBatch != mapBatch && locationMap == -1 && textureBatch == currentBatch)
+    {
+        // Only the texture has already been used.
+        if (texturesUsed.size() % MAX_TEXTURES_PER_BATCH != 0)
+        {
+            // Only the texture has already been used in the current batch and it has space for the map.
+            texturesUsed.push_back(mapID);
+            return bundle = { currentBatch, static_cast<float>(location) - 1, static_cast<float>(texturesUsed.size()) - 1 };
+        }
+        else
+        {
+            // Only the texture has already been used in the current batch and it lacks space for the map.
+            CloseOffBatch();
+            int newBatch = floor(texturesUsed.size() / MAX_TEXTURES_PER_BATCH);
+            texturesUsed.push_back(textureID);
+            texturesUsed.push_back(mapID);
+            return bundle = { newBatch, 0, 1 };
+        }
+    }
+    else if (textureBatch != mapBatch && location == -1 && mapBatch == currentBatch)
+    {
+        // Only the map has already been used.
+        if (texturesUsed.size() % MAX_TEXTURES_PER_BATCH != 0)
+        {
+            // Only the map has already been used in the current batch and it has space for the texture.
+            texturesUsed.push_back(textureID);
+            return bundle = { currentBatch, static_cast<float>(texturesUsed.size()) - 1, static_cast<float>(locationMap) - 1 };
+        }
+        else
+        {
+            // Only the map has already been used in the current batch and it lacks space for the texture.
+            CloseOffBatch();
+            int newBatch = floor(texturesUsed.size() / MAX_TEXTURES_PER_BATCH);
+            texturesUsed.push_back(textureID);
+            texturesUsed.push_back(mapID);
+            return bundle = { newBatch, 0, 1 };
+        }
+    }
+    else if (textureBatch == mapBatch && location == -1)
+    {
+        // Neither have been used and the current batch has space for both.
+        texturesUsed.push_back(textureID);
+        texturesUsed.push_back(mapID);
+        return bundle = { currentBatch, (float)((static_cast<int>(texturesUsed.size()) - 2) % MAX_TEXTURES_PER_BATCH), (float)((static_cast<int>(texturesUsed.size() - 1)) % MAX_TEXTURES_PER_BATCH) };
+    }
+    else
+    {
+        // Neither have been used and the current batch lacks space for both.
+        // Or some other mixture which needs fixing.
+        CloseOffBatch();
+        int newBatch = floor(texturesUsed.size() / MAX_TEXTURES_PER_BATCH);
+        texturesUsed.push_back(textureID);
+        texturesUsed.push_back(mapID);
+        return bundle = { newBatch, 0, 1 };
+    }
+}
+
 Renderer::Renderer(GLuint whiteTexture) : batches(1), shader("assets/shaders/quad.vert", "assets/shaders/quad.frag"), whiteTextureID(whiteTexture)
 {
     GLuint quadIBO;
@@ -90,6 +219,7 @@ Renderer::Renderer(GLuint whiteTexture) : batches(1), shader("assets/shaders/qua
     // Use white texture as the first texture
     // -----------------------------------------
     this->textureIDs.push_back(whiteTexture);
+    this->texturesUsed.push_back(whiteTextureID);
     whiteTextureIndex = 0.0f;
 }
 
@@ -98,34 +228,8 @@ void Renderer::prepareQuad(glm::vec2 position, float width, float height,
 {
     // Figure out which batch should be written to
     // -------------------------------------------
-    auto result = std::find(textureIDs.begin(), textureIDs.end(), textureID);
-    int location;
-    if (result == textureIDs.end())
-    {
-        location = textureIDs.size();
-        textureIDs.push_back(textureID);
-    }
-    else
-    {
-        location = result - textureIDs.begin();
-    }
-
-    auto mResult = std::find(textureIDs.begin(), textureIDs.end(), mapID);
-    int mLocation;
-    if (mResult == textureIDs.end())
-    {
-        mLocation = textureIDs.size();
-        textureIDs.push_back(mapID);
-    }
-    else
-    {
-        mLocation = mResult - textureIDs.begin();
-    }
-
-    int batchIndex = location / MAX_TEXTURES_PER_BATCH;
-    float glTextureIndex = location % MAX_TEXTURES_PER_BATCH;
-    float glMapIndex = mLocation % MAX_TEXTURES_PER_BATCH;
-    Batch& batch = batches[batchIndex];
+    Bundle bundle = DetermineBatch(textureID, mapID);
+    Batch& batch = batches[bundle.batch];
 
     // Initialize the data for the quad
     // --------------------------------
@@ -142,10 +246,10 @@ void Renderer::prepareQuad(glm::vec2 position, float width, float height,
     const float b = rgb.b;
     const float a = rgb.a;
 
-    quad.topRight = { rightX, topY,      r, g, b, a,   1.0, 1.0,    glTextureIndex, glMapIndex, CalculateModifier(width), CalculateModifier(height) };
-    quad.bottomRight = { rightX, bottomY,   r, g, b, a,   1.0, 0.0,    glTextureIndex, glMapIndex, CalculateModifier(width), CalculateModifier(height) };
-    quad.bottomLeft = { leftX,  bottomY,   r, g, b, a,   0.0, 0.0,    glTextureIndex, glMapIndex, CalculateModifier(width), CalculateModifier(height) };
-    quad.topLeft = { leftX,  topY,      r, g, b, a,   0.0, 1.0,    glTextureIndex, glMapIndex, CalculateModifier(width), CalculateModifier(height) };
+    quad.topRight = { rightX, topY,      r, g, b, a,   1.0, 1.0,    bundle.textureLocation, bundle.mapLocation, CalculateModifier(width), CalculateModifier(height) };
+    quad.bottomRight = { rightX, bottomY,   r, g, b, a,   1.0, 0.0,    bundle.textureLocation, bundle.mapLocation, CalculateModifier(width), CalculateModifier(height) };
+    quad.bottomLeft = { leftX,  bottomY,   r, g, b, a,   0.0, 0.0,    bundle.textureLocation, bundle.mapLocation, CalculateModifier(width), CalculateModifier(height) };
+    quad.topLeft = { leftX,  topY,      r, g, b, a,   0.0, 1.0,    bundle.textureLocation, bundle.mapLocation, CalculateModifier(width), CalculateModifier(height) };
 }
 
 void Renderer::prepareQuad(PositionComponent* pos, float width, float height, float tWidth, float tHeight,
@@ -153,35 +257,8 @@ void Renderer::prepareQuad(PositionComponent* pos, float width, float height, fl
 {
     // Figure out which batch should be written to
     // -------------------------------------------
-
-    auto result = std::find(textureIDs.begin(), textureIDs.end(), textureID);
-    int location;
-    if (result == textureIDs.end())
-    {
-        location = textureIDs.size();
-        textureIDs.push_back(textureID);
-    }
-    else
-    {
-        location = result - textureIDs.begin();
-    }
-
-    auto mResult = std::find(textureIDs.begin(), textureIDs.end(), mapID);
-    int mLocation;
-    if (mResult == textureIDs.end())
-    {
-        mLocation = textureIDs.size();
-        textureIDs.push_back(mapID);
-    }
-    else
-    {
-        mLocation = mResult - textureIDs.begin();
-    }
-
-    int batchIndex = location / MAX_TEXTURES_PER_BATCH;
-    float glTextureIndex = location % MAX_TEXTURES_PER_BATCH;
-    float glMapIndex = mLocation % MAX_TEXTURES_PER_BATCH;
-    Batch& batch = batches[batchIndex];
+    Bundle bundle = DetermineBatch(textureID, mapID);
+    Batch& batch = batches[bundle.batch];
 
     float xL = 0.0f;
     float yL = 0.0f;
@@ -219,17 +296,17 @@ void Renderer::prepareQuad(PositionComponent* pos, float width, float height, fl
         const float xMod = fmod(width, tWidth);
         const float yMod = fmod(height, tHeight);
 
-        quad.topRight = { topRight.x, topRight.y,      r, g, b, a,   xMod, yMod,    glTextureIndex, glMapIndex, CalculateModifier(width), CalculateModifier(height) };
-        quad.bottomRight = { bottomRight.x, bottomRight.y,   r, g, b, a,   xMod, 0.0,    glTextureIndex, glMapIndex, CalculateModifier(width), CalculateModifier(height) };
-        quad.bottomLeft = { bottomLeft.x,  bottomLeft.y,   r, g, b, a,   0.0, 0.0,    glTextureIndex, glMapIndex, CalculateModifier(width), CalculateModifier(height) };
-        quad.topLeft = { topLeft.x,  topLeft.y,      r, g, b, a,   0.0, yMod,    glTextureIndex, glMapIndex, CalculateModifier(width), CalculateModifier(height) };
+        quad.topRight = { topRight.x, topRight.y,      r, g, b, a,   xMod, yMod,    bundle.textureLocation, bundle.mapLocation, CalculateModifier(width), CalculateModifier(height) };
+        quad.bottomRight = { bottomRight.x, bottomRight.y,   r, g, b, a,   xMod, 0.0,    bundle.textureLocation, bundle.mapLocation, CalculateModifier(width), CalculateModifier(height) };
+        quad.bottomLeft = { bottomLeft.x,  bottomLeft.y,   r, g, b, a,   0.0, 0.0,    bundle.textureLocation, bundle.mapLocation, CalculateModifier(width), CalculateModifier(height) };
+        quad.topLeft = { topLeft.x,  topLeft.y,      r, g, b, a,   0.0, yMod,    bundle.textureLocation, bundle.mapLocation, CalculateModifier(width), CalculateModifier(height) };
     }
     else
     {
-        quad.topRight = { topRight.x, topRight.y,      r, g, b, a,   xR, yR,    glTextureIndex, glMapIndex, CalculateModifier(width), CalculateModifier(height) };
-        quad.bottomRight = { bottomRight.x, bottomRight.y,   r, g, b, a,   xR, yL,    glTextureIndex, glMapIndex, CalculateModifier(width), CalculateModifier(height) };
-        quad.bottomLeft = { bottomLeft.x,  bottomLeft.y,   r, g, b, a,   xL, yL,    glTextureIndex, glMapIndex, CalculateModifier(width), CalculateModifier(height) };
-        quad.topLeft = { topLeft.x,  topLeft.y,      r, g, b, a,   xL, yR,    glTextureIndex, glMapIndex, CalculateModifier(width), CalculateModifier(height) };
+        quad.topRight = { topRight.x, topRight.y,      r, g, b, a,   xR, yR,    bundle.textureLocation, bundle.mapLocation, CalculateModifier(width), CalculateModifier(height) };
+        quad.bottomRight = { bottomRight.x, bottomRight.y,   r, g, b, a,   xR, yL,    bundle.textureLocation, bundle.mapLocation, CalculateModifier(width), CalculateModifier(height) };
+        quad.bottomLeft = { bottomLeft.x,  bottomLeft.y,   r, g, b, a,   xL, yL,    bundle.textureLocation, bundle.mapLocation, CalculateModifier(width), CalculateModifier(height) };
+        quad.topLeft = { topLeft.x,  topLeft.y,      r, g, b, a,   xL, yR,    bundle.textureLocation, bundle.mapLocation, CalculateModifier(width), CalculateModifier(height) };
     }
 }
 
@@ -239,34 +316,8 @@ void Renderer::prepareQuad(PositionComponent* pos, float width, float height,
 {
     // Figure out which batch should be written to
     // -------------------------------------------
-    auto result = std::find(textureIDs.begin(), textureIDs.end(), animID);
-    int location;
-    if (result == textureIDs.end())
-    {
-        location = textureIDs.size();
-        textureIDs.push_back(animID);
-    }
-    else
-    {
-        location = result - textureIDs.begin();
-    }
-    
-    auto mResult = std::find(textureIDs.begin(), textureIDs.end(), mapID);
-    int mLocation;
-    if (mResult == textureIDs.end())
-    {
-        mLocation = textureIDs.size();
-        textureIDs.push_back(mapID);
-    }
-    else
-    {
-        mLocation = mResult - textureIDs.begin();
-    }
-
-    int batchIndex = location / MAX_TEXTURES_PER_BATCH;
-    float glTextureIndex = location % MAX_TEXTURES_PER_BATCH;
-    float glMapIndex = mLocation % MAX_TEXTURES_PER_BATCH;
-    Batch& batch = batches[batchIndex];
+    Bundle bundle = DetermineBatch(animID, mapID);
+    Batch& batch = batches[bundle.batch];
 
     
     // Figure out how cells should be handled.
@@ -313,10 +364,10 @@ void Renderer::prepareQuad(PositionComponent* pos, float width, float height,
     float w = width / cols;
     float h = height / rows;
 
-    quad.topRight = { topRight.x, topRight.y,      r, g, b, a,   uvX1, uvY1,    glTextureIndex, glMapIndex, CalculateModifier(w), CalculateModifier(h) };
-    quad.bottomRight = { bottomRight.x, bottomRight.y,   r, g, b, a,   uvX1, uvY0,    glTextureIndex, glMapIndex, CalculateModifier(w), CalculateModifier(h) };
-    quad.bottomLeft = { bottomLeft.x,  bottomLeft.y,   r, g, b, a,   uvX0, uvY0,    glTextureIndex, glMapIndex, CalculateModifier(w), CalculateModifier(h) };
-    quad.topLeft = { topLeft.x,  topLeft.y,      r, g, b, a,   uvX0, uvY1,    glTextureIndex, glMapIndex, CalculateModifier(w), CalculateModifier(h) };
+    quad.topRight = { topRight.x, topRight.y,      r, g, b, a,   uvX1, uvY1,    bundle.textureLocation, bundle.mapLocation, CalculateModifier(w), CalculateModifier(h) };
+    quad.bottomRight = { bottomRight.x, bottomRight.y,   r, g, b, a,   uvX1, uvY0,    bundle.textureLocation, bundle.mapLocation, CalculateModifier(w), CalculateModifier(h) };
+    quad.bottomLeft = { bottomLeft.x,  bottomLeft.y,   r, g, b, a,   uvX0, uvY0,    bundle.textureLocation, bundle.mapLocation, CalculateModifier(w), CalculateModifier(h) };
+    quad.topLeft = { topLeft.x,  topLeft.y,      r, g, b, a,   uvX0, uvY1,    bundle.textureLocation, bundle.mapLocation, CalculateModifier(w), CalculateModifier(h) };
 }
 
 
@@ -325,34 +376,8 @@ void Renderer::prepareQuad(PositionComponent* pos, ColliderComponent* col, float
 {
     // Figure out which batch should be written to
     // -------------------------------------------
-    auto result = std::find(textureIDs.begin(), textureIDs.end(), textureID);
-    int location;
-    if (result == textureIDs.end())
-    {
-        location = textureIDs.size();
-        textureIDs.push_back(textureID);
-    }
-    else
-    {
-        location = result - textureIDs.begin();
-    }
-
-    auto mResult = std::find(textureIDs.begin(), textureIDs.end(), mapID);
-    int mLocation;
-    if (mResult == textureIDs.end())
-    {
-        mLocation = textureIDs.size();
-        textureIDs.push_back(mapID);
-    }
-    else
-    {
-        mLocation = mResult - textureIDs.begin();
-    }
-
-    int batchIndex = location / MAX_TEXTURES_PER_BATCH;
-    float glTextureIndex = location % MAX_TEXTURES_PER_BATCH;
-    float glMapIndex = mLocation % MAX_TEXTURES_PER_BATCH;
-    Batch& batch = batches[batchIndex];
+    Bundle bundle = DetermineBatch(textureID, mapID);
+    Batch& batch = batches[bundle.batch];
 
     // Initialize the data for the quad
     // --------------------------------
@@ -374,10 +399,10 @@ void Renderer::prepareQuad(PositionComponent* pos, ColliderComponent* col, float
     const float b = rgb.b;
     const float a = rgb.a;
 
-    quad.topRight = { topRight.x, topRight.y,      r, g, b, a,   1.0, 1.0,    glTextureIndex, glMapIndex, CalculateModifier(width), CalculateModifier(height) };
-    quad.bottomRight = { bottomRight.x, bottomRight.y,   r, g, b, a,   1.0, 0.0,    glTextureIndex, glMapIndex, CalculateModifier(width), CalculateModifier(height) };
-    quad.bottomLeft = { bottomLeft.x,  bottomLeft.y,   r, g, b, a,   0.0, 0.0,    glTextureIndex, glMapIndex, CalculateModifier(width), CalculateModifier(height) };
-    quad.topLeft = { topLeft.x,  topLeft.y,      r, g, b, a,   0.0, 1.0,    glTextureIndex, glMapIndex, CalculateModifier(width), CalculateModifier(height) };
+    quad.topRight = { topRight.x, topRight.y,      r, g, b, a,   1.0, 1.0,    bundle.textureLocation, bundle.mapLocation, CalculateModifier(width), CalculateModifier(height) };
+    quad.bottomRight = { bottomRight.x, bottomRight.y,   r, g, b, a,   1.0, 0.0,    bundle.textureLocation, bundle.mapLocation, CalculateModifier(width), CalculateModifier(height) };
+    quad.bottomLeft = { bottomLeft.x,  bottomLeft.y,   r, g, b, a,   0.0, 0.0,    bundle.textureLocation, bundle.mapLocation, CalculateModifier(width), CalculateModifier(height) };
+    quad.topLeft = { topLeft.x,  topLeft.y,      r, g, b, a,   0.0, 1.0,    bundle.textureLocation, bundle.mapLocation, CalculateModifier(width), CalculateModifier(height) };
 }
 
 void Renderer::prepareQuad(glm::vec2 topRight, glm::vec2 bottomRight, glm::vec2 bottomLeft, glm::vec2 topLeft,
@@ -385,34 +410,8 @@ void Renderer::prepareQuad(glm::vec2 topRight, glm::vec2 bottomRight, glm::vec2 
 {
     // Figure out which batch should be written to
     // -------------------------------------------
-    auto result = std::find(textureIDs.begin(), textureIDs.end(), textureID);
-    int location;
-    if (result == textureIDs.end())
-    {
-        location = textureIDs.size();
-        textureIDs.push_back(textureID);
-    }
-    else
-    {
-        location = result - textureIDs.begin();
-    }
-
-    auto mResult = std::find(textureIDs.begin(), textureIDs.end(), mapID);
-    int mLocation;
-    if (mResult == textureIDs.end())
-    {
-        mLocation = textureIDs.size();
-        textureIDs.push_back(mapID);
-    }
-    else
-    {
-        mLocation = mResult - textureIDs.begin();
-    }
-
-    int batchIndex = location / MAX_TEXTURES_PER_BATCH;
-    float glTextureIndex = location % MAX_TEXTURES_PER_BATCH;
-    float glMapIndex = mLocation % MAX_TEXTURES_PER_BATCH;
-    Batch& batch = batches[batchIndex];
+    Bundle bundle = DetermineBatch(textureID, mapID);
+    Batch& batch = batches[bundle.batch];
 
     // Initialize the data for the quad
     // --------------------------------
@@ -427,10 +426,10 @@ void Renderer::prepareQuad(glm::vec2 topRight, glm::vec2 bottomRight, glm::vec2 
     float width = topRight.x - topLeft.x;
     float height = topRight.y - bottomRight.y;
 
-    quad.topRight = { topRight.x, topRight.y,      r, g, b, a,   1.0, 1.0,    glTextureIndex, glMapIndex, CalculateModifier(width), CalculateModifier(height) };
-    quad.bottomRight = { bottomRight.x, bottomRight.y,   r, g, b, a,   1.0, 0.0,    glTextureIndex, glMapIndex, CalculateModifier(width), CalculateModifier(height) };
-    quad.bottomLeft = { bottomLeft.x,  bottomLeft.y,   r, g, b, a,   0.0, 0.0,    glTextureIndex, glMapIndex, CalculateModifier(width), CalculateModifier(height) };
-    quad.topLeft = { topLeft.x,  topLeft.y,      r, g, b, a,   0.0, 1.0,    glTextureIndex, glMapIndex, CalculateModifier(width), CalculateModifier(height) };
+    quad.topRight = { topRight.x, topRight.y,      r, g, b, a,   1.0, 1.0,    bundle.textureLocation, bundle.mapLocation, CalculateModifier(width), CalculateModifier(height) };
+    quad.bottomRight = { bottomRight.x, bottomRight.y,   r, g, b, a,   1.0, 0.0,    bundle.textureLocation, bundle.mapLocation, CalculateModifier(width), CalculateModifier(height) };
+    quad.bottomLeft = { bottomLeft.x,  bottomLeft.y,   r, g, b, a,   0.0, 0.0,    bundle.textureLocation, bundle.mapLocation, CalculateModifier(width), CalculateModifier(height) };
+    quad.topLeft = { topLeft.x,  topLeft.y,      r, g, b, a,   0.0, 1.0,    bundle.textureLocation, bundle.mapLocation, CalculateModifier(width), CalculateModifier(height) };
 }
 
 void Renderer::prepareQuad(int batchIndex, Quad& input)
@@ -448,11 +447,10 @@ void Renderer::sendToGL()
     int currentBatch = 0;
     int texUnit = 0;
 
-    for (int i = 0; i < textureIDs.size(); i++)
+    for (int i = 0; i < texturesUsed.size(); i++)
     {
-        // std::cout << "texUnit: " << texUnit << std::endl;
         glActiveTexture(GL_TEXTURE0 + texUnit);
-        glBindTexture(GL_TEXTURE_2D, textureIDs[i]);
+        glBindTexture(GL_TEXTURE_2D, textureIDs[texturesUsed[i]] - 1);
 
         if (texUnit >= MAX_TEXTURES_PER_BATCH - 1)
         {
@@ -503,6 +501,9 @@ void Renderer::flush(const Batch& batch)
 
 void Renderer::resetBuffers()
 {
+    texturesUsed.clear();
+    texturesUsed.push_back(whiteTextureID);
+
     for (Batch& batch : batches)
     {
         batch.quadIndex = 0;

@@ -44,7 +44,9 @@ struct Quad
 class Bundle
 {
 public:
-    std::vector<int> textureIDs;
+    int batch;
+    float textureLocation;
+    float mapLocation;
 };
 
 // Store the quads before a draw call
@@ -53,7 +55,6 @@ class Batch
 public:
     static constexpr int MAX_QUADS = 10000;
 
-    Bundle bundle;
     // TODO: Look into decoupling # of quads that can be rendered with # of textures that can be rendered in one batch
     std::array<Quad, MAX_QUADS> quadBuffer;
     int quadIndex = 0;
@@ -69,6 +70,7 @@ public:
     static constexpr int MAX_TEXTURES_PER_BATCH = 32;
 
     std::vector<GLuint> textureIDs;
+    std::vector<GLuint> texturesUsed;
     float whiteTextureIndex;
 
     GLuint VAO;
@@ -78,6 +80,8 @@ public:
 
     Renderer(GLuint whiteTexture);
     float CalculateModifier(float i);
+    void CloseOffBatch();
+    Bundle DetermineBatch(int textureID, int mapID);
     void prepareQuad(PositionComponent* pos, float width, float height, float tWidth, float tHeight, glm::vec4 rgb, int textureID, int mapID, bool tiled, bool flipped);
     void prepareQuad(PositionComponent* pos, ColliderComponent* col, float width, float height, glm::vec4 rgb, int textureID, int mapID);
     void prepareQuad(glm::vec2 topRight, glm::vec2 bottomRight, glm::vec2 bottomLeft, glm::vec2 topLeft, glm::vec4 rgb, int textureID, int mapID);
