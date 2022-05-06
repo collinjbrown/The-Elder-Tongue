@@ -175,6 +175,9 @@ public:
 	bool crouching;
 	float crouchMod;
 
+	bool wallRunning;
+	float maxWallRun;
+
 	bool canClimb;
 	bool shouldClimb;
 	bool climbing;
@@ -199,7 +202,7 @@ public:
 	float lastFlurry;
 	float flurryDelay;
 
-	MovementComponent(Entity* entity, bool active, float acceleration, float maxSpeed, float maxJumpHeight, float airControl, bool canMove, float crouchMod, bool canClimb, bool shouldClimb, float climbMod,
+	MovementComponent(Entity* entity, bool active, float acceleration, float maxSpeed, float maxJumpHeight, float airControl, bool canMove, float crouchMod, bool canClimb, bool shouldClimb, float climbMod, float maxWallRun,
 					  glm::vec2 attackThrust, float slashSpeed, float damage, float attackMultiplier, float minAttackDelay, float maxAttackDelay, int maxFlurry,  float flurryDelay);
 };
 
@@ -331,7 +334,10 @@ public:
 
 	ColliderComponent* platformCollider;
 
-	BladeComponent(Entity* entity, bool active, float rushRange, float slowRange, float throwRange, float followSpeed, float projectileSpeed, ColliderComponent* platformCollider);
+	Texture2D* corporealMap;
+	Texture2D* incorporealMap;
+
+	BladeComponent(Entity* entity, bool active, float rushRange, float slowRange, float throwRange, float followSpeed, float projectileSpeed, ColliderComponent* platformCollider, Texture2D* corporealMap, Texture2D* incorporealMap);
 };
 
 #endif

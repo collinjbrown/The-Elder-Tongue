@@ -238,6 +238,7 @@ void ECS::Update(float deltaTime)
 		Entity* moonlightBlade = CreateEntity(0, "Moonlight Blade");
 		Texture2D* moonlightBladeTex = Game::main.textureMap["moonlightBlade"];
 		Texture2D* moonlightBladeMap = Game::main.textureMap["moonlightBladeMap"];
+		Texture2D* moonlightBladeIncorporealMap = Game::main.textureMap["moonlightBladeIncorporealMap"];
 
 		ECS::main.RegisterComponent(new PositionComponent(moonlightBlade, true, false, 0.0f, 0.0f, 0.0f), moonlightBlade);
 		ECS::main.RegisterComponent(new PhysicsComponent(moonlightBlade, true, (PositionComponent*)moonlightBlade->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), moonlightBlade);
@@ -251,7 +252,7 @@ void ECS::Update(float deltaTime)
 		ECS::main.RegisterComponent(new PhysicsComponent(hilt, true, (PositionComponent*)hilt->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), hilt);
 		ColliderComponent* platformCollider = new ColliderComponent(hilt, false, (PositionComponent*)hilt->componentIDMap[positionComponentID], true, false, false, false, false, false, EntityClass::object, 1.0f, 0.0f, 0.0f, 35.0f, 5.0f, 0.0f, 0.0f);
 		ECS::main.RegisterComponent(platformCollider, hilt);
-		ECS::main.RegisterComponent(new BladeComponent(moonlightBlade, true, 1010.0f, 1000.0f, 30000.0f, 0.5f, 1000.0f, platformCollider), moonlightBlade);
+		ECS::main.RegisterComponent(new BladeComponent(moonlightBlade, true, 1010.0f, 1000.0f, 30000.0f, 0.5f, 1000.0f, platformCollider, moonlightBladeMap, moonlightBladeIncorporealMap), moonlightBlade);
 
 		#pragma endregion
 
@@ -262,7 +263,7 @@ void ECS::Update(float deltaTime)
 		ECS::main.RegisterComponent(new PositionComponent(player, true, false, 0, 100, 0.0f), player);
 		ECS::main.RegisterComponent(new PhysicsComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 5000.0f, 2000.0f), player);
 		ECS::main.RegisterComponent(new ColliderComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], false, false, false, false, true, false, EntityClass::player, 1.0f, 1.0f, 10.0f, 20.0f, 50.0f, 0.0f, -7.75f), player);
-		ECS::main.RegisterComponent(new MovementComponent(player, true, 4000.0f, 500.0f, 2.5f, 0.5f, true, 0.7f, true, false, 0.9f, glm::vec2(100.0f, 0), 50.0f, 20.0f, 1.5f, 0.1f, 0.35f, 5, 3.0f), player);
+		ECS::main.RegisterComponent(new MovementComponent(player, true, 4000.0f, 500.0f, 2.5f, 0.5f, true, 0.7f, true, false, 0.9f, 2.0f, glm::vec2(100.0f, 0), 50.0f, 20.0f, 1.5f, 0.1f, 0.35f, 5, 3.0f), player);
 		ECS::main.RegisterComponent(new InputComponent(player, true, moonlightBlade, true, 0.5f, 5000.0f, 0.5f, 2, 0.5f, 2.0f, 500.0f), player);
 		ECS::main.RegisterComponent(new CameraFollowComponent(player, true, 10.0f), player);
 		ECS::main.RegisterComponent(new HealthComponent(player, true, 1000.0f, false), player);
@@ -273,7 +274,7 @@ void ECS::Update(float deltaTime)
 		a->AddAnimation("crouch", Game::main.animationMap["baseCrouch"]);
 		a->AddAnimation("crouchWalk", Game::main.animationMap["baseCrouchWalk"]);
 		a->AddAnimation("jumpUp", Game::main.animationMap["baseJumpUp"]);
-		a->AddAnimation("climbUp", Game::main.animationMap["baseClimbUp"]);
+		a->AddAnimation("wallRun", Game::main.animationMap["baseWallRun"]);
 		a->AddAnimation("slide", Game::main.animationMap["baseSlide"]);
 		a->AddAnimation("slideDown", Game::main.animationMap["baseSlideDown"]);
 		a->AddAnimation("jumpDown", Game::main.animationMap["baseJumpDown"]);
@@ -589,7 +590,7 @@ InputComponent::InputComponent(Entity* entity, bool active, Entity* moonlightBla
 
 #pragma region Movement Component
 
-MovementComponent::MovementComponent(Entity* entity, bool active, float acceleration, float maxSpeed, float maxJumpHeight, float airControl, bool canMove, float crouchMod, bool canClimb, bool shouldClimb, float climbMod,
+MovementComponent::MovementComponent(Entity* entity, bool active, float acceleration, float maxSpeed, float maxJumpHeight, float airControl, bool canMove, float crouchMod, bool canClimb, bool shouldClimb, float climbMod, float maxWallRun,
 	glm::vec2 attackThrust, float slashSpeed, float damage, float attackMultiplier, float minAttackDelay, float maxAttackDelay, int maxFlurry, float flurryDelay)
 {
 	this->ID = movementComponentID;
@@ -606,6 +607,9 @@ MovementComponent::MovementComponent(Entity* entity, bool active, float accelera
 
 	this->crouching = false;
 	this->crouchMod = crouchMod;
+
+	this->wallRunning = false;
+	this->maxWallRun = maxWallRun;
 
 	this->canClimb = canClimb;
 	this->shouldClimb = shouldClimb;
@@ -792,7 +796,7 @@ AIComponent::AIComponent(Entity* entity, bool active, bool proc, float procRange
 
 #pragma region Blade Component
 
-BladeComponent::BladeComponent(Entity* entity, bool active, float rushRange, float slowRange, float throwRange, float followSpeed, float projectileSpeed, ColliderComponent* platformCollider)
+BladeComponent::BladeComponent(Entity* entity, bool active, float rushRange, float slowRange, float throwRange, float followSpeed, float projectileSpeed, ColliderComponent* platformCollider, Texture2D* corporealMap, Texture2D* incorporealMap)
 {
 	this->ID = bladeComponentID;
 	this->entity = entity;
@@ -810,6 +814,9 @@ BladeComponent::BladeComponent(Entity* entity, bool active, float rushRange, flo
 	this->projectileSpeed = projectileSpeed;
 
 	this->platformCollider = platformCollider;
+
+	this->corporealMap = corporealMap;
+	this->incorporealMap = incorporealMap;
 }
 
 #pragma endregion
@@ -1145,14 +1152,25 @@ void ColliderSystem::Update(int activeScene, float deltaTime)
 						physA->velocityY = velAdd.y;
 					}
 
+					MovementComponent* moveA = (MovementComponent*)cA->entity->componentIDMap[movementComponentID];
 					if (cB->platform && c->contactNormal.y == 1)
 					{
 						cA->onPlatform = true;
 					}
-
-					if (cB->climbable && c->contactNormal.x != 0 && cA->entity->componentIDMap[movementComponentID] != nullptr)
+					
+					if (moveA != nullptr && cB->platform && c->contactNormal.x != 0 && physA->velocityY > physA->velocityX)
 					{
-						MovementComponent* moveA = (MovementComponent*)cA->entity->componentIDMap[movementComponentID];
+						if (!moveA->wallRunning)
+						{
+							moveA->wallRunning = true;
+							moveA->maxWallRun = cB->pos->y - (cB->height / 2.0f);
+							// physA->velocityY += physA->velocityX * 0.5f;
+							physA->velocityX = 0;
+						}
+					}
+
+					if (cB->climbable && c->contactNormal.x != 0 && moveA != nullptr)
+					{
 
 						if (moveA->canClimb && moveA->shouldClimb)
 						{
@@ -1162,7 +1180,7 @@ void ColliderSystem::Update(int activeScene, float deltaTime)
 								physA->velocityX = 0;
 								physA->velocityY = 0;
 
-								moveA->maxClimbHeight = cB->pos->y + (cB->height / 2.0f);
+								moveA->maxClimbHeight = cA->pos->y;
 								moveA->minClimbHeight = cB->pos->y - (cB->height / 2.0f);
 							}
 
@@ -1783,6 +1801,17 @@ void InputSystem::Update(int activeScene, float deltaTime)
 			{
 				float aBot = phys->pos->y - (col->height / 2.0f) + col->offsetY;
 				float aTop = phys->pos->y + (col->height / 2.0f) + col->offsetY;
+
+				if (move->wallRunning && phys->velocityY <= 0.0f || move->wallRunning && playerPos.y >= move->maxWallRun)
+				{
+					move->wallRunning = false;
+					phys->gravityMod = phys->baseGravityMod;
+				}
+				else if (move->wallRunning)
+				{
+					phys->gravityMod = phys->baseGravityMod * 0.6f;
+				}
+
 				if (move->climbing && !move->shouldClimb ||
 					move->climbing && aBot > move->maxClimbHeight ||
 					move->climbing && aTop < move->minClimbHeight)
@@ -2041,19 +2070,7 @@ void InputSystem::Update(int activeScene, float deltaTime)
 					mod = move->airControl;
 				}
 
-				if (glfwGetKey(Game::main.window, GLFW_KEY_W) == GLFW_PRESS && move->canMove && move->climbing)
-				{
-					if (abs(phys->velocityY) < 0.5f)
-					{
-						ParticleEngine::main.AddParticles(10, phys->pos->x, phys->pos->y - 30.0f, Element::dust, rand() % 10 + 1);
-					}
-
-					if (phys->velocityY < move->maxSpeed * mod)
-					{
-						phys->velocityY += move->acceleration * deltaTime * mod;
-					}
-				}
-				else if (glfwGetKey(Game::main.window, GLFW_KEY_S) == GLFW_PRESS && move->canMove && move->climbing)
+				if (glfwGetKey(Game::main.window, GLFW_KEY_S) == GLFW_PRESS && move->canMove && move->climbing)
 				{
 					ParticleEngine::main.AddParticles(1, phys->pos->x, phys->pos->y + 20.0f, Element::dust, rand() % 10 + 1);
 					if (phys->velocityY > -move->maxSpeed * mod)
@@ -2280,7 +2297,7 @@ void AnimationControllerSystem::Update(int activeScene, float deltaTime)
 							c->animator->SetAnimation("slashOne");
 						}
 					}
-					else if (abs(p->velocityY) > 200.0f && !col->onPlatform && !move->climbing)
+					else if (abs(p->velocityY) > 200.0f && !col->onPlatform && !move->climbing && !move->wallRunning)
 					{
 						if (c->animator->activeAnimation != "jumpUp" && p->velocityY > 0)
 						{
@@ -2291,9 +2308,9 @@ void AnimationControllerSystem::Update(int activeScene, float deltaTime)
 							c->animator->SetAnimation("jumpDown");
 						}
 					}
-					else if (p->velocityY > 100.0f && move->climbing && c->animator->activeAnimation != "climbUp")
+					else if (move->wallRunning && c->animator->activeAnimation != "wallRun")
 					{
-						c->animator->SetAnimation("climbUp");
+						c->animator->SetAnimation("wallRun");
 					}
 					else if (p->velocityY <= 0.0f && move->climbing && c->animator->activeAnimation != "slideDown")
 					{
@@ -2729,6 +2746,7 @@ void BladeSystem::Update(int activeScene, float deltaTime)
 
 			if (!b->thrown)
 			{
+				sprite->map = b->incorporealMap;
 				colA->active = false;
 				damA->active = false;
 				b->platformCollider->active = false;
@@ -2742,7 +2760,7 @@ void BladeSystem::Update(int activeScene, float deltaTime)
 				glm::vec2 mouse = glm::vec2(Game::main.mouseX, Game::main.mouseY);
 				glm::vec2 target;
 
-				if (physB->velocityX >= 0)
+				if (physB->velocityX >= 0 && !moveB->climbing || moveB->climbing && !sprite->flipped)
 				{
 					target = glm::vec2(posB->x - (colB->width), posB->y + (colB->height));
 				}
@@ -2795,6 +2813,7 @@ void BladeSystem::Update(int activeScene, float deltaTime)
 			}
 			else if (b->lodged)
 			{
+
 				colA->active = false;
 				damA->active = false;
 
@@ -2806,6 +2825,7 @@ void BladeSystem::Update(int activeScene, float deltaTime)
 				if (b->platformCollider->active == false && posA->rotation < 15.0f && posA->rotation > -15.0f ||
 					b->platformCollider->active == false && posA->rotation > 345.0f)
 				{
+					sprite->map = b->corporealMap;
 					PositionComponent* hiltPos = (PositionComponent*)b->platformCollider->entity->componentIDMap[positionComponentID];
 					hiltPos->x = posA->x;
 					hiltPos->y = posA->y;
@@ -2827,6 +2847,7 @@ void BladeSystem::Update(int activeScene, float deltaTime)
 				else if (b->platformCollider->active == false && posA->rotation < -75.0f ||
 						 b->platformCollider->active == false && sprite->flipped && posA->rotation > 75.0f)
 				{
+					sprite->map = b->corporealMap;
 					PositionComponent* hiltPos = (PositionComponent*)b->platformCollider->entity->componentIDMap[positionComponentID];
 					hiltPos->x = posA->x;
 					hiltPos->y = posA->y;
@@ -2835,6 +2856,9 @@ void BladeSystem::Update(int activeScene, float deltaTime)
 					b->platformCollider->platform = true;
 					b->platformCollider->width = 5.0f;
 					b->platformCollider->height = 70.0f;
+
+					b->platformCollider->offsetX = 0.0f;
+					b->platformCollider->offsetY = 0.0f;
 				}
 			}
 			else

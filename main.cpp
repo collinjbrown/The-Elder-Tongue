@@ -194,6 +194,10 @@ int main(void)
     renderer.textureIDs.push_back(moonlightBladeMap.ID);
     Game::main.textureMap.emplace("moonlightBladeMap", &moonlightBladeMap);
 
+    Texture2D moonlightBladeIncorporealMap{ "assets/sprites/blade/moonlight_blade_incorporealMap.png", true, GL_NEAREST };
+    renderer.textureIDs.push_back(moonlightBladeIncorporealMap.ID);
+    Game::main.textureMap.emplace("moonlightBladeIncorporealMap", &moonlightBladeIncorporealMap);
+
     Texture2D skull{ "assets/sprites/skull/skull.png", true, GL_NEAREST };
     renderer.textureIDs.push_back(skull.ID);
     Game::main.textureMap.emplace("skull", &skull);
@@ -225,12 +229,12 @@ int main(void)
     renderer.textureIDs.push_back(baseJumpDown.ID);
     Game::main.animationMap.emplace("baseJumpDown", &baseJumpDown);
 
-    Animation2D baseClimbUp{ "assets/animations/lily/lily_climbUp.png", true,  2, 4, 0.1f, { 1, 2, 2, 2 }, true, GL_NEAREST };
-    renderer.textureIDs.push_back(baseClimbUp.ID);
-    Game::main.animationMap.emplace("baseClimbUp", &baseClimbUp);
+    Animation2D baseWallRun{ "assets/animations/lily/lily_wallRun.png", true,  3, 4, 0.1f, { 1, 3, 3, 3 }, true, GL_NEAREST };
+    renderer.textureIDs.push_back(baseWallRun.ID);
+    Game::main.animationMap.emplace("baseWallRun", &baseWallRun);
 
     Animation2D baseSlideDown{ "assets/animations/lily/lily_slideDown.png", true,  1, 1, 5.0f, { 1 }, true, GL_NEAREST };
-    renderer.textureIDs.push_back(baseClimbUp.ID);
+    renderer.textureIDs.push_back(baseSlideDown.ID);
     Game::main.animationMap.emplace("baseSlideDown", &baseSlideDown);
 
     Animation2D baseSlide{ "assets/animations/lily/lily_slide.png", true,  1, 2, 1.0f, { 1, 1 }, true, GL_NEAREST };
