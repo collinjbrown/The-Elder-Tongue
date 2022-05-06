@@ -2864,13 +2864,13 @@ void BladeSystem::Update(int activeScene, float deltaTime)
 
 					if (dist > b->rushRange)
 					{
-						posA->x += vel.x * (1.0f / b->followSpeed);
-						posA->y += vel.y * (1.0f / b->followSpeed);
+						posA->x += vel.x * (1.0f / b->followSpeed) * (100 * deltaTime);
+						posA->y += vel.y * (1.0f / b->followSpeed) * (100 * deltaTime);
 					}
 					else
 					{
-						physA->velocityX += vel.x * (1.0f / b->followSpeed);
-						physA->velocityY += vel.y * (1.0f / b->followSpeed);
+						physA->velocityX += vel.x * (1.0f / b->followSpeed) * (200 * deltaTime);
+						physA->velocityY += vel.y * (1.0f / b->followSpeed) * (200 * deltaTime);
 					}
 				}
 			}
