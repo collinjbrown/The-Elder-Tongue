@@ -260,13 +260,13 @@ void ECS::Update(float deltaTime)
 		ECS::main.RegisterComponent(new PhysicsComponent(moonlightBlade, true, (PositionComponent*)moonlightBlade->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), moonlightBlade);
 		ECS::main.RegisterComponent(new StaticSpriteComponent(moonlightBlade, true, (PositionComponent*)moonlightBlade->componentIDMap[positionComponentID], moonlightBladeTex->width, moonlightBladeTex->height, moonlightBladeTex, moonlightBladeMap, false, false), moonlightBlade);
 		// ECS::main.RegisterComponent(new AIComponent(moonlightBlade, true, false, 1010.0f, 1000.0f, 0.5f, 0.0f, 0.0f, AIType::moonlight_blade), moonlightBlade);
-		ECS::main.RegisterComponent(new ColliderComponent(moonlightBlade, false, (PositionComponent*)moonlightBlade->componentIDMap[positionComponentID], false, false, false, true, false, true, EntityClass::object, 1.0f, 0.0f, 0.0f, 5.0f, 5.0f, 0.0f, 0.0f), moonlightBlade);
+		ECS::main.RegisterComponent(new ColliderComponent(moonlightBlade, false, (PositionComponent*)moonlightBlade->componentIDMap[positionComponentID], false, false, true, false, true, false, true, EntityClass::object, 1.0f, 0.0f, 0.0f, 5.0f, 5.0f, 0.0f, 0.0f), moonlightBlade);
 		ECS::main.RegisterComponent(new DamageComponent(moonlightBlade, true, player, false, 0.0f, true, false, 100, 20.0f, false, true, true, true), moonlightBlade);
 
 		Entity* hilt = CreateEntity(0, "Moonlight Blade Hilt");
 		ECS::main.RegisterComponent(new PositionComponent(hilt, true, false, 0, 0, 0, 0.0f), hilt);
 		ECS::main.RegisterComponent(new PhysicsComponent(hilt, true, (PositionComponent*)hilt->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), hilt);
-		ColliderComponent* platformCollider = new ColliderComponent(hilt, false, (PositionComponent*)hilt->componentIDMap[positionComponentID], true, false, false, false, false, false, EntityClass::object, 1.0f, 0.0f, 0.0f, 35.0f, 5.0f, 0.0f, 0.0f);
+		ColliderComponent* platformCollider = new ColliderComponent(hilt, false, (PositionComponent*)hilt->componentIDMap[positionComponentID], true, true, true, false, false, false, false, EntityClass::object, 1.0f, 0.0f, 0.0f, 35.0f, 5.0f, 0.0f, 0.0f);
 		ECS::main.RegisterComponent(platformCollider, hilt);
 		ECS::main.RegisterComponent(new BladeComponent(moonlightBlade, true, 1010.0f, 1000.0f, 30000.0f, 0.5f, 1000.0f, platformCollider, moonlightBladeMap, moonlightBladeIncorporealMap, 0.5f), moonlightBlade);
 
@@ -278,7 +278,7 @@ void ECS::Update(float deltaTime)
 
 		ECS::main.RegisterComponent(new PositionComponent(player, true, false, 0, 100, 0, 0.0f), player);
 		ECS::main.RegisterComponent(new PhysicsComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 5000.0f, 2000.0f), player);
-		ECS::main.RegisterComponent(new ColliderComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], false, false, false, false, true, false, EntityClass::player, 1.0f, 1.0f, 10.0f, 20.0f, 50.0f, 0.0f, -7.75f), player);
+		ECS::main.RegisterComponent(new ColliderComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], false, false, false, false, false, true, false, EntityClass::player, 1.0f, 1.0f, 10.0f, 20.0f, 50.0f, 0.0f, -7.75f), player);
 		ECS::main.RegisterComponent(new MovementComponent(player, true, 4000.0f, 500.0f, 2.5f, 0.5f, true, 0.7f, true, false, 0.9f, 2.0f, glm::vec2(100.0f, 0), 50.0f, 20.0f, 1.5f, 0.1f, 0.35f, 5, 3.0f), player);
 		ECS::main.RegisterComponent(new InputComponent(player, true, moonlightBlade, true, 0.5f, 5000.0f, 0.5f, 2, 0.5f, 2.0f, 500.0f), player);
 		ECS::main.RegisterComponent(new CameraFollowComponent(player, true, 10.0f), player);
@@ -340,7 +340,7 @@ void ECS::Update(float deltaTime)
 			Entity* platform = CreateEntity(0, "floor");
 			ECS::main.RegisterComponent(new PositionComponent(platform, true, true, rand() % 5000, rand() % 5000, 0, 0), platform);
 			ECS::main.RegisterComponent(new PhysicsComponent(platform, true, (PositionComponent*)platform->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 0.1f, 0.0f), platform);
-			ECS::main.RegisterComponent(new ColliderComponent(platform, true, (PositionComponent*)platform->componentIDMap[positionComponentID], true, false, true, false, false, false, EntityClass::object, 1000.0f, 0.0f, 1.0f, width, height, 0.0f, 0.0f), platform);
+			ECS::main.RegisterComponent(new ColliderComponent(platform, true, (PositionComponent*)platform->componentIDMap[positionComponentID], true, false, false, true, false, false, false, EntityClass::object, 1000.0f, 0.0f, 1.0f, width, height, 0.0f, 0.0f), platform);
 			ECS::main.RegisterComponent(new StaticSpriteComponent(platform, true, (PositionComponent*)platform->componentIDMap[positionComponentID], width, height, tex3, tex3Map, false, false), platform);
 		}
 
@@ -349,7 +349,7 @@ void ECS::Update(float deltaTime)
 			Entity* floor = CreateEntity(0, "floor");
 			ECS::main.RegisterComponent(new PositionComponent(floor, true, true, i * 500, -200, 0, 0.0f), floor);
 			ECS::main.RegisterComponent(new PhysicsComponent(floor, true, (PositionComponent*)floor->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 0.1f, 0.0f), floor);
-			ECS::main.RegisterComponent(new ColliderComponent(floor, true, (PositionComponent*)floor->componentIDMap[positionComponentID], true, false, true, false, false, false, EntityClass::object, 1000.0f, 0.0f, 1.0f, 540.0f, 80.0f, 0.0f, 0.0f), floor);
+			ECS::main.RegisterComponent(new ColliderComponent(floor, true, (PositionComponent*)floor->componentIDMap[positionComponentID], true, false, false, true, false, false, false, EntityClass::object, 1000.0f, 0.0f, 1.0f, 540.0f, 80.0f, 0.0f, 0.0f), floor);
 			ECS::main.RegisterComponent(new StaticSpriteComponent(floor, true, (PositionComponent*)floor->componentIDMap[positionComponentID], 540.0f, 80.0f, tex3, tex3Map, false, false), floor);
 
 			Entity* earth = CreateEntity(0, "floor");
@@ -540,7 +540,7 @@ StaticSpriteComponent::StaticSpriteComponent(Entity* entity, bool active, Positi
 
 #pragma region Collider Component
 
-ColliderComponent::ColliderComponent(Entity* entity, bool active, PositionComponent* pos, bool platform, bool onewayPlatform, bool climbable, bool trigger, bool takesDamage, bool doesDamage, EntityClass entityClass, float mass, float bounce, float friction, float width, float height, float offsetX, float offsetY)
+ColliderComponent::ColliderComponent(Entity* entity, bool active, PositionComponent* pos, bool platform, bool onewayPlatform, bool ignoreOnewayPlatforms, bool climbable, bool trigger, bool takesDamage, bool doesDamage, EntityClass entityClass, float mass, float bounce, float friction, float width, float height, float offsetX, float offsetY)
 {
 	ID = colliderComponentID;
 	this->active = active;
@@ -549,6 +549,8 @@ ColliderComponent::ColliderComponent(Entity* entity, bool active, PositionCompon
 
 	this->platform = platform;
 	this->onewayPlatform = onewayPlatform;
+	this->ignoreOnewayPlatforms = ignoreOnewayPlatforms;
+
 	this->onPlatform = false;
 	this->collidedLastTick = false;
 	this->climbable = climbable;
@@ -1179,7 +1181,8 @@ void ColliderSystem::Update(int activeScene, float deltaTime)
 
 				if (c != nullptr)
 				{
-					if (c->resolve)
+					if (c->resolve && !cB->onewayPlatform ||
+						c->resolve && cB->platform && cB->onewayPlatform && c->contactNormal.y == 1 && !cA->ignoreOnewayPlatforms)
 					{
 						glm::vec2 vMod = c->contactNormal * glm::vec2(abs(physA->velocityX), abs(physA->velocityY)) * (1.0f - c->time);
 
@@ -1981,7 +1984,7 @@ void InputSystem::Update(int activeScene, float deltaTime)
 
 						ECS::main.RegisterComponent(new PositionComponent(projectile, true, false, playerPos.x, playerPos.y, playerPos.z, 0.0f), projectile);
 						ECS::main.RegisterComponent(new PhysicsComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], phys->velocityX + projVel.x, phys->velocityY + projVel.y, 0.0f, 0.0f, 0.0f), projectile);
-						ECS::main.RegisterComponent(new ColliderComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], false, false, false, true, false, true, EntityClass::object, 1.0f, 0.0f, 0.0f, 5.0f, 5.0f, 0.0f, 0.0f), projectile);
+						ECS::main.RegisterComponent(new ColliderComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], false, false, true, false, true, false, true, EntityClass::object, 1.0f, 0.0f, 0.0f, 5.0f, 5.0f, 0.0f, 0.0f), projectile);
 						ECS::main.RegisterComponent(new DamageComponent(projectile, true, move->entity, true, t, true, true, 1, 20.0f, false, true, true, false), projectile);
 						ECS::main.RegisterComponent(new AnimationComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], anim, "default", sMap), projectile);
 
@@ -2058,11 +2061,11 @@ void InputSystem::Update(int activeScene, float deltaTime)
 
 					if (move->wallRunning && anComp->flipped)
 					{
-						phys->velocityX += 150 * move->maxJumpHeight;
+						phys->velocityX += 250 * move->maxJumpHeight;
 					}
 					else if (move->wallRunning)
 					{
-						phys->velocityX -= 150 * move->maxJumpHeight;
+						phys->velocityX -= 250 * move->maxJumpHeight;
 					}
 
 					move->wallRunning = false;
@@ -2088,6 +2091,8 @@ void InputSystem::Update(int activeScene, float deltaTime)
 					move->crouching = true;
 					col->height = col->baseHeight * 0.75f;
 					col->offsetY = col->baseOffsetY - 5.0f;
+
+					col->ignoreOnewayPlatforms = true;
 				}
 				else
 				{
@@ -2099,6 +2104,8 @@ void InputSystem::Update(int activeScene, float deltaTime)
 					move->crouching = false;
 					col->height = col->baseHeight;
 					col->offsetY = col->baseOffsetY;
+
+					col->ignoreOnewayPlatforms = false;
 				}
 
 				if (move->crouching && abs(phys->velocityX) - 10.0f > move->maxSpeed * move->crouchMod && col->onPlatform)
@@ -2737,7 +2744,7 @@ void AISystem::Update(int activeScene, float deltaTime)
 
 							ECS::main.RegisterComponent(new PositionComponent(projectile, true, false, posA->x, posA->y, posA->z, 0.0f), projectile);
 							ECS::main.RegisterComponent(new PhysicsComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], vel.x, vel.y, 0.0f, 0.0f, 0.0f), projectile);
-							ECS::main.RegisterComponent(new ColliderComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], false, false, false, true, false, true, EntityClass::object, 1.0f, 0.0f, 0.0f, 5.0f, 5.0f, 0.0f, 0.0f), projectile);
+							ECS::main.RegisterComponent(new ColliderComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], false, false, true, false, true, false, true, EntityClass::object, 1.0f, 0.0f, 0.0f, 5.0f, 5.0f, 0.0f, 0.0f), projectile);
 							ECS::main.RegisterComponent(new DamageComponent(projectile, true, a->entity, true, 10.0f, false, true, 1, 10.0f, true, true, true, false), projectile);
 							ECS::main.RegisterComponent(new StaticSpriteComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], s->width, s->height, s, sMap, false, false), projectile);
 						}
@@ -2890,6 +2897,7 @@ void BladeSystem::Update(int activeScene, float deltaTime)
 					b->platformCollider->width = 35.0f;
 					b->platformCollider->height = 5.0f;
 					b->platformCollider->platform = true;
+					b->platformCollider->onewayPlatform = true;
 
 					if (sprite->flipped)
 					{
@@ -2910,6 +2918,7 @@ void BladeSystem::Update(int activeScene, float deltaTime)
 					b->platformCollider->active = true;
 
 					b->platformCollider->platform = true;
+					b->platformCollider->onewayPlatform = false;
 					b->platformCollider->width = 5.0f;
 					b->platformCollider->height = 70.0f;
 

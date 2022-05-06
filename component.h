@@ -105,6 +105,7 @@ public:
 						// this is set to true so that I don't have to
 						// raycast to check if you're on a platform.
 	bool onewayPlatform;
+	bool ignoreOnewayPlatforms;
 	
 	bool collidedLastTick;
 	bool climbable;
@@ -129,7 +130,7 @@ public:
 
 	PositionComponent* pos;
 
-	ColliderComponent(Entity* entity, bool active, PositionComponent* pos, bool platform, bool onewayPlatform, bool climbable, bool trigger, bool takesDamage, bool doesDamage, EntityClass entityClass, float mass, float bounce, float friction, float width, float height, float offsetX, float offsetY);
+	ColliderComponent(Entity* entity, bool active, PositionComponent* pos, bool platform, bool onewayPlatform, bool ignoreOnewayPlatforms, bool climbable, bool trigger, bool takesDamage, bool doesDamage, EntityClass entityClass, float mass, float bounce, float friction, float width, float height, float offsetX, float offsetY);
 };
 
 class InputComponent : public Component
