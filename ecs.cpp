@@ -519,7 +519,7 @@ PhysicsComponent::PhysicsComponent(Entity* entity, bool active, PositionComponen
 
 #pragma region Static Sprite Component
 
-StaticSpriteComponent::StaticSpriteComponent(Entity* entity, bool active, PositionComponent* pos, float width, float height, float scale, Texture2D* sprite, Texture2D* map, bool flipped, bool tiled)
+StaticSpriteComponent::StaticSpriteComponent(Entity* entity, bool active, PositionComponent* pos, float width, float height, float scale, Texture2D* sprite, Texture2D* mapTex, bool flipped, bool tiled)
 {
 	ID = spriteComponentID;
 	this->active = active;
@@ -532,7 +532,7 @@ StaticSpriteComponent::StaticSpriteComponent(Entity* entity, bool active, Positi
 	this->scale = scale;
 
 	this->sprite = sprite;
-	this->map = map;
+	this->mapTex = mapTex;
 
 	this->flipped = flipped;
 	this->tiled = tiled;
@@ -690,7 +690,7 @@ void AnimationComponent::AddAnimation(std::string s, Animation2D* anim)
 	animations.emplace(s, anim);
 }
 
-AnimationComponent::AnimationComponent(Entity* entity, bool active, PositionComponent* pos, Animation2D* idleAnimation, std::string animationName, Texture2D* map, float scale)
+AnimationComponent::AnimationComponent(Entity* entity, bool active, PositionComponent* pos, Animation2D* idleAnimation, std::string animationName, Texture2D* mapTex, float scale)
 {
 	this->ID = animationComponentID;
 	this->entity = entity;
@@ -705,7 +705,7 @@ AnimationComponent::AnimationComponent(Entity* entity, bool active, PositionComp
 
 	this->scale = scale;
 
-	this->map = map;
+	this->mapTex = mapTex;
 	activeAnimation = animationName;
 	animations.emplace(animationName, idleAnimation);
 	activeY = animations[activeAnimation]->rows - 1;
@@ -890,7 +890,7 @@ void StaticRenderingSystem::Update(int activeScene, float deltaTime)
 				pos->y + (s->height / 2.0f) > Game::main.bottomY && pos->y - (s->height / 2.0f) < Game::main.topY &&
 				pos->z < Game::main.camZ)
 			{
-				Game::main.renderer->prepareQuad(pos, s->width, s->height, s->sprite->width, s->sprite->height, s->scale, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), s->sprite->ID, s->map->ID, s->tiled, s->flipped);
+				Game::main.renderer->prepareQuad(pos, s->width, s->height, s->sprite->width, s->sprite->height, s->scale, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), s->sprite->ID, s->mapTex->ID, s->tiled, s->flipped);
 			}
 		}
 	}
@@ -1326,7 +1326,7 @@ void ColliderSystem::Update(int activeScene, float deltaTime)
 
 								bDamage->lifetime -= deltaTime;
 							}
-						}	// Bin gar keine Russin, stamm’ aus Litauen, echt deutsch.
+						}	// Bin gar keine Russin, stammï¿½ aus Litauen, echt deutsch.
 					}	// And when we were children, staying at the arch-duke's,
 				}	// My cousin's, he took me out on a sled,
 			}	// And I was frightened. He said, Marie,
@@ -2502,7 +2502,7 @@ void AnimationSystem::Update(int activeScene, float deltaTime)
 				pos->z < Game::main.camZ)
 			{
 				// std::cout << std::to_string(activeAnimation->width) + "/" + std::to_string(activeAnimation->height) + "\n";
-				Game::main.renderer->prepareQuad(pos, activeAnimation->width, activeAnimation->height, a->scale, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), activeAnimation->ID, a->map->ID, cellX, cellY, activeAnimation->columns, activeAnimation->rows, a->flipped);
+				Game::main.renderer->prepareQuad(pos, activeAnimation->width, activeAnimation->height, a->scale, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), activeAnimation->ID, a->mapTex->ID, cellX, cellY, activeAnimation->columns, activeAnimation->rows, a->flipped);
 			}
 
 		}
@@ -2808,7 +2808,7 @@ void BladeSystem::Update(int activeScene, float deltaTime)
 
 			if (!b->thrown)
 			{
-				sprite->map = b->incorporealMap;
+				sprite->mapTex = b->incorporealMap;
 				colA->active = false;
 				damA->active = false;
 				b->platformCollider->active = false;
@@ -2892,7 +2892,7 @@ void BladeSystem::Update(int activeScene, float deltaTime)
 				if (b->platformCollider->active == false && posA->rotation < 15.0f && posA->rotation > -15.0f ||
 					b->platformCollider->active == false && posA->rotation > 345.0f)
 				{
-					sprite->map = b->corporealMap;
+					sprite->mapTex = b->corporealMap;
 					PositionComponent* hiltPos = (PositionComponent*)b->platformCollider->entity->componentIDMap[positionComponentID];
 					hiltPos->x = posA->x;
 					hiltPos->y = posA->y;
@@ -2915,7 +2915,7 @@ void BladeSystem::Update(int activeScene, float deltaTime)
 				else if (b->platformCollider->active == false && posA->rotation < -75.0f ||
 						 b->platformCollider->active == false && sprite->flipped && posA->rotation > 75.0f)
 				{
-					sprite->map = b->corporealMap;
+					sprite->mapTex = b->corporealMap;
 					PositionComponent* hiltPos = (PositionComponent*)b->platformCollider->entity->componentIDMap[positionComponentID];
 					hiltPos->x = posA->x;
 					hiltPos->y = posA->y;

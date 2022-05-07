@@ -7,6 +7,7 @@ project (the-moonlight-tongue LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(BASE_SRCS
     animation_2D.cpp
@@ -55,4 +56,3 @@ if(NOT DEFINED CMAKE_SUPPRESS_DEVELOPER_WARNINGS)
 endif()
 
 target_link_libraries(the-moonlight-tongue glfw glad glm)
-set_target_properties(the-moonlight-tongue PROPERTIES CXX_EXTENSIONS OFF)

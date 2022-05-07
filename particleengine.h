@@ -1,6 +1,7 @@
 #ifndef PARTICLEENGINE_H
 #define PARTICLEENGINE_H
 
+#include <algorithm>
 #include <vector>
 #include "game.h"
 #include "texture_2D.h"
