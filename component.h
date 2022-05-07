@@ -86,7 +86,8 @@ public:
 	float width;
 	float height;
 
-	float scale;
+	float scaleX;
+	float scaleY;
 
 	bool flipped;
 	bool tiled;
@@ -96,7 +97,7 @@ public:
 
 	PositionComponent* pos;
 
-	StaticSpriteComponent(Entity* entity, bool active, PositionComponent* pos, float width, float height, float scale, Texture2D* sprite, Texture2D* mapTex, bool flipped, bool tiled);
+	StaticSpriteComponent(Entity* entity, bool active, PositionComponent* pos, float width, float height, float scaleX, float scaleY, Texture2D* sprite, Texture2D* mapTex, bool flipped, bool tiled);
 };
 
 class ColliderComponent : public Component
@@ -234,13 +235,14 @@ public:
 
 	float lastTick;
 
-	float scale;
+	float scaleX;
+	float scaleY;
 
 	void SetAnimation(std::string s);
 
 	void AddAnimation(std::string s, Animation2D* anim);
 
-	AnimationComponent(Entity* entity, bool active, PositionComponent* pos, Animation2D* idleAnimation, std::string animationName, Texture2D* mapTex, float scale);
+	AnimationComponent(Entity* entity, bool active, PositionComponent* pos, Animation2D* idleAnimation, std::string animationName, Texture2D* mapTex, float scaleX, float scaleY);
 };
 
 class AnimationControllerComponent : public Component

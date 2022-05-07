@@ -243,7 +243,7 @@ void ECS::Update(float deltaTime)
 		Texture2D* watermarkMap = Game::main.textureMap["watermarkMap"];
 
 		ECS::main.RegisterComponent(new PositionComponent(alphaWatermark, true, true, 0, 0, 100, 0), alphaWatermark);
-		ECS::main.RegisterComponent(new StaticSpriteComponent(alphaWatermark, true, (PositionComponent*)alphaWatermark->componentIDMap[positionComponentID], watermark->width, watermark->height, 1.0f, watermark, watermarkMap, false, false), alphaWatermark);
+		ECS::main.RegisterComponent(new StaticSpriteComponent(alphaWatermark, true, (PositionComponent*)alphaWatermark->componentIDMap[positionComponentID], watermark->width, watermark->height, 1.0f, 1.0f, watermark, watermarkMap, false, false), alphaWatermark);
 		ECS::main.RegisterComponent(new ImageComponent(alphaWatermark, true, Anchor::topRight, 0, 0), alphaWatermark);
 
 		#pragma endregion
@@ -258,7 +258,7 @@ void ECS::Update(float deltaTime)
 
 		ECS::main.RegisterComponent(new PositionComponent(moonlightBlade, true, false, 0, 0, 0, 0.0f), moonlightBlade);
 		ECS::main.RegisterComponent(new PhysicsComponent(moonlightBlade, true, (PositionComponent*)moonlightBlade->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), moonlightBlade);
-		ECS::main.RegisterComponent(new StaticSpriteComponent(moonlightBlade, true, (PositionComponent*)moonlightBlade->componentIDMap[positionComponentID], moonlightBladeTex->width, moonlightBladeTex->height, 1.0f, moonlightBladeTex, moonlightBladeMap, false, false), moonlightBlade);
+		ECS::main.RegisterComponent(new StaticSpriteComponent(moonlightBlade, true, (PositionComponent*)moonlightBlade->componentIDMap[positionComponentID], moonlightBladeTex->width, moonlightBladeTex->height, 1.0f, 1.0f, moonlightBladeTex, moonlightBladeMap, false, false), moonlightBlade);
 		// ECS::main.RegisterComponent(new AIComponent(moonlightBlade, true, false, 1010.0f, 1000.0f, 0.5f, 0.0f, 0.0f, AIType::moonlight_blade), moonlightBlade);
 		ECS::main.RegisterComponent(new ColliderComponent(moonlightBlade, false, (PositionComponent*)moonlightBlade->componentIDMap[positionComponentID], false, false, true, false, true, false, true, EntityClass::object, 1.0f, 0.0f, 0.0f, 5.0f, 5.0f, 0.0f, 0.0f), moonlightBlade);
 		ECS::main.RegisterComponent(new DamageComponent(moonlightBlade, true, player, false, 0.0f, true, false, 100, 20.0f, false, true, true, true), moonlightBlade);
@@ -283,7 +283,7 @@ void ECS::Update(float deltaTime)
 		ECS::main.RegisterComponent(new InputComponent(player, true, moonlightBlade, true, 0.5f, 5000.0f, 0.5f, 2, 0.5f, 2.0f, 500.0f), player);
 		ECS::main.RegisterComponent(new CameraFollowComponent(player, true, 10.0f), player);
 		ECS::main.RegisterComponent(new HealthComponent(player, true, 1000.0f, false), player);
-		ECS::main.RegisterComponent(new AnimationComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], anim1, "idle", lilyMap, 1.0f), player);
+		ECS::main.RegisterComponent(new AnimationComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], anim1, "idle", lilyMap, 1.0f, 1.0f), player);
 		AnimationComponent* a = (AnimationComponent*)player->componentIDMap[animationComponentID];
 		ECS::main.RegisterComponent(new PlayerAnimationControllerComponent(player, true, a), player);
 		a->AddAnimation("walk", Game::main.animationMap["baseWalk"]);
@@ -341,7 +341,7 @@ void ECS::Update(float deltaTime)
 			ECS::main.RegisterComponent(new PositionComponent(platform, true, true, rand() % 5000, rand() % 5000, 0, 0), platform);
 			ECS::main.RegisterComponent(new PhysicsComponent(platform, true, (PositionComponent*)platform->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 0.1f, 0.0f), platform);
 			ECS::main.RegisterComponent(new ColliderComponent(platform, true, (PositionComponent*)platform->componentIDMap[positionComponentID], true, false, false, true, false, false, false, EntityClass::object, 1000.0f, 0.0f, 1.0f, width, height, 0.0f, 0.0f), platform);
-			ECS::main.RegisterComponent(new StaticSpriteComponent(platform, true, (PositionComponent*)platform->componentIDMap[positionComponentID], width, height, 1.0f, tex3, tex3Map, false, false), platform);
+			ECS::main.RegisterComponent(new StaticSpriteComponent(platform, true, (PositionComponent*)platform->componentIDMap[positionComponentID], width, height, 1.0f, 1.0f, tex3, tex3Map, false, false), platform);
 		}
 
 		for (int i = 0; i < 50; i++)
@@ -350,11 +350,11 @@ void ECS::Update(float deltaTime)
 			ECS::main.RegisterComponent(new PositionComponent(floor, true, true, i * 500, -200, 0, 0.0f), floor);
 			ECS::main.RegisterComponent(new PhysicsComponent(floor, true, (PositionComponent*)floor->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 0.1f, 0.0f), floor);
 			ECS::main.RegisterComponent(new ColliderComponent(floor, true, (PositionComponent*)floor->componentIDMap[positionComponentID], true, false, false, true, false, false, false, EntityClass::object, 1000.0f, 0.0f, 1.0f, 540.0f, 80.0f, 0.0f, 0.0f), floor);
-			ECS::main.RegisterComponent(new StaticSpriteComponent(floor, true, (PositionComponent*)floor->componentIDMap[positionComponentID], 540.0f, 80.0f, 1.0f, tex3, tex3Map, false, false), floor);
+			ECS::main.RegisterComponent(new StaticSpriteComponent(floor, true, (PositionComponent*)floor->componentIDMap[positionComponentID], 540.0f, 80.0f, 1.0f, 1.0f, tex3, tex3Map, false, false), floor);
 
 			Entity* earth = CreateEntity(0, "floor");
 			ECS::main.RegisterComponent(new PositionComponent(earth, true, true, i * 500, -1000, 0, 0.0f), earth);
-			ECS::main.RegisterComponent(new StaticSpriteComponent(earth, true, (PositionComponent*)earth->componentIDMap[positionComponentID], tex3->width * 35, tex3->height * 100.0f, 1.0f, tex3, tex3Map, false, false), earth);
+			ECS::main.RegisterComponent(new StaticSpriteComponent(earth, true, (PositionComponent*)earth->componentIDMap[positionComponentID], tex3->width * 35, tex3->height * 100.0f, 1.0f, 1.0f, tex3, tex3Map, false, false), earth);
 		}
 
 		// Do this after we instantiate objects so that it can properly sort out which nodes
@@ -519,7 +519,7 @@ PhysicsComponent::PhysicsComponent(Entity* entity, bool active, PositionComponen
 
 #pragma region Static Sprite Component
 
-StaticSpriteComponent::StaticSpriteComponent(Entity* entity, bool active, PositionComponent* pos, float width, float height, float scale, Texture2D* sprite, Texture2D* mapTex, bool flipped, bool tiled)
+StaticSpriteComponent::StaticSpriteComponent(Entity* entity, bool active, PositionComponent* pos, float width, float height, float scaleX, float scaleY, Texture2D* sprite, Texture2D* mapTex, bool flipped, bool tiled)
 {
 	ID = spriteComponentID;
 	this->active = active;
@@ -529,7 +529,8 @@ StaticSpriteComponent::StaticSpriteComponent(Entity* entity, bool active, Positi
 	this->width = width;
 	this->height = height;
 	
-	this->scale = scale;
+	this->scaleX = scaleX;
+	this->scaleY = scaleY;
 
 	this->sprite = sprite;
 	this->mapTex = mapTex;
@@ -690,7 +691,7 @@ void AnimationComponent::AddAnimation(std::string s, Animation2D* anim)
 	animations.emplace(s, anim);
 }
 
-AnimationComponent::AnimationComponent(Entity* entity, bool active, PositionComponent* pos, Animation2D* idleAnimation, std::string animationName, Texture2D* mapTex, float scale)
+AnimationComponent::AnimationComponent(Entity* entity, bool active, PositionComponent* pos, Animation2D* idleAnimation, std::string animationName, Texture2D* mapTex, float scaleX, float scaleY)
 {
 	this->ID = animationComponentID;
 	this->entity = entity;
@@ -703,7 +704,8 @@ AnimationComponent::AnimationComponent(Entity* entity, bool active, PositionComp
 
 	this->pos = pos;
 
-	this->scale = scale;
+	this->scaleX = scaleX;
+	this->scaleY = scaleY;
 
 	this->mapTex = mapTex;
 	activeAnimation = animationName;
@@ -890,7 +892,7 @@ void StaticRenderingSystem::Update(int activeScene, float deltaTime)
 				pos->y + (s->height / 2.0f) > Game::main.bottomY && pos->y - (s->height / 2.0f) < Game::main.topY &&
 				pos->z < Game::main.camZ)
 			{
-				Game::main.renderer->prepareQuad(pos, s->width, s->height, s->sprite->width, s->sprite->height, s->scale, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), s->sprite->ID, s->mapTex->ID, s->tiled, s->flipped);
+				Game::main.renderer->prepareQuad(pos, s->width, s->height, s->scaleX, s->scaleY, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), s->sprite->ID, s->mapTex->ID, s->tiled, s->flipped);
 			}
 		}
 	}
@@ -1990,7 +1992,7 @@ void InputSystem::Update(int activeScene, float deltaTime)
 						ECS::main.RegisterComponent(new PhysicsComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], phys->velocityX + projVel.x, phys->velocityY + projVel.y, 0.0f, 0.0f, 0.0f), projectile);
 						ECS::main.RegisterComponent(new ColliderComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], false, false, true, false, true, false, true, EntityClass::object, 1.0f, 0.0f, 0.0f, 5.0f, 5.0f, 0.0f, 0.0f), projectile);
 						ECS::main.RegisterComponent(new DamageComponent(projectile, true, move->entity, true, t, true, true, 1, 20.0f, false, true, true, false), projectile);
-						ECS::main.RegisterComponent(new AnimationComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], anim, "default", sMap, 1.0f), projectile);
+						ECS::main.RegisterComponent(new AnimationComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], anim, "default", sMap, 1.0f, 1.0f), projectile);
 
 						PhysicsComponent* p = (PhysicsComponent*)projectile->componentIDMap[physicsComponentID];
 						if (p->velocityX < 0)
@@ -2222,7 +2224,7 @@ void InputSystem::CalculateProjection(PhysicsComponent* phys, InputComponent* m,
 				projPos.y + (s->height / 2.0f) > Game::main.bottomY && projPos.y - (s->height / 2.0f) < Game::main.topY)
 			{
 
-				Game::main.renderer->prepareQuad(projPos, s->width / 2.0f, s->height / 2.0f, 1.0f, glm::vec4(1.0f, 1.0f, 1.0f, 0.5f), s->ID, Game::main.textureMap["blank"]->ID);
+				Game::main.renderer->prepareQuad(projPos, s->width / 2.0f, s->height / 2.0f, 1.0f, 1.0f, glm::vec4(1.0f, 1.0f, 1.0f, 0.5f), s->ID, Game::main.textureMap["blank"]->ID);
 			}
 		}
 	}
@@ -2502,7 +2504,7 @@ void AnimationSystem::Update(int activeScene, float deltaTime)
 				pos->z < Game::main.camZ)
 			{
 				// std::cout << std::to_string(activeAnimation->width) + "/" + std::to_string(activeAnimation->height) + "\n";
-				Game::main.renderer->prepareQuad(pos, activeAnimation->width, activeAnimation->height, a->scale, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), activeAnimation->ID, a->mapTex->ID, cellX, cellY, activeAnimation->columns, activeAnimation->rows, a->flipped);
+				Game::main.renderer->prepareQuad(pos, activeAnimation->width, activeAnimation->height, a->scaleX, a->scaleY, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), activeAnimation->ID, a->mapTex->ID, cellX, cellY, activeAnimation->columns, activeAnimation->rows, a->flipped);
 			}
 
 		}
@@ -2750,7 +2752,7 @@ void AISystem::Update(int activeScene, float deltaTime)
 							ECS::main.RegisterComponent(new PhysicsComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], vel.x, vel.y, 0.0f, 0.0f, 0.0f), projectile);
 							ECS::main.RegisterComponent(new ColliderComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], false, false, true, false, true, false, true, EntityClass::object, 1.0f, 0.0f, 0.0f, 5.0f, 5.0f, 0.0f, 0.0f), projectile);
 							ECS::main.RegisterComponent(new DamageComponent(projectile, true, a->entity, true, 10.0f, false, true, 1, 10.0f, true, true, true, false), projectile);
-							ECS::main.RegisterComponent(new StaticSpriteComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], s->width, s->height, 1.0f, s, sMap, false, false), projectile);
+							ECS::main.RegisterComponent(new StaticSpriteComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], s->width, s->height, 1.0f, 1.0f, s, sMap, false, false), projectile);
 						}
 						else
 						{
