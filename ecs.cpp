@@ -243,8 +243,8 @@ void ECS::Update(float deltaTime)
 		Texture2D* watermarkMap = Game::main.textureMap["watermarkMap"];
 
 		ECS::main.RegisterComponent(new PositionComponent(alphaWatermark, true, true, 0, 0, 100, 0), alphaWatermark);
-		ECS::main.RegisterComponent(new StaticSpriteComponent(alphaWatermark, true, (PositionComponent*)alphaWatermark->componentIDMap[positionComponentID], watermark->width, watermark->height, 2.0f, watermark, watermarkMap, false, false), alphaWatermark);
-		ECS::main.RegisterComponent(new ImageComponent(alphaWatermark, true, Anchor::topRight, -100, -100), alphaWatermark);
+		ECS::main.RegisterComponent(new StaticSpriteComponent(alphaWatermark, true, (PositionComponent*)alphaWatermark->componentIDMap[positionComponentID], watermark->width, watermark->height, 1.0f, watermark, watermarkMap, false, false), alphaWatermark);
+		ECS::main.RegisterComponent(new ImageComponent(alphaWatermark, true, Anchor::topRight, 0, 0), alphaWatermark);
 
 		#pragma endregion
 
