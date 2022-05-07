@@ -336,10 +336,9 @@ void ECS::Update(float deltaTime)
 		{
 			float width = rand() % 1000 + 300;
 			float height = rand() % 1000 + 300;
-			float rotation = rand() % 360;
 
 			Entity* platform = CreateEntity(0, "floor");
-			ECS::main.RegisterComponent(new PositionComponent(platform, true, true, rand() % 5000, rand() % 5000, 0, rotation), platform);
+			ECS::main.RegisterComponent(new PositionComponent(platform, true, true, rand() % 5000, rand() % 5000, 0, 0), platform);
 			ECS::main.RegisterComponent(new PhysicsComponent(platform, true, (PositionComponent*)platform->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 0.1f, 0.0f), platform);
 			ECS::main.RegisterComponent(new ColliderComponent(platform, true, (PositionComponent*)platform->componentIDMap[positionComponentID], true, false, false, true, false, false, false, EntityClass::object, 1000.0f, 0.0f, 1.0f, width, height, 0.0f, 0.0f), platform);
 			ECS::main.RegisterComponent(new StaticSpriteComponent(platform, true, (PositionComponent*)platform->componentIDMap[positionComponentID], width, height, 1.0f, tex3, tex3Map, false, false), platform);
