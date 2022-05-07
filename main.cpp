@@ -146,7 +146,7 @@ int main(void)
     renderer.textureIDs.push_back(slashMap.ID);
     Game::main.textureMap.emplace("slashMap", &slashMap);
 
-    Animation2D slashUp{ "assets/animations/slash/slashUp.png", true, 2, 3, 0.01f, {1, 2, 2}, false, GL_NEAREST};
+    Animation2D slashUp{ "assets/animations/slash/slashUp.png", true, 2, 3, 0.01f, { 1, 2, 2 }, false, GL_NEAREST};
     renderer.textureIDs.push_back(slashUp.ID);
     Game::main.animationMap.emplace("slashUp", &slashUp);
 

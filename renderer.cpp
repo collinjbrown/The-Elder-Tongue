@@ -462,7 +462,7 @@ void Renderer::sendToGL()
     for (int i = 0; i < texturesUsed.size(); i++)
     {
         glActiveTexture(GL_TEXTURE0 + texUnit);
-        glBindTexture(GL_TEXTURE_2D, textureIDs[texturesUsed[i]] - 1);
+        glBindTexture(GL_TEXTURE_2D, textureIDs[texturesUsed[i] - 1]);
 
         if (texUnit >= MAX_TEXTURES_PER_BATCH - 1)
         {
