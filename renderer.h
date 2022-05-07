@@ -82,12 +82,12 @@ public:
     float CalculateModifier(float i);
     void CloseOffBatch();
     Bundle DetermineBatch(int textureID, int mapID);
-    void prepareQuad(PositionComponent* pos, float width, float height, float tWidth, float tHeight, glm::vec4 rgb, int textureID, int mapID, bool tiled, bool flipped);
-    void prepareQuad(PositionComponent* pos, ColliderComponent* col, float width, float height, glm::vec4 rgb, int textureID, int mapID);
-    void prepareQuad(glm::vec2 topRight, glm::vec2 bottomRight, glm::vec2 bottomLeft, glm::vec2 topLeft, glm::vec4 rgb, int textureID, int mapID);
-    void prepareQuad(glm::vec2 position, float width, float height, glm::vec4 rgb, int textureID, int mapID); // Specify texture ID rather than index?
+    void prepareQuad(PositionComponent* pos, float width, float height, float tWidth, float tHeight, float scale, glm::vec4 rgb, int textureID, int mapID, bool tiled, bool flipped);
+    void prepareQuad(PositionComponent* pos, ColliderComponent* col, float width, float height, float scale, glm::vec4 rgb, int textureID, int mapID);
+    void prepareQuad(glm::vec2 topRight, glm::vec2 bottomRight, glm::vec2 bottomLeft, glm::vec2 topLeft, glm::vec4 rgb, float scale, int textureID, int mapID);
+    void prepareQuad(glm::vec2 position, float width, float height, float scale, glm::vec4 rgb, int textureID, int mapID); // Specify texture ID rather than index?
     // NOTE: Directly sending a texture index rather than ID can result in the wrong texture being drawn (due to being in the wrong batch)
-    void prepareQuad(PositionComponent* pos, float width, float height, glm::vec4 rgb, int animID, int mapID, int cellX, int cellY, int cols, int rows, bool flipped);
+    void prepareQuad(PositionComponent* pos, float width, float height, float scale, glm::vec4 rgb, int animID, int mapID, int cellX, int cellY, int cols, int rows, bool flipped);
     void prepareQuad(int batchIndex, Quad& input);
     void prepareDownLine(float x, float y, float height);
     void prepareRightLine(float x, float y, float width);

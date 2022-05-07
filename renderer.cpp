@@ -223,7 +223,7 @@ Renderer::Renderer(GLuint whiteTexture) : batches(1), shader("assets/shaders/qua
     whiteTextureIndex = 0.0f;
 }
 
-void Renderer::prepareQuad(glm::vec2 position, float width, float height,
+void Renderer::prepareQuad(glm::vec2 position, float width, float height, float scale,
     glm::vec4 rgb, int textureID, int mapID)
 {
     // Figure out which batch should be written to
@@ -236,10 +236,10 @@ void Renderer::prepareQuad(glm::vec2 position, float width, float height,
     Quad& quad = batch.quadBuffer[batch.quadIndex];
     batch.quadIndex++;
 
-    const float rightX = position.x + (width / 2.0f);
-    const float leftX = position.x - (width / 2.0f);
-    const float topY = position.y + (height / 2.0f);
-    const float bottomY = position.y - (height / 2.0f);
+    const float rightX = position.x + ((width * scale) / 2.0f);
+    const float leftX = position.x - ((width * scale) / 2.0f);
+    const float topY = position.y + ((height * scale) / 2.0f);
+    const float bottomY = position.y - ((height * scale) / 2.0f);
 
     const float r = rgb.r;
     const float g = rgb.g;
@@ -252,7 +252,7 @@ void Renderer::prepareQuad(glm::vec2 position, float width, float height,
     quad.topLeft = { leftX,  topY,      r, g, b, a,   0.0, 1.0,    bundle.textureLocation, bundle.mapLocation, CalculateModifier(width), CalculateModifier(height) };
 }
 
-void Renderer::prepareQuad(PositionComponent* pos, float width, float height, float tWidth, float tHeight,
+void Renderer::prepareQuad(PositionComponent* pos, float width, float height, float tWidth, float tHeight, float scale,
     glm::vec4 rgb, int textureID, int mapID, bool tiled, bool flipped)
 {
     // Figure out which batch should be written to
@@ -276,15 +276,10 @@ void Renderer::prepareQuad(PositionComponent* pos, float width, float height, fl
     Quad& quad = batch.quadBuffer[batch.quadIndex];
     batch.quadIndex++;
 
-    const float rightX = pos->x + (width / 2.0f);
-    const float leftX = pos->x - (width / 2.0f);
-    const float topY = pos->y + (height / 2.0f);
-    const float bottomY = pos->y - (height / 2.0f);
-
-    const glm::vec2 topRight = glm::vec2(pos->x, pos->y) + pos->Rotate(glm::vec2((width / 2.0f), (height / 2.0f)));
-    const glm::vec2 bottomRight = glm::vec2(pos->x, pos->y) + pos->Rotate(glm::vec2((width / 2.0f), -(height / 2.0f)));
-    const glm::vec2 bottomLeft = glm::vec2(pos->x, pos->y) + pos->Rotate(glm::vec2(-(width / 2.0f), -(height / 2.0f)));
-    const glm::vec2 topLeft = glm::vec2(pos->x, pos->y) + pos->Rotate(glm::vec2(-(width / 2.0f), (height / 2.0f)));
+    const glm::vec2 topRight = glm::vec2(pos->x, pos->y) + pos->Rotate(glm::vec2(((width * scale) / 2.0f), ((height * scale) / 2.0f)));
+    const glm::vec2 bottomRight = glm::vec2(pos->x, pos->y) + pos->Rotate(glm::vec2(((width * scale) / 2.0f), -((height * scale) / 2.0f)));
+    const glm::vec2 bottomLeft = glm::vec2(pos->x, pos->y) + pos->Rotate(glm::vec2(-((width * scale) / 2.0f), -((height * scale) / 2.0f)));
+    const glm::vec2 topLeft = glm::vec2(pos->x, pos->y) + pos->Rotate(glm::vec2(-((width * scale) / 2.0f), ((height * scale) / 2.0f)));
 
     const float r = rgb.r;
     const float g = rgb.g;
@@ -311,7 +306,7 @@ void Renderer::prepareQuad(PositionComponent* pos, float width, float height, fl
 }
 
 
-void Renderer::prepareQuad(PositionComponent* pos, float width, float height,
+void Renderer::prepareQuad(PositionComponent* pos, float width, float height, float scale,
     glm::vec4 rgb, int animID, int mapID, int cellX, int cellY, int cols, int rows, bool flipped)
 {
     // Figure out which batch should be written to
@@ -346,15 +341,10 @@ void Renderer::prepareQuad(PositionComponent* pos, float width, float height,
     Quad& quad = batch.quadBuffer[batch.quadIndex];
     batch.quadIndex++;
 
-    const float rightX = pos->x + (width / (float)cols);
-    const float leftX = pos->x - (width / (float)cols);
-    const float topY = pos->y + (height / (float)rows);
-    const float bottomY = pos->y - (height / (float)rows);
-
-    const glm::vec2 topRight = glm::vec2(pos->x, pos->y) + pos->Rotate(glm::vec2((width / (float)cols), (height / (float)rows)));
-    const glm::vec2 bottomRight = glm::vec2(pos->x, pos->y) + pos->Rotate(glm::vec2((width / (float)cols), -(height / (float)rows)));
-    const glm::vec2 bottomLeft = glm::vec2(pos->x, pos->y) + pos->Rotate(glm::vec2(-(width / (float)cols), -(height / (float)rows)));
-    const glm::vec2 topLeft = glm::vec2(pos->x, pos->y) + pos->Rotate(glm::vec2(-(width / (float)cols), (height / (float)rows)));
+    const glm::vec2 topRight = glm::vec2(pos->x, pos->y) + pos->Rotate(glm::vec2(((width * scale) / (float)cols), ((height * scale) / (float)rows)));
+    const glm::vec2 bottomRight = glm::vec2(pos->x, pos->y) + pos->Rotate(glm::vec2(((width * scale) / (float)cols), -((height * scale) / (float)rows)));
+    const glm::vec2 bottomLeft = glm::vec2(pos->x, pos->y) + pos->Rotate(glm::vec2(-((width * scale) / (float)cols), -((height * scale) / (float)rows)));
+    const glm::vec2 topLeft = glm::vec2(pos->x, pos->y) + pos->Rotate(glm::vec2(-((width * scale) / (float)cols), ((height * scale) / (float)rows)));
 
     const float r = rgb.r;
     const float g = rgb.g;
@@ -371,7 +361,7 @@ void Renderer::prepareQuad(PositionComponent* pos, float width, float height,
 }
 
 
-void Renderer::prepareQuad(PositionComponent* pos, ColliderComponent* col, float width, float height,
+void Renderer::prepareQuad(PositionComponent* pos, ColliderComponent* col, float width, float height, float scale,
     glm::vec4 rgb, int textureID, int mapID)
 {
     // Figure out which batch should be written to
@@ -384,15 +374,10 @@ void Renderer::prepareQuad(PositionComponent* pos, ColliderComponent* col, float
     Quad& quad = batch.quadBuffer[batch.quadIndex];
     batch.quadIndex++;
 
-    const float rightX = pos->x + (col->width / 2.0f) + col->offsetX;
-    const float leftX = pos->x - (col->width / 2.0f) + col->offsetX;
-    const float topY = pos->y + (col->height / 2.0f) + col->offsetY;
-    const float bottomY = pos->y - (col->height / 2.0f) + col->offsetY;
-
-    const glm::vec2 topRight = glm::vec2(pos->x, pos->y) + pos->Rotate(glm::vec2((width / 2.0f), (height / 2.0f)));
-    const glm::vec2 bottomRight = glm::vec2(pos->x, pos->y) + pos->Rotate(glm::vec2((width / 2.0f), -(height / 2.0f)));
-    const glm::vec2 bottomLeft = glm::vec2(pos->x, pos->y) + pos->Rotate(glm::vec2(-(width / 2.0f), -(height / 2.0f)));
-    const glm::vec2 topLeft = glm::vec2(pos->x, pos->y) + pos->Rotate(glm::vec2(-(width / 2.0f), (height / 2.0f)));
+    const glm::vec2 topRight = glm::vec2(pos->x, pos->y) + pos->Rotate(glm::vec2(((width * scale) / 2.0f), ((height * scale) / 2.0f)));
+    const glm::vec2 bottomRight = glm::vec2(pos->x, pos->y) + pos->Rotate(glm::vec2(((width * scale) / 2.0f), -((height * scale) / 2.0f)));
+    const glm::vec2 bottomLeft = glm::vec2(pos->x, pos->y) + pos->Rotate(glm::vec2(-((width * scale) / 2.0f), -((height * scale) / 2.0f)));
+    const glm::vec2 topLeft = glm::vec2(pos->x, pos->y) + pos->Rotate(glm::vec2(-((width * scale) / 2.0f), ((height * scale) / 2.0f)));
 
     const float r = rgb.r;
     const float g = rgb.g;
@@ -406,7 +391,7 @@ void Renderer::prepareQuad(PositionComponent* pos, ColliderComponent* col, float
 }
 
 void Renderer::prepareQuad(glm::vec2 topRight, glm::vec2 bottomRight, glm::vec2 bottomLeft, glm::vec2 topLeft,
-    glm::vec4 rgb, int textureID, int mapID)
+    glm::vec4 rgb, float scale, int textureID, int mapID)
 {
     // Figure out which batch should be written to
     // -------------------------------------------
@@ -426,10 +411,10 @@ void Renderer::prepareQuad(glm::vec2 topRight, glm::vec2 bottomRight, glm::vec2 
     float width = topRight.x - topLeft.x;
     float height = topRight.y - bottomRight.y;
 
-    quad.topRight = { topRight.x, topRight.y,      r, g, b, a,   1.0, 1.0,    bundle.textureLocation, bundle.mapLocation, CalculateModifier(width), CalculateModifier(height) };
-    quad.bottomRight = { bottomRight.x, bottomRight.y,   r, g, b, a,   1.0, 0.0,    bundle.textureLocation, bundle.mapLocation, CalculateModifier(width), CalculateModifier(height) };
-    quad.bottomLeft = { bottomLeft.x,  bottomLeft.y,   r, g, b, a,   0.0, 0.0,    bundle.textureLocation, bundle.mapLocation, CalculateModifier(width), CalculateModifier(height) };
-    quad.topLeft = { topLeft.x,  topLeft.y,      r, g, b, a,   0.0, 1.0,    bundle.textureLocation, bundle.mapLocation, CalculateModifier(width), CalculateModifier(height) };
+    quad.topRight = { topRight.x * scale, topRight.y * scale,      r, g, b, a,   1.0, 1.0,    bundle.textureLocation, bundle.mapLocation, CalculateModifier(width), CalculateModifier(height) };
+    quad.bottomRight = { bottomRight.x * scale, bottomRight.y * scale,   r, g, b, a,   1.0, 0.0,    bundle.textureLocation, bundle.mapLocation, CalculateModifier(width), CalculateModifier(height) };
+    quad.bottomLeft = { bottomLeft.x * scale,  bottomLeft.y * scale,   r, g, b, a,   0.0, 0.0,    bundle.textureLocation, bundle.mapLocation, CalculateModifier(width), CalculateModifier(height) };
+    quad.topLeft = { topLeft.x * scale,  topLeft.y * scale,      r, g, b, a,   0.0, 1.0,    bundle.textureLocation, bundle.mapLocation, CalculateModifier(width), CalculateModifier(height) };
 }
 
 void Renderer::prepareQuad(int batchIndex, Quad& input)

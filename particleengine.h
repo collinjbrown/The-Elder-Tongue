@@ -134,7 +134,7 @@ public:
 				{
 					particle->ticks += 1;
 					// Game::main.renderer->prepareQuad(glm::vec2(particle->x, particle->y), 1.0f, 1.0f, color, s->ID);
-					Game::main.renderer->prepareQuad(glm::vec2(particle->x, particle->y), s->width / 4.0f, s->height / 4.0f, color, s->ID, Game::main.textureMap["base_map"]->ID);
+					Game::main.renderer->prepareQuad(glm::vec2(particle->x, particle->y), s->width / 4.0f, s->height / 4.0f, 1.0f, color, s->ID, Game::main.textureMap["base_map"]->ID);
 				}
 				else
 				{
@@ -167,7 +167,7 @@ public:
 					color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 				}
 
-				Game::main.renderer->prepareQuad(glm::vec2(particle->x, particle->y), s->width / 4.0f, s->height / 4.0f, color, s->ID, Game::main.textureMap["base_map"]->ID);
+				Game::main.renderer->prepareQuad(glm::vec2(particle->x, particle->y), s->width / 4.0f, s->height / 4.0f, 1.0f, color, s->ID, Game::main.textureMap["base_map"]->ID);
 			}
 		}
 	}
