@@ -1,3 +1,7 @@
+// texture_2D.cpp is where we handle the logic of creating textures.
+// It should be fairly self-explanatory, and we will likely not
+// touch much of this code going forward, unless something *really* breaks.
+
 #include "texture_2D.h"
 #include "external/stb_image.h"
 

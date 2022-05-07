@@ -1,6 +1,10 @@
 #include "shader.h"
 #include <glm/gtc/type_ptr.hpp>
 
+// This is where we create shaders.
+// We only use two shader files right now,
+// but if we ever add more it may get more complicated.
+
 Shader::Shader(const char* vertexPath, const char* fragmentPath)
 {
     // 1. Retrieve the vertex/fragment source code from filePath

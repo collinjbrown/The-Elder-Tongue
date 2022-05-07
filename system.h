@@ -1,6 +1,12 @@
 #ifndef SYSTEM_H
 #define SYSTEM_H
 
+// As I mentioned in ecs.h, this contains some forward declarations of the components
+// to satisfy the compiler. Otherwise, this just contains a whole lot of declarations
+// we'll define in ecs.cpp, which really handles all the system logic.
+// We'll also throw any structs and classes needed to handle particular system logic in here,
+// like the collision struct used by the collision system.
+
 #include "game.h"
 #include <vector>
 #include <array>

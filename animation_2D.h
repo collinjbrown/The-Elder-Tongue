@@ -1,3 +1,6 @@
+// This just contains the data we'll use in animation_2D.cpp.
+// Nothing too fancy, again.
+
 #ifndef ANIMATION_2D_H
 #define ANIMATION_2D_H
 

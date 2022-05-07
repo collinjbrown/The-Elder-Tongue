@@ -1,3 +1,6 @@
+// This is based off of texture_2D.cpp with some slight modifications here and there to account for our animation system.
+// We shouldn't modify this too often since it handles some stuff core to rendering.
+
 #include "animation_2D.h"
 #include "external/stb_image.h"
 

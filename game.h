@@ -8,9 +8,8 @@
 
 using namespace std;
 
-// The game class holds data about the broader game state;
-// if you have data that pertains to the actual gameplay
-// and world state, put it in the engine.
+// The game class holds data about the camera, window, and rendering.
+// We may also add info about key mapping to this.
 
 class Game
 {

@@ -1,3 +1,6 @@
+// This contains some of the data we'll need in texture_2D.cpp.
+// Yeah, that's about it.
+
 #ifndef TEXTURE_2D_H
 #define TEXTURE_2D_H
 

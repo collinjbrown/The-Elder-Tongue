@@ -1,6 +1,9 @@
 #include "game.h"
 #include <glm/gtc/matrix_transform.hpp>
 
+// This just holds updateOrth().
+// Nothing particularly fancy.
+
 void Game::updateOrtho()
 {
     const float halfWidth = windowWidth / 2.0f;

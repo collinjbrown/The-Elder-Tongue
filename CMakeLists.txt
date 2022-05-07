@@ -32,6 +32,7 @@ set(BASE_SRCS
     system.h
     texture_2D.cpp
     texture_2D.h
+    savesystem.h
     )
 
 # Add source to this project's executable.

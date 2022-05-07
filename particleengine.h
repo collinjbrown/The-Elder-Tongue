@@ -6,6 +6,10 @@
 #include "game.h"
 #include "texture_2D.h"
 
+// Seeing as particles won't interact much with the other parts of the game, I went ahead and moved much of their logic
+// out of ecs.cpp. I didn't want it getting overly cluttered, not to mention that the particle system doesn't exactly
+// align with the architecture of the rest of the game (perfectly).
+
 enum class Element { aether, fire, dust };
 struct Particle
 {

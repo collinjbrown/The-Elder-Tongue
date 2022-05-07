@@ -9,6 +9,15 @@
 #include "game.h"
 #include "component.h"
 
+// This holds all the functions we use to send rendering info to OpenGL.
+// In short, one calls some variation on prepareQuad() from outside (like in ecs.cpp)
+// and then this handles the rest. It takes that quad and determines which batch
+// the textures are in, ensuring that the texture and its map aren't accidentally placed
+// in separate batches. Then, it calculates the modifier that is sent to the fragment shader
+// which is necessary to get texture sampling to work correctly. At the end of each frame,
+// Main calls sendToGL() which in turn flushes out however many batches we need
+// and then Main calls resetBuffers() to prepare for the next frame.
+
 float Renderer::CalculateModifier(float i)
 {
     return (256.0f * (1.0f / i));
@@ -253,7 +262,7 @@ void Renderer::prepareQuad(glm::vec2 position, float width, float height, float 
 }
 
 void Renderer::prepareQuad(PositionComponent* pos, float width, float height, float scaleX, float scaleY,
-    glm::vec4 rgb, int textureID, int mapID, bool tiled, bool flipped)
+    glm::vec4 rgb, int textureID, int mapID, bool tiled, bool flippedX, bool flippedY)
 {
     // Figure out which batch should be written to
     // -------------------------------------------
@@ -265,10 +274,16 @@ void Renderer::prepareQuad(PositionComponent* pos, float width, float height, fl
     float xR = 1.0f;
     float yR = 1.0f;
 
-    if (flipped)
+    if (flippedX)
     {
         xL = 1.0f;
         xR = 0.0f;
+    }
+
+    if (flippedY)
+    {
+        yL = 1.0f;
+        yR = 0.0f;
     }
 
     // Initialize the data for the quad
@@ -286,8 +301,6 @@ void Renderer::prepareQuad(PositionComponent* pos, float width, float height, fl
 
     if (tiled)
     {
-
-
         Quad& quad = batch.quadBuffer[batch.quadIndex];
         batch.quadIndex++;
 
@@ -313,7 +326,7 @@ void Renderer::prepareQuad(PositionComponent* pos, float width, float height, fl
 
 
 void Renderer::prepareQuad(PositionComponent* pos, float width, float height, float scaleX, float scaleY,
-    glm::vec4 rgb, int animID, int mapID, int cellX, int cellY, int cols, int rows, bool flipped)
+    glm::vec4 rgb, int animID, int mapID, int cellX, int cellY, int cols, int rows, bool flippedX, bool flippedY)
 {
     // Figure out which batch should be written to
     // -------------------------------------------
@@ -331,12 +344,20 @@ void Renderer::prepareQuad(PositionComponent* pos, float width, float height, fl
     float uvX1 =  uvX0 + cellXMod;
     float uvY1 = uvY0 + cellYMod;
 
-    if (flipped)
+    if (flippedX)
     {
         float tempX0 = uvX0;
 
         uvX0 = uvX1;
         uvX1 = tempX0;
+    }
+
+    if (flippedY)
+    {
+        float tempY0 = uvY0;
+
+        uvY0 = uvY1;
+        uvY1 = tempY0;
     }
 
     /*std::cout << std::to_string(uvX0) + "/" + std::to_string(uvY0) + "\n";

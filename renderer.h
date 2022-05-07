@@ -1,6 +1,10 @@
 #ifndef RENDERER_H
 #define RENDERER_H
 
+// Renderer.h just contains all the data we're gonna need for renderer.cpp to do its job.
+// There might be a bug in here right now, having to do with max quad count, but we'll
+// fix that at some point in the future (if it is, in fact, a problem, which it may well not be).
+
 #include <array>
 #include <vector>
 #include <glm/glm.hpp>
@@ -82,12 +86,12 @@ public:
     float CalculateModifier(float i);
     void CloseOffBatch();
     Bundle DetermineBatch(int textureID, int mapID);
-    void prepareQuad(PositionComponent* pos, float width, float height, float scaleX, float scaleY, glm::vec4 rgb, int textureID, int mapID, bool tiled, bool flipped);
+    void prepareQuad(PositionComponent* pos, float width, float height, float scaleX, float scaleY, glm::vec4 rgb, int textureID, int mapID, bool tiled, bool flippedX, bool flippedY);
     void prepareQuad(PositionComponent* pos, ColliderComponent* col, float width, float height, float scaleX, float scaleY, glm::vec4 rgb, int textureID, int mapID);
     void prepareQuad(glm::vec2 topRight, glm::vec2 bottomRight, glm::vec2 bottomLeft, glm::vec2 topLeft, glm::vec4 rgb, float scaleX, float scaleY, int textureID, int mapID);
     void prepareQuad(glm::vec2 position, float width, float height, float scaleX, float scaleY, glm::vec4 rgb, int textureID, int mapID); // Specify texture ID rather than index?
     // NOTE: Directly sending a texture index rather than ID can result in the wrong texture being drawn (due to being in the wrong batch)
-    void prepareQuad(PositionComponent* pos, float width, float height, float scaleX, float scaleY, glm::vec4 rgb, int animID, int mapID, int cellX, int cellY, int cols, int rows, bool flipped);
+    void prepareQuad(PositionComponent* pos, float width, float height, float scaleX, float scaleY, glm::vec4 rgb, int animID, int mapID, int cellX, int cellY, int cols, int rows, bool flippedX, bool flippedY);
     void prepareQuad(int batchIndex, Quad& input);
     void prepareDownLine(float x, float y, float height);
     void prepareRightLine(float x, float y, float width);

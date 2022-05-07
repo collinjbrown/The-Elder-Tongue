@@ -15,12 +15,6 @@
 // but we won't worry overly much about having that
 // information accessed in a contiguous fashion.
 
-// As everything in this roguelike should have some presence
-// in the game world, we're going to hard code position,
-// velocity, and sprites into each entity.
-// This also helps because lots of components will want to access
-// these without having to dig through other components.
-
 class Component;
 
 class Entity
