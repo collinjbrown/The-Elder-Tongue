@@ -10,7 +10,7 @@
 // out of ecs.cpp. I didn't want it getting overly cluttered, not to mention that the particle system doesn't exactly
 // align with the architecture of the rest of the game (perfectly).
 
-enum class Element { aether, fire, dust };
+enum class Element { aether, fire, necrotic, dust };
 struct Particle
 {
 	float x;
@@ -81,10 +81,9 @@ public:
 				int r = rand() % 100 + 1;
 				float cr = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
 
-				if (particle->element == Element::fire)
+				if (particle->element == Element::fire ||
+					particle->element == Element::necrotic)
 				{
-					color = glm::vec4(1.0f, cr, 0.0f, 1.0f);
-
 					particle->y += 2.0f;
 
 					if (r > 75)
@@ -98,6 +97,15 @@ public:
 					else if (r < 10)
 					{
 						particle->y -= 2.0f;
+					}
+
+					if (particle->element == Element::fire)
+					{
+						color = glm::vec4(1.0f, cr, 0.0f, 1.0f);
+					}
+					else
+					{
+						color = glm::vec4(0.5f, cr, 0.5f, 1.0f);
 					}
 				}
 				else if (particle->element == Element::aether)
@@ -170,6 +178,10 @@ public:
 				else if (particle->element == Element::dust)
 				{
 					color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+				}
+				else
+				{
+					color = glm::vec4(0.5f, cr, 0.5f, 1.0f);
 				}
 
 				Game::main.renderer->prepareQuad(glm::vec2(particle->x, particle->y), s->width / 4.0f, s->height / 4.0f, 1.0f, 1.0f, color, s->ID, Game::main.textureMap["base_map"]->ID);

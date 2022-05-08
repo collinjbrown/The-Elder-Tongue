@@ -138,11 +138,23 @@ int main(void)
     //renderer.textureIDs.push_back(blank.ID);
     //Game::main.textureMap.emplace("blank", &blank);
 
-    Texture2D moonlightSlashMap{ "assets/animations/slash/moonlight_slash_map.png", true, GL_NEAREST };
+    /*Texture2D moonlightSlashMap{ "assets/animations/slash/moonlight_slash_map.png", true, GL_NEAREST };
     renderer.textureIDs.push_back(moonlightSlashMap.ID);
-    Game::main.textureMap.emplace("moonlightSlashMap", &moonlightSlashMap);
+    Game::main.textureMap.emplace("moonlightSlashMap", &moonlightSlashMap);*/
 
-    Texture2D slashMap{ "assets/animations/slash/slash_map.png", true, GL_NEAREST };
+    Texture2D wreathedSlashMap{ "assets/animations/slash/wreathed_slash_map.png", true, GL_NEAREST };
+    renderer.textureIDs.push_back(wreathedSlashMap.ID);
+    Game::main.textureMap.emplace("wreathed_slashMap", &wreathedSlashMap);
+
+    Animation2D wreathedSlashUp{ "assets/animations/slash/wreathed_slashOne.png", true, 3, 3, 0.01f, { 2, 3, 3 }, false, GL_NEAREST };
+    renderer.textureIDs.push_back(wreathedSlashUp.ID);
+    Game::main.animationMap.emplace("wreathed_slashUp", &wreathedSlashUp);
+
+    Animation2D wreathedSlashDown{ "assets/animations/slash/wreathed_slashTwo.png", true, 3, 3, 0.01f, { 2, 3, 3 }, false, GL_NEAREST };
+    renderer.textureIDs.push_back(wreathedSlashDown.ID);
+    Game::main.animationMap.emplace("wreathed_slashDown", &wreathedSlashDown);
+
+    /*Texture2D slashMap{ "assets/animations/slash/slash_map.png", true, GL_NEAREST };
     renderer.textureIDs.push_back(slashMap.ID);
     Game::main.textureMap.emplace("slashMap", &slashMap);
 
@@ -152,7 +164,7 @@ int main(void)
 
     Animation2D slashDown{ "assets/animations/slash/slashDown.png", true, 2, 3, 0.01f, { 1, 2, 2 }, false, GL_NEAREST };
     renderer.textureIDs.push_back(slashDown.ID);
-    Game::main.animationMap.emplace("slashDown", &slashDown);
+    Game::main.animationMap.emplace("slashDown", &slashDown);*/
 
     Texture2D bullet{ "assets/sprites/bullets/bullet.png", true, GL_NEAREST };
     renderer.textureIDs.push_back(bullet.ID);
@@ -214,7 +226,7 @@ int main(void)
     renderer.textureIDs.push_back(skullMap.ID);
     Game::main.textureMap.emplace("skullMap", &skullMap);
 
-    #pragma region Player Animations
+    #pragma region Base Player Animations
 
     Texture2D lilyMap{ "assets/animations/lily/lily_base_map.png", true, GL_NEAREST };
     renderer.textureIDs.push_back(lilyMap.ID);
@@ -223,7 +235,6 @@ int main(void)
     Animation2D baseIdle{ "assets/animations/lily/lily_idle.png", true, 2, 2, 0.5f, { 2, 2 }, true, GL_NEAREST };
     renderer.textureIDs.push_back(baseIdle.ID);
     Game::main.animationMap.emplace("baseIdle", &baseIdle);
-
 
     Animation2D baseWalk{ "assets/animations/lily/lily_run.png", true, 3, 4, 0.05f, { 1, 3, 3, 3 }, true, GL_NEAREST };
     renderer.textureIDs.push_back(baseWalk.ID);
@@ -268,6 +279,62 @@ int main(void)
     Animation2D baseSlashTwo{ "assets/animations/lily/lily_slashTwo.png", true, 2, 3, 0.01f, { 1, 2, 2 }, false, GL_NEAREST };
     renderer.textureIDs.push_back(baseSlashTwo.ID);
     Game::main.animationMap.emplace("baseSlashTwo", &baseSlashTwo);
+
+    #pragma endregion
+
+    #pragma region Offensive (as in Combat) Player Animations
+
+    Texture2D lilyWreathedMap{ "assets/animations/lily/wreathed/lily_wreathed_map.png", true, GL_NEAREST };
+    renderer.textureIDs.push_back(lilyWreathedMap.ID);
+    Game::main.textureMap.emplace("lilyWreathedMap", &lilyWreathedMap);
+
+    Animation2D wreathedIdle{ "assets/animations/lily/wreathed/wreathed_lily_idle.png", true, 2, 2, 0.5f, { 2, 2 }, true, GL_NEAREST };
+    renderer.textureIDs.push_back(wreathedIdle.ID);
+    Game::main.animationMap.emplace("wreathed_baseIdle", &wreathedIdle);
+
+    Animation2D wreathedWalk{ "assets/animations/lily/wreathed/wreathed_lily_run.png", true, 3, 4, 0.05f, { 1, 3, 3, 3 }, true, GL_NEAREST };
+    renderer.textureIDs.push_back(wreathedWalk.ID);
+    Game::main.animationMap.emplace("wreathed_baseWalk", &wreathedWalk);
+
+    Animation2D wreathedJumpUp{ "assets/animations/lily/wreathed/wreathed_lily_up.png", true, 1, 1, 5.0f, { 1 }, true, GL_NEAREST };
+    renderer.textureIDs.push_back(wreathedJumpUp.ID);
+    Game::main.animationMap.emplace("wreathed_baseJumpUp", &wreathedJumpUp);
+
+    Animation2D wreathedJumpDown{ "assets/animations/lily/wreathed/wreathed_lily_down.png", true,  2, 2, 1.0f, { 2, 2 }, true, GL_NEAREST };
+    renderer.textureIDs.push_back(wreathedJumpDown.ID);
+    Game::main.animationMap.emplace("wreathed_baseJumpDown", &wreathedJumpDown);
+
+    Animation2D wreathedWallRun{ "assets/animations/lily/wreathed/wreathed_lily_wallRun.png", true,  3, 4, 0.1f, { 1, 3, 3, 3 }, true, GL_NEAREST };
+    renderer.textureIDs.push_back(wreathedWallRun.ID);
+    Game::main.animationMap.emplace("wreathed_baseWallRun", &wreathedWallRun);
+
+    Animation2D wreathedSlideDown{ "assets/animations/lily/wreathed/wreathed_lily_slideDown.png", true,  1, 1, 5.0f, { 1 }, true, GL_NEAREST };
+    renderer.textureIDs.push_back(wreathedSlideDown.ID);
+    Game::main.animationMap.emplace("wreathed_baseSlideDown", &wreathedSlideDown);
+
+    Animation2D wreathedSlide{ "assets/animations/lily/wreathed/wreathed_lily_slide.png", true,  1, 2, 1.0f, { 1, 1 }, true, GL_NEAREST };
+    renderer.textureIDs.push_back(wreathedSlide.ID);
+    Game::main.animationMap.emplace("wreathed_baseSlide", &wreathedSlide);
+
+    Animation2D wreathedCrouch{ "assets/animations/lily/wreathed/wreathed_lily_crouch.png", true, 2, 2, 0.5f, { 2, 2 }, true, GL_NEAREST };
+    renderer.textureIDs.push_back(wreathedCrouch.ID);
+    Game::main.animationMap.emplace("wreathed_baseCrouch", &wreathedCrouch);
+
+    Animation2D wreathedCrouchWalk{ "assets/animations/lily/wreathed/wreathed_lily_crouchWalk.png", true, 3, 4, 0.1f, { 1, 3, 3, 3 }, true, GL_NEAREST };
+    renderer.textureIDs.push_back(wreathedCrouchWalk.ID);
+    Game::main.animationMap.emplace("wreathed_baseCrouchWalk", &wreathedCrouchWalk);
+
+    /*Animation2D baseDeath{ "assets/animations/base/baseDying.png", true, 4, 4, 1.0f, { 2, 4, 4, 4 }, false, GL_NEAREST };
+    renderer.textureIDs.push_back(baseDeath.ID);*/
+    Game::main.animationMap.emplace("wreathed_baseDeath", &baseDeath);
+
+    Animation2D wreathedSlashOne{ "assets/animations/lily/wreathed/wreathed_lily_slashOne.png", true, 3, 3, 0.01f, { 2, 3, 3 }, false, GL_NEAREST };
+    renderer.textureIDs.push_back(wreathedSlashOne.ID);
+    Game::main.animationMap.emplace("wreathed_baseSlashOne", &wreathedSlashOne);
+
+    Animation2D wreathedSlashTwo{ "assets/animations/lily/wreathed/wreathed_lily_slashTwo.png", true, 3, 3, 0.01f, { 2, 3, 3 }, false, GL_NEAREST };
+    renderer.textureIDs.push_back(wreathedSlashTwo.ID);
+    Game::main.animationMap.emplace("wreathed_baseSlashTwo", &wreathedSlashTwo);
 
     #pragma endregion
     //Animation2D swordBaseIdle{ "assets/animations/lily/lily_idle.png", true, 3, 2, 0.5f, { 3, 3 }, true, GL_NEAREST };
@@ -467,7 +534,7 @@ int main(void)
         #pragma region GL Color & Clear
         // Here we update the background color.
         // We want it black for now, so that's what it is.
-        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+        glClearColor(0.25f, 0.25f, 0.5f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         #pragma endregion
 

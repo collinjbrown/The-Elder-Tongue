@@ -209,14 +209,21 @@ public:
 	float slashSpeed;
 	float projectileSpeed;
 
-	InputComponent(Entity* entity, bool active, Entity* moonlightBlade, bool acceptInput, float projectionDelay, float projectionDepth, float maxCoyoteTime, int maxJumps, float projectileDelay, float slashSpeed, float projectileSpeed);
+	Texture2D* baseMap;
+	Texture2D* wreathedMap;
+
+	InputComponent(Entity* entity, bool active, Entity* moonlightBlade, bool acceptInput, float projectionDelay, float projectionDepth, float maxCoyoteTime, int maxJumps, float projectileDelay, float slashSpeed, float projectileSpeed, Texture2D* baseMap, Texture2D* wreathedMap);
 };
 
 class MovementComponent : public Component
 {
 public:
+	// Does Lily have her sword and is she kicking ass?
+	bool enwreathed;
+
 	float acceleration;
 	float maxSpeed;
+	float baseMaxSpeed;
 	float maxJumpHeight;
 
 	bool jumping;
@@ -378,13 +385,16 @@ public:
 class BladeComponent : public Component
 {
 public:
+	bool held;
+	bool returningToHand;
+
 	bool attacking;
 	bool thrown;
 	bool lodged;
 
 	float rushRange;
 	float slowRange;
-	float throwRange;
+	float catchRange;
 
 	float followSpeed;
 	float projectileSpeed;
@@ -398,7 +408,7 @@ public:
 	float lastTargetSet;
 	float minTargetSetDelay;
 
-	BladeComponent(Entity* entity, bool active, float rushRange, float slowRange, float throwRange, float followSpeed, float projectileSpeed, ColliderComponent* platformCollider, Texture2D* corporealMap, Texture2D* incorporealMap, float minTargetSetDelay);
+	BladeComponent(Entity* entity, bool active, float rushRange, float slowRange, float catchRange, float followSpeed, float projectileSpeed, ColliderComponent* platformCollider, Texture2D* corporealMap, Texture2D* incorporealMap, float minTargetSetDelay);
 };
 
 enum class Anchor { topLeft, bottomLeft, topRight, bottomRight };

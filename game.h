@@ -44,6 +44,21 @@ public:
 
 	Renderer* renderer;
 	void updateOrtho();
+
+	int bladeManualTargetButton = GLFW_MOUSE_BUTTON_3;
+	int bladeThrowButton = GLFW_MOUSE_BUTTON_2;
+	int attackButton = GLFW_MOUSE_BUTTON_1;
+
+	int climbButton = GLFW_KEY_LEFT_SHIFT;
+	int dropWeaponButton = GLFW_KEY_C;
+	int jumpButton = GLFW_KEY_SPACE;
+	int crouchButton = GLFW_KEY_LEFT_CONTROL;
+
+	int climbUpButton = GLFW_KEY_W;
+	int climbDownButton = GLFW_KEY_S;
+
+	int moveRightButton = GLFW_KEY_D;
+	int moveLeftButton = GLFW_KEY_A;
 };
 
 #endif
