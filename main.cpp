@@ -296,11 +296,11 @@ int main(void)
     renderer.textureIDs.push_back(wreathedWalk.ID);
     Game::main.animationMap.emplace("wreathed_baseWalk", &wreathedWalk);
 
-    Animation2D wreathedJumpUp{ "assets/animations/lily/wreathed/wreathed_lily_up.png", true, 1, 1, 5.0f, { 1 }, true, GL_NEAREST };
+    Animation2D wreathedJumpUp{ "assets/animations/lily/wreathed/wreathed_lily_up.png", true, 2, 2, 0.1f, { 1, 2 }, true, GL_NEAREST };
     renderer.textureIDs.push_back(wreathedJumpUp.ID);
     Game::main.animationMap.emplace("wreathed_baseJumpUp", &wreathedJumpUp);
 
-    Animation2D wreathedJumpDown{ "assets/animations/lily/wreathed/wreathed_lily_down.png", true,  2, 2, 1.0f, { 2, 2 }, true, GL_NEAREST };
+    Animation2D wreathedJumpDown{ "assets/animations/lily/wreathed/wreathed_lily_down.png", true,  2, 2, 0.5f, { 2, 2 }, true, GL_NEAREST };
     renderer.textureIDs.push_back(wreathedJumpDown.ID);
     Game::main.animationMap.emplace("wreathed_baseJumpDown", &wreathedJumpDown);
 

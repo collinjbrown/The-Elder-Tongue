@@ -2031,6 +2031,7 @@ void InputSystem::Update(int activeScene, float deltaTime)
 						bladeComponent->held = false;
 						bladeSprite->active = true;
 						bladeComponent->attacking = false;
+						move->isAttacking = false;
 						move->enwreathed = false;
 
 						move->maxSpeed = move->baseMaxSpeed;
