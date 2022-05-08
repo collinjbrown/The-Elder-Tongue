@@ -1,6 +1,6 @@
 ---
 
-<p align="center"><img src="https://github.com/collinjbrown/The-Moonlight-Tongue/assets/sprites/readme/the_moonlight_tongue.svg" alt="The Moonlight Tongue" style="width:200px;"></p>
+<p align="center"><img src="https://github.com/collinjbrown/The-Moonlight-Tongue/blob/main/assets/sprites/readme/the_moonlight_tongue.svg" alt="The Moonlight Tongue" style="width:200px;"></p>
 
 ---
 
