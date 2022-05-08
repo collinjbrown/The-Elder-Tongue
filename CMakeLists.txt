@@ -10,29 +10,29 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(BASE_SRCS
-    animation_2D.cpp
-    animation_2D.h
-    check_error.cpp
-    check_error.h
-    component.h
-    particleengine.h
-    ecs.h
-    ecs.cpp
-    entity.h
-    game.cpp
-    game.h
-    main.cpp
-    main.h
-    renderer.cpp
-    renderer.h
-    shader.cpp
-    shader.h
-    external/stb_image.cpp
-    external/stb_image.h
-    system.h
-    texture_2D.cpp
-    texture_2D.h
-    savesystem.h
+    "src/animation_2D.cpp"
+    "src/animation_2D.h"
+    "src/check_error.cpp"
+    "src/check_error.h"
+    "src/component.h"
+    "src/particleengine.h"
+    "src/ecs.h"
+    "src/ecs.cpp"
+    "src/entity.h"
+    "src/game.cpp"
+    "src/game.h"
+    "src/main.cpp"
+    "src/main.h"
+    "src/renderer.cpp"
+    "src/renderer.h"
+    "src/shader.cpp"
+    "src/shader.h"
+    "src/external/stb_image.cpp"
+    "src/external/stb_image.h"
+    "src/system.h"
+    "src/texture_2D.cpp"
+    "src/texture_2D.h"
+    "src/savesystem.h"
     )
 
 # Add source to this project's executable.
