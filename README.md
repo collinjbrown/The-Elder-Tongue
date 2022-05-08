@@ -1,3 +1,9 @@
+---
+
+<p align="center"><img src="https://github.com/collinjbrown/The-Moonlight-Tongue/assets/sprites/readme/the_moonlight_tongue.svg" alt="The Moonlight Tongue" style="width:200px;"></p>
+
+---
+
 # The Moonlight Tongue
  A Metroidvania game about....
 
