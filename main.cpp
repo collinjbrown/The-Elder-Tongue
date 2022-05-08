@@ -146,11 +146,11 @@ int main(void)
     renderer.textureIDs.push_back(wreathedSlashMap.ID);
     Game::main.textureMap.emplace("wreathed_slashMap", &wreathedSlashMap);
 
-    Animation2D wreathedSlashUp{ "assets/animations/slash/wreathed_slashOne.png", true, 3, 3, 0.01f, { 2, 3, 3 }, false, GL_NEAREST };
+    Animation2D wreathedSlashUp{ "assets/animations/slash/wreathed_slashOne.png", true, 3, 3, 0.02f, { 2, 3, 3 }, false, GL_NEAREST };
     renderer.textureIDs.push_back(wreathedSlashUp.ID);
     Game::main.animationMap.emplace("wreathed_slashUp", &wreathedSlashUp);
 
-    Animation2D wreathedSlashDown{ "assets/animations/slash/wreathed_slashTwo.png", true, 3, 3, 0.01f, { 2, 3, 3 }, false, GL_NEAREST };
+    Animation2D wreathedSlashDown{ "assets/animations/slash/wreathed_slashTwo.png", true, 3, 3, 0.02f, { 2, 3, 3 }, false, GL_NEAREST };
     renderer.textureIDs.push_back(wreathedSlashDown.ID);
     Game::main.animationMap.emplace("wreathed_slashDown", &wreathedSlashDown);
 
@@ -272,11 +272,11 @@ int main(void)
     renderer.textureIDs.push_back(baseDeath.ID);
     Game::main.animationMap.emplace("baseDeath", &baseDeath);
 
-    Animation2D baseSlashOne{ "assets/animations/lily/lily_slashOne.png", true, 2, 3, 0.01f, { 2, 2, 2 }, false, GL_NEAREST };
+    Animation2D baseSlashOne{ "assets/animations/lily/lily_slashOne.png", true, 2, 3, 0.05f, { 2, 2, 2 }, false, GL_NEAREST };
     renderer.textureIDs.push_back(baseSlashOne.ID);
     Game::main.animationMap.emplace("baseSlashOne", &baseSlashOne);
 
-    Animation2D baseSlashTwo{ "assets/animations/lily/lily_slashTwo.png", true, 2, 3, 0.01f, { 1, 2, 2 }, false, GL_NEAREST };
+    Animation2D baseSlashTwo{ "assets/animations/lily/lily_slashTwo.png", true, 2, 3, 0.05f, { 1, 2, 2 }, false, GL_NEAREST };
     renderer.textureIDs.push_back(baseSlashTwo.ID);
     Game::main.animationMap.emplace("baseSlashTwo", &baseSlashTwo);
 
@@ -328,11 +328,11 @@ int main(void)
     renderer.textureIDs.push_back(baseDeath.ID);*/
     Game::main.animationMap.emplace("wreathed_baseDeath", &baseDeath);
 
-    Animation2D wreathedSlashOne{ "assets/animations/lily/wreathed/wreathed_lily_slashOne.png", true, 3, 3, 0.01f, { 2, 3, 3 }, false, GL_NEAREST };
+    Animation2D wreathedSlashOne{ "assets/animations/lily/wreathed/wreathed_lily_slashOne.png", true, 3, 3, 0.02f, { 2, 3, 3 }, false, GL_NEAREST };
     renderer.textureIDs.push_back(wreathedSlashOne.ID);
     Game::main.animationMap.emplace("wreathed_baseSlashOne", &wreathedSlashOne);
 
-    Animation2D wreathedSlashTwo{ "assets/animations/lily/wreathed/wreathed_lily_slashTwo.png", true, 3, 3, 0.01f, { 2, 3, 3 }, false, GL_NEAREST };
+    Animation2D wreathedSlashTwo{ "assets/animations/lily/wreathed/wreathed_lily_slashTwo.png", true, 3, 3, 0.02f, { 2, 3, 3 }, false, GL_NEAREST };
     renderer.textureIDs.push_back(wreathedSlashTwo.ID);
     Game::main.animationMap.emplace("wreathed_baseSlashTwo", &wreathedSlashTwo);
 

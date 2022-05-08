@@ -289,7 +289,7 @@ void ECS::Update(float deltaTime)
 		ECS::main.RegisterComponent(new PositionComponent(player, true, false, 0, 100, 0, 0.0f), player);
 		ECS::main.RegisterComponent(new PhysicsComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 5000.0f, 2000.0f), player);
 		ECS::main.RegisterComponent(new ColliderComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], false, false, false, false, false, true, false, EntityClass::player, 1.0f, 1.0f, 10.0f, 20.0f, 50.0f, 0.0f, -7.75f), player);
-		ECS::main.RegisterComponent(new MovementComponent(player, true, 4000.0f, 500.0f, 2.5f, 0.5f, true, 0.7f, true, false, 0.9f, 2.0f, glm::vec2(100.0f, 0), 50.0f, 20.0f, 1.5f, 0.1f, 0.35f, 5, 3.0f), player);
+		ECS::main.RegisterComponent(new MovementComponent(player, true, 4000.0f, 500.0f, 2.5f, 0.5f, true, 0.7f, true, false, 0.9f, 2.0f, glm::vec2(100.0f, 400.0f), 50.0f, 20.0f, 1.5f, 0.25f, 0.5f, 5, 3.0f), player);
 		ECS::main.RegisterComponent(new InputComponent(player, true, moonlightBlade, true, 0.5f, 5000.0f, 0.5f, 2, 0.5f, 2.0f, 500.0f, lilyMap, lilyWreathedMap), player);
 		ECS::main.RegisterComponent(new CameraFollowComponent(player, true, 10.0f), player);
 		ECS::main.RegisterComponent(new HealthComponent(player, true, 1000.0f, false), player);
@@ -2037,7 +2037,7 @@ void InputSystem::Update(int activeScene, float deltaTime)
 					}
 					else
 					{
-						if (glfwGetMouseButton(Game::main.window, Game::main.attackButton) == GLFW_PRESS && move->lastAttack > move->minAttackDelay && move->lastFlurry > move->flurryDelay && move->attackNumber < move->maxFlurry && move->climbing)
+						if (glfwGetMouseButton(Game::main.window, Game::main.attackButton) == GLFW_PRESS && move->lastAttack > move->minAttackDelay && move->lastFlurry > move->flurryDelay && move->attackNumber < move->maxFlurry && !move->climbing)
 						{
 							move->isAttacking = true;
 							move->attackNumber++;
@@ -2069,7 +2069,15 @@ void InputSystem::Update(int activeScene, float deltaTime)
 
 							projVel *= move->slashSpeed;
 
-							phys->velocityY += move->attackThrust.y;
+							if (abs(phys->velocityY) < 100.0f)
+							{
+								phys->velocityY += move->attackThrust.y;
+							}
+
+							if (phys->velocityY < 0)
+							{
+								phys->velocityY = 0;
+							}
 
 							if (move->attackNumber % 2 == 0)
 							{
@@ -2093,7 +2101,7 @@ void InputSystem::Update(int activeScene, float deltaTime)
 							ECS::main.RegisterComponent(new DamageComponent(projectile, true, move->entity, true, t, true, true, 1, 20.0f, false, true, true, false), projectile);
 
 							PhysicsComponent* p = (PhysicsComponent*)projectile->componentIDMap[physicsComponentID];
-							if (p->velocityX < 0)
+							if (p->velocityX < 0 || anComp->flippedX)
 							{
 								AnimationComponent* a = (AnimationComponent*)projectile->componentIDMap[animationComponentID];
 
@@ -2105,6 +2113,7 @@ void InputSystem::Update(int activeScene, float deltaTime)
 						{
 							move->lastFlurry += deltaTime;
 							move->lastAttack += deltaTime;
+							phys->gravityMod = phys->baseGravityMod;
 						}
 					}
 
