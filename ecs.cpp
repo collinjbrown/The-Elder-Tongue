@@ -1873,8 +1873,7 @@ void InputSystem::Update(int activeScene, float deltaTime)
 
 			if (move->enwreathed)
 			{
-				magicParticles = Element::fire;
-				mundaneParticles = Element::fire;
+				mundaneParticles = Element::aether;
 			}
 
 			PhysicsComponent* phys = (PhysicsComponent*)m->entity->componentIDMap[physicsComponentID];
@@ -2000,7 +1999,7 @@ void InputSystem::Update(int activeScene, float deltaTime)
 					{
 						for (int k = 0; k < 5; k++)
 						{
-							ParticleEngine::main.AddParticles(1, playerPos.x + (j * 5), playerPos.y + (k * 5), Element::fire, rand() % 10 + 1);
+							ParticleEngine::main.AddParticles(1, playerPos.x + (j * 5), playerPos.y + (k * 5), magicParticles, rand() % 10 + 1);
 						}
 					}
 					anComp->mapTex = m->wreathedMap;
@@ -2022,7 +2021,7 @@ void InputSystem::Update(int activeScene, float deltaTime)
 						{
 							for (int k = 0; k < 5; k++)
 							{
-								ParticleEngine::main.AddParticles(1, playerPos.x + (j * 5), playerPos.y + (k * 5), Element::aether, rand() % 10 + 1);
+								ParticleEngine::main.AddParticles(1, playerPos.x + (j * 5), playerPos.y + (k * 5), magicParticles, rand() % 10 + 1);
 							}
 						}
 
@@ -2489,8 +2488,6 @@ void AnimationControllerSystem::Update(int activeScene, float deltaTime)
 							c->animator->flippedX = false;
 						}
 					}
-
-					// Add climbing, sliding, crouching, and crouch-walking.
 
 					if (move->isAttacking && move->attackNumber % 2 == 0)
 					{
