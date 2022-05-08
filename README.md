@@ -27,7 +27,7 @@
 - ~~Add basic input.~~
 - Add buttons.
 - Add menus.
-- Make inputs mappable.
+- ~~Make inputs mappable.~~
 - Saving and loading.
 ## Physics
 - ~~Add gravity, accelaration, velocity, etc.~~
