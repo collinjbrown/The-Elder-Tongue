@@ -2209,7 +2209,7 @@ void InputSystem::Update(int activeScene, float deltaTime)
 				}
 
 
-				if (glfwGetKey(Game::main.window, Game::main.crouchButton) == GLFW_PRESS)
+				if (glfwGetKey(Game::main.window, Game::main.crouchButton) == GLFW_PRESS && !move->jumping)
 				{
 					if (col->height == col->baseHeight && col->offsetY == col->baseOffsetY)
 					{
