@@ -132,8 +132,6 @@ public:
 
 	void Update(int activeScene, float deltaTime);
 
-	void CalculateProjection(PhysicsComponent* phys, InputComponent* m, MovementComponent* move);
-
 	void AddComponent(Component* component);
 
 	void PurgeEntity(Entity* e);

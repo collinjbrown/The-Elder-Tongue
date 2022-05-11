@@ -45,20 +45,50 @@ public:
 	Renderer* renderer;
 	void updateOrtho();
 
-	int bladeManualTargetButton = GLFW_MOUSE_BUTTON_3;
-	int bladeThrowButton = GLFW_MOUSE_BUTTON_2;
-	int attackButton = GLFW_MOUSE_BUTTON_1;
+	// Keyboard and Mouse Mappings
+	int bladeManualTargetKey = GLFW_MOUSE_BUTTON_3;
+	int bladeThrowKey = GLFW_MOUSE_BUTTON_2;
+	int dashKey = GLFW_MOUSE_BUTTON_1;
 
-	int climbButton = GLFW_KEY_LEFT_SHIFT;
-	int dropWeaponButton = GLFW_KEY_C;
-	int jumpButton = GLFW_KEY_SPACE;
-	int crouchButton = GLFW_KEY_LEFT_CONTROL;
+	int climbKey = GLFW_KEY_LEFT_SHIFT;
+	int dropWeaponKey = GLFW_KEY_C;
+	int jumpKey = GLFW_KEY_SPACE;
+	int crouchKey = GLFW_KEY_LEFT_CONTROL;
 
-	int climbUpButton = GLFW_KEY_W;
-	int climbDownButton = GLFW_KEY_S;
+	int climbUpKey = GLFW_KEY_W;
+	int climbDownKey = GLFW_KEY_S;
 
-	int moveRightButton = GLFW_KEY_D;
-	int moveLeftButton = GLFW_KEY_A;
+	int moveRightKey = GLFW_KEY_D;
+	int moveLeftKey = GLFW_KEY_A;
+
+	int dashUpKey = GLFW_KEY_W;
+	int dashDownKey = GLFW_KEY_S;
+	int dashRightKey = GLFW_KEY_D;
+	int dashLeftKey = GLFW_KEY_A;
+
+	// Gamepad Mappings
+	int bladeManualTargetPad = GLFW_GAMEPAD_BUTTON_LEFT_THUMB;
+	int bladeThrowPad = GLFW_GAMEPAD_BUTTON_RIGHT_BUMPER;
+	int dashPad = GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER;
+
+	int climbPad = GLFW_GAMEPAD_AXIS_LEFT_TRIGGER;
+	int dropWeaponPad = GLFW_GAMEPAD_BUTTON_Y;
+	int jumpPad = GLFW_GAMEPAD_BUTTON_A;
+	int crouchPad = GLFW_GAMEPAD_BUTTON_LEFT_BUMPER;
+
+	int climbUpPad = GLFW_GAMEPAD_AXIS_LEFT_Y;
+	int climbDownPad = GLFW_GAMEPAD_AXIS_LEFT_Y;
+
+	int moveRightPad = GLFW_GAMEPAD_AXIS_LEFT_X;
+	int moveLeftPad = GLFW_GAMEPAD_AXIS_LEFT_X;
+
+	int dashUpPad = GLFW_GAMEPAD_AXIS_LEFT_Y;
+	int dashDownPad = GLFW_GAMEPAD_AXIS_LEFT_Y;
+	int dashRightPad = GLFW_GAMEPAD_AXIS_LEFT_X;
+	int dashLeftPad = GLFW_GAMEPAD_AXIS_LEFT_X;
+
+	int swordRotXPad = GLFW_GAMEPAD_AXIS_RIGHT_X;
+	int swordRotYPad = GLFW_GAMEPAD_AXIS_RIGHT_Y;
 };
 
 #endif

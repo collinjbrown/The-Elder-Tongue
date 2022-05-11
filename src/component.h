@@ -190,29 +190,25 @@ public:
 	Entity* moonlightBlade;
 	bool acceptInput;
 
-	bool projecting;
-	float projectionTime;
-	float projectionDelay;
-	int projectionDepth;
-
 	bool releasedJump;
 	float coyoteTime;
 	float maxCoyoteTime;
 	int jumps;
 	int maxJumps;
 
-	float lastTick;
+	int dashes;
+	int maxDashes;
 
-	float lastProjectile;
-	float projectileDelay;
+	float lastDash;
+	float dashLength;
 
-	float slashSpeed;
-	float projectileSpeed;
+	float lastTarget;
+	float targetDelay;
 
 	Texture2D* baseMap;
 	Texture2D* wreathedMap;
 
-	InputComponent(Entity* entity, bool active, Entity* moonlightBlade, bool acceptInput, float projectionDelay, float projectionDepth, float maxCoyoteTime, int maxJumps, float projectileDelay, float slashSpeed, float projectileSpeed, Texture2D* baseMap, Texture2D* wreathedMap);
+	InputComponent(Entity* entity, bool active, Entity* moonlightBlade, bool acceptInput, float maxCoyoteTime, int maxJumps, float maxDashes, float dashLength, float targetDelay, Texture2D* baseMap, Texture2D* wreathedMap);
 };
 
 class MovementComponent : public Component
@@ -220,6 +216,7 @@ class MovementComponent : public Component
 public:
 	// Does Lily have her sword and is she kicking ass?
 	bool enwreathed;
+	bool canMove;
 
 	float acceleration;
 	float maxSpeed;
@@ -227,10 +224,10 @@ public:
 	float maxJumpHeight;
 
 	bool jumping;
-	bool preparingToJump;
 	float airControl;
 
-	bool canMove;
+	bool dashing;
+	float dashSpeed;
 
 	bool crouching;
 	float crouchMod;
@@ -246,24 +243,7 @@ public:
 	float maxClimbHeight;
 	float minClimbHeight;
 
-	bool isAttacking;
-	glm::vec2 attackThrust;
-	float slashSpeed;
-
-	float damage;
-	float attackMultiplier;
-	int attackNumber;
-
-	float lastAttack;
-	float minAttackDelay;
-	float maxAttackDelay;
-
-	int maxFlurry;
-	float lastFlurry;
-	float flurryDelay;
-
-	MovementComponent(Entity* entity, bool active, float acceleration, float maxSpeed, float maxJumpHeight, float airControl, bool canMove, float crouchMod, bool canClimb, bool shouldClimb, float climbMod, float maxWallRun,
-					  glm::vec2 attackThrust, float slashSpeed, float damage, float attackMultiplier, float minAttackDelay, float maxAttackDelay, int maxFlurry,  float flurryDelay);
+	MovementComponent(Entity* entity, bool active, bool canMove, float acceleration, float maxSpeed, float maxJumpHeight, float airControl, float dashSpeed, float crouchMod, bool canClimb, bool shouldClimb, float climbMod);
 };
 
 class CameraFollowComponent : public Component
