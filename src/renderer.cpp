@@ -288,6 +288,8 @@ void Renderer::prepareQuad(PositionComponent* pos, float width, float height, fl
 
     // Initialize the data for the quad
     // --------------------------------
+    Quad& quad = batch.quadBuffer[batch.quadIndex];
+    batch.quadIndex++;
 
     const glm::vec2 topRight = glm::vec2(pos->x, pos->y) + pos->Rotate(glm::vec2(((width * scaleX) / 2.0f), ((height * scaleY) / 2.0f)));
     const glm::vec2 bottomRight = glm::vec2(pos->x, pos->y) + pos->Rotate(glm::vec2(((width * scaleX) / 2.0f), -((height * scaleY) / 2.0f)));
@@ -301,22 +303,13 @@ void Renderer::prepareQuad(PositionComponent* pos, float width, float height, fl
 
     if (tiled)
     {
-        Quad& quad = batch.quadBuffer[batch.quadIndex];
-        batch.quadIndex++;
-
-        const float xMod = fmod(width, width); // tWidth);
-        const float yMod = fmod(height, height); // tHeight);
-
-        quad.topRight = { topRight.x, topRight.y,      r, g, b, a,   xMod, yMod,    bundle.textureLocation, bundle.mapLocation, CalculateModifier(width), CalculateModifier(height) };
-        quad.bottomRight = { bottomRight.x, bottomRight.y,   r, g, b, a,   xMod, 0.0,    bundle.textureLocation, bundle.mapLocation, CalculateModifier(width), CalculateModifier(height) };
-        quad.bottomLeft = { bottomLeft.x,  bottomLeft.y,   r, g, b, a,   0.0, 0.0,    bundle.textureLocation, bundle.mapLocation, CalculateModifier(width), CalculateModifier(height) };
-        quad.topLeft = { topLeft.x,  topLeft.y,      r, g, b, a,   0.0, yMod,    bundle.textureLocation, bundle.mapLocation, CalculateModifier(width), CalculateModifier(height) };
+        quad.topRight = { topRight.x, topRight.y,      r, g, b, a,   xR * scaleX, yR * scaleY,    bundle.textureLocation, bundle.mapLocation, CalculateModifier(width), CalculateModifier(height) };
+        quad.bottomRight = { bottomRight.x, bottomRight.y,   r, g, b, a,   xR * scaleX, yL * scaleY,    bundle.textureLocation, bundle.mapLocation, CalculateModifier(width), CalculateModifier(height) };
+        quad.bottomLeft = { bottomLeft.x,  bottomLeft.y,   r, g, b, a,   xL * scaleX, yL * scaleY,    bundle.textureLocation, bundle.mapLocation, CalculateModifier(width), CalculateModifier(height) };
+        quad.topLeft = { topLeft.x,  topLeft.y,      r, g, b, a,   xL * scaleX, yR * scaleY,    bundle.textureLocation, bundle.mapLocation, CalculateModifier(width), CalculateModifier(height) };
     }
     else
     {
-        Quad& quad = batch.quadBuffer[batch.quadIndex];
-        batch.quadIndex++;
-
         quad.topRight = { topRight.x, topRight.y,      r, g, b, a,   xR, yR,    bundle.textureLocation, bundle.mapLocation, CalculateModifier(width), CalculateModifier(height) };
         quad.bottomRight = { bottomRight.x, bottomRight.y,   r, g, b, a,   xR, yL,    bundle.textureLocation, bundle.mapLocation, CalculateModifier(width), CalculateModifier(height) };
         quad.bottomLeft = { bottomLeft.x,  bottomLeft.y,   r, g, b, a,   xL, yL,    bundle.textureLocation, bundle.mapLocation, CalculateModifier(width), CalculateModifier(height) };

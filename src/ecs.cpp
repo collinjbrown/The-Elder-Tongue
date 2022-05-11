@@ -344,9 +344,9 @@ void ECS::Update(float deltaTime)
 			ECS::main.RegisterComponent(new ColliderComponent(floor, true, (PositionComponent*)floor->componentIDMap[positionComponentID], true, false, false, true, false, false, false, EntityClass::object, 1000.0f, 0.0f, 1.0f, 540.0f, 80.0f, 0.0f, 0.0f), floor);
 			ECS::main.RegisterComponent(new StaticSpriteComponent(floor, true, (PositionComponent*)floor->componentIDMap[positionComponentID], 540.0f, 80.0f, 1.0f, 1.0f, tex3, tex3Map, false, false, false), floor);
 
-			Entity* earth = CreateEntity(0, "floor");
+			/*Entity* earth = CreateEntity(0, "floor");
 			ECS::main.RegisterComponent(new PositionComponent(earth, true, true, i * 500, -1000, 0, 0.0f), earth);
-			ECS::main.RegisterComponent(new StaticSpriteComponent(earth, true, (PositionComponent*)earth->componentIDMap[positionComponentID], tex3->width * 35, tex3->height * 100.0f, 1.0f, 1.0f, tex3, tex3Map, false, false, false), earth);
+			ECS::main.RegisterComponent(new StaticSpriteComponent(earth, true, (PositionComponent*)earth->componentIDMap[positionComponentID], tex3->width * 35, tex3->height * 100.0f, 1.0f, 1.0f, tex3, tex3Map, false, false, false), earth);*/
 		}
 
 		// Do this after we instantiate objects so that it can properly sort out which nodes
