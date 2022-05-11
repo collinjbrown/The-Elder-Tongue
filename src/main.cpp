@@ -174,11 +174,11 @@ int main(void)
     renderer.textureIDs.push_back(aetherBullet.ID);
     Game::main.textureMap.emplace("aether_bullet", &aetherBullet);
 
-    Texture2D wallMap{ "assets/sprites/world/test/wall_map.png", true, GL_NEAREST };
+    Texture2D wallMap{ "assets/sprites/world/wall_map.png", true, GL_NEAREST };
     renderer.textureIDs.push_back(wallMap.ID);
     Game::main.textureMap.emplace("wallMap", &wallMap);
 
-    Texture2D wall{ "assets/sprites/world/test/wall.png", true, GL_NEAREST };
+    Texture2D wall{ "assets/sprites/world/wall.png", true, GL_NEAREST };
     renderer.textureIDs.push_back(wall.ID);
     Game::main.textureMap.emplace("wall", &wall);
 

@@ -321,6 +321,12 @@ void ECS::Update(float deltaTime)
 		}
 		#pragma endregion
 
+		Texture2D* wallTex = Game::main.textureMap["wall"];
+		Texture2D* wallTexMap = Game::main.textureMap["wallMap"];
+		Entity* wall = CreateEntity(0, "wall");
+		ECS::main.RegisterComponent(new PositionComponent(wall, true, true, 0, 0, -100, 0.0f), wall);
+		ECS::main.RegisterComponent(new StaticSpriteComponent(wall, true, (PositionComponent*)wall->componentIDMap[positionComponentID], wallTex->width, wallTex->height, 1000.0f, 1000.0f, wallTex, wallTexMap, false, false, true), wall);
+
 		Texture2D* tex3 = Game::main.textureMap["blank"];
 		Texture2D* tex3Map = Game::main.textureMap["base_map"];
 
@@ -879,8 +885,8 @@ void StaticRenderingSystem::Update(int activeScene, float deltaTime)
 		{
 			PositionComponent* pos = s->pos;
 
-			if (pos->x + (s->width / 2.0f) > Game::main.leftX && pos->x - (s->width / 2.0f) < Game::main.rightX &&
-				pos->y + (s->height / 2.0f) > Game::main.bottomY && pos->y - (s->height / 2.0f) < Game::main.topY &&
+			if (pos->x + (s->width * s->scaleX / 2.0f) > Game::main.leftX && pos->x - (s->width * s->scaleX / 2.0f) < Game::main.rightX &&
+				pos->y + (s->height * s->scaleY / 2.0f) > Game::main.bottomY && pos->y - (s->height * s->scaleY / 2.0f) < Game::main.topY &&
 				pos->z < Game::main.camZ)
 			{
 				Game::main.renderer->prepareQuad(pos, s->width, s->height, s->scaleX, s->scaleY, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), s->sprite->ID, s->mapTex->ID, s->tiled, s->flippedX, s->flippedY);
