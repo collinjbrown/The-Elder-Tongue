@@ -1844,22 +1844,83 @@ void InputSystem::Update(int activeScene, float deltaTime)
 				GLFWgamepadstate state;
 				glfwGetGamepadState(GLFW_JOYSTICK_1, &state);
 
+				// std::cout << std::to_string(state.axes[Game::main.moveRightPad]) + "\n";
+
 				// This needs fixing.
-				if (!bladeManualTarget) bladeManualTarget = (state.axes[Game::main.bladeManualTargetPad] || state.buttons[Game::main.bladeManualTargetPad]);
-				if (!bladeThrow) bladeThrow = (state.axes[Game::main.bladeThrowPad] || state.buttons[Game::main.bladeThrowPad]);
-				if (!dash) dash = (state.axes[Game::main.dashPad] || state.buttons[Game::main.dashPad]);
-				if (!climb) climb = (state.axes[Game::main.climbPad] || state.buttons[Game::main.climbPad]);
-				if (!dropWeapon) dropWeapon = (state.axes[Game::main.dropWeaponPad] || state.buttons[Game::main.dropWeaponPad]);
-				if (!jump) jump = (state.axes[Game::main.jumpPad] || state.buttons[Game::main.jumpPad]);
-				if (!crouch) crouch = (state.axes[Game::main.crouchPad] || state.buttons[Game::main.crouchPad]);
-				if (!climbUp) climbUp = (state.axes[Game::main.climbUpPad] || state.buttons[Game::main.climbUpPad]);
-				if (!climbDown) climbDown = (state.axes[Game::main.climbDownPad] || state.buttons[Game::main.climbDownPad]);
-				if (!moveRight) moveRight = (state.axes[Game::main.moveRightPad] || state.buttons[Game::main.moveRightPad]);
-				if (!moveLeft) moveLeft = (state.axes[Game::main.moveLeftPad] || state.buttons[Game::main.moveLeftPad]);
-				if (!dashUp) dashUp = (state.axes[Game::main.dashUpPad] || state.buttons[Game::main.dashUpPad]);
-				if (!dashDown) dashDown = (state.axes[Game::main.dashDownPad] || state.buttons[Game::main.dashDownPad]);
-				if (!dashRight) dashRight = (state.axes[Game::main.dashRightPad] || state.buttons[Game::main.dashRightPad]);
-				if (!dashLeft) dashLeft = (state.axes[Game::main.dashLeftPad] || state.buttons[Game::main.dashLeftPad]);
+				if (!bladeManualTarget) bladeManualTarget =		(Game::main.bladeManualTargetPadType == InputType::trigger && state.axes[Game::main.bladeManualTargetPad] + 1 ||
+																Game::main.bladeManualTargetPadType == InputType::stickPos && state.axes[Game::main.bladeManualTargetPad] > 0.1f ||
+																Game::main.bladeManualTargetPadType == InputType::stickNeg && state.axes[Game::main.bladeManualTargetPad] < -0.1f ||
+																Game::main.bladeManualTargetPadType == InputType::button && state.buttons[Game::main.bladeManualTargetPad]);
+
+				if (!bladeThrow) bladeThrow =					(Game::main.bladeThrowPadType == InputType::trigger && state.axes[Game::main.bladeThrowPad] + 1 ||
+																Game::main.bladeThrowPadType == InputType::stickPos && state.axes[Game::main.bladeThrowPad] > 0.1f ||
+																Game::main.bladeThrowPadType == InputType::stickNeg && state.axes[Game::main.bladeThrowPad] < -0.1f ||
+																Game::main.bladeThrowPadType == InputType::button && state.buttons[Game::main.bladeThrowPad]);
+
+				if (!dash) dash =								(Game::main.dashPadType == InputType::trigger && state.axes[Game::main.dashPad] + 1 ||
+																Game::main.dashPadType == InputType::stickPos && state.axes[Game::main.dashPad] > 0.1f ||
+																Game::main.dashPadType == InputType::stickNeg && state.axes[Game::main.dashPad] < -0.1f ||
+																Game::main.dashPadType == InputType::button && state.buttons[Game::main.dashPad]);
+
+				if (!climb) climb =								(Game::main.climbPadType == InputType::trigger && state.axes[Game::main.climbPad] + 1 ||
+																Game::main.climbPadType == InputType::stickPos && state.axes[Game::main.climbPad] > 0.1f ||
+																Game::main.climbPadType == InputType::stickNeg && state.axes[Game::main.climbPad] < -0.1f ||
+																Game::main.climbPadType == InputType::button && state.buttons[Game::main.climbPad]);
+
+				if (!dropWeapon) dropWeapon =					(Game::main.dropWeaponPadType == InputType::trigger && state.axes[Game::main.dropWeaponPad] + 1 ||
+																Game::main.dropWeaponPadType == InputType::stickPos && state.axes[Game::main.dropWeaponPad] > 0.1f ||
+																Game::main.dropWeaponPadType == InputType::stickNeg && state.axes[Game::main.dropWeaponPad] < -0.1f ||
+																Game::main.dropWeaponPadType == InputType::button && state.buttons[Game::main.dropWeaponPad]);
+
+				if (!jump) jump =								(Game::main.jumpPadType == InputType::trigger && state.axes[Game::main.jumpPad] + 1 ||
+																Game::main.jumpPadType == InputType::stickPos && state.axes[Game::main.jumpPad] > 0.1f ||
+																Game::main.jumpPadType == InputType::stickNeg && state.axes[Game::main.jumpPad] < -0.1f ||
+																Game::main.jumpPadType == InputType::button && state.buttons[Game::main.jumpPad]);
+
+				if (!crouch) crouch =							(Game::main.crouchPadType == InputType::trigger && state.axes[Game::main.crouchPad] + 1 ||
+																Game::main.crouchPadType == InputType::stickPos && state.axes[Game::main.crouchPad] > 0.1f ||
+																Game::main.crouchPadType == InputType::stickNeg && state.axes[Game::main.crouchPad] < -0.1f ||
+																Game::main.crouchPadType == InputType::button && state.buttons[Game::main.crouchPad]);
+
+				if (!climbUp) climbUp =							(Game::main.climbUpPadType == InputType::trigger && state.axes[Game::main.climbUpPad] + 1 ||
+																Game::main.climbUpPadType == InputType::stickPos && state.axes[Game::main.climbUpPad] > 0.1f ||
+																Game::main.climbUpPadType == InputType::stickNeg && state.axes[Game::main.climbUpPad] < -0.1f ||
+																Game::main.climbUpPadType == InputType::button && state.buttons[Game::main.climbUpPad]);
+
+				if (!climbDown) climbDown =						(Game::main.climbDownPadType == InputType::trigger && state.axes[Game::main.climbDownPad] + 1 ||
+																Game::main.climbDownPadType == InputType::stickPos && state.axes[Game::main.climbDownPad] > 0.1f ||
+																Game::main.climbDownPadType == InputType::stickNeg && state.axes[Game::main.climbDownPad] < -0.1f ||
+																Game::main.climbDownPadType == InputType::button && state.buttons[Game::main.climbDownPad]);
+
+				if (!moveRight) moveRight =						(Game::main.moveRightPadType == InputType::trigger && state.axes[Game::main.moveRightPad] + 1 ||
+																Game::main.moveRightPadType == InputType::stickPos && state.axes[Game::main.moveRightPad] > 0.1f ||
+																Game::main.moveRightPadType == InputType::stickNeg && state.axes[Game::main.moveRightPad] < -0.1f ||
+																Game::main.moveRightPadType == InputType::button && state.buttons[Game::main.moveRightPad]);
+
+				if (!moveLeft) moveLeft =						(Game::main.moveLeftPadType == InputType::trigger && state.axes[Game::main.moveLeftPad] + 1 ||
+																Game::main.moveLeftPadType == InputType::stickPos && state.axes[Game::main.moveLeftPad] > 0.1f ||
+																Game::main.moveLeftPadType == InputType::stickNeg && state.axes[Game::main.moveLeftPad] < -0.1f ||
+																Game::main.moveLeftPadType == InputType::button && state.buttons[Game::main.moveLeftPad]);
+
+				if (!dashUp) dashUp =							(Game::main.dashUpPadType == InputType::trigger && state.axes[Game::main.dashUpPad] + 1 ||
+																Game::main.dashUpPadType == InputType::stickPos && state.axes[Game::main.dashUpPad] > 0.1f ||
+																Game::main.dashUpPadType == InputType::stickNeg && state.axes[Game::main.dashUpPad] < -0.1f ||
+																Game::main.dashUpPadType == InputType::button && state.buttons[Game::main.dashUpPad]);
+
+				if (!dashDown) dashDown =						(Game::main.dashDownPadType == InputType::trigger && state.axes[Game::main.dashDownPad] + 1 ||
+																Game::main.dashDownPadType == InputType::stickPos && state.axes[Game::main.dashDownPad] > 0.1f ||
+																Game::main.dashDownPadType == InputType::stickNeg && state.axes[Game::main.dashDownPad] < -0.1f ||
+																Game::main.dashDownPadType == InputType::button && state.buttons[Game::main.dashDownPad]);
+
+				if (!dashRight) dashRight =						(Game::main.dashRightPadType == InputType::trigger && state.axes[Game::main.dashRightPad] + 1 ||
+																Game::main.dashRightPadType == InputType::stickPos && state.axes[Game::main.dashRightPad] > 0.1f ||
+																Game::main.dashRightPadType == InputType::stickNeg && state.axes[Game::main.dashRightPad] < -0.1f ||
+																Game::main.dashRightPadType == InputType::button && state.buttons[Game::main.dashRightPad]);
+				
+				if (!dashLeft) dashLeft =						(Game::main.dashLeftPadType == InputType::trigger && state.axes[Game::main.dashLeftPad] + 1 ||
+																Game::main.dashLeftPadType == InputType::stickPos && state.axes[Game::main.dashLeftPad] > 0.1f ||
+																Game::main.dashLeftPadType == InputType::stickNeg && state.axes[Game::main.dashLeftPad] < -0.1f ||
+																Game::main.dashLeftPadType == InputType::button && state.buttons[Game::main.dashLeftPad]);
 			}
 
 			MovementComponent* move = (MovementComponent*)m->entity->componentIDMap[movementComponentID];

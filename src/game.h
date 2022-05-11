@@ -11,6 +11,8 @@ using namespace std;
 // The game class holds data about the camera, window, and rendering.
 // We may also add info about key mapping to this.
 
+enum class InputType { button, trigger, stickPos, stickNeg };
+
 class Game
 {
 public:
@@ -67,27 +69,56 @@ public:
 	int dashLeftKey = GLFW_KEY_A;
 
 	// Gamepad Mappings
+	
+	InputType bladeManualTargetPadType = InputType::button;
 	int bladeManualTargetPad = GLFW_GAMEPAD_BUTTON_LEFT_THUMB;
+
+	InputType bladeThrowPadType = InputType::button;
 	int bladeThrowPad = GLFW_GAMEPAD_BUTTON_RIGHT_BUMPER;
+
+	InputType dashPadType = InputType::trigger;
 	int dashPad = GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER;
 
+	InputType climbPadType = InputType::trigger;
 	int climbPad = GLFW_GAMEPAD_AXIS_LEFT_TRIGGER;
+
+	InputType dropWeaponPadType = InputType::button;
 	int dropWeaponPad = GLFW_GAMEPAD_BUTTON_Y;
+
+	InputType jumpPadType = InputType::button;
 	int jumpPad = GLFW_GAMEPAD_BUTTON_A;
+
+	InputType crouchPadType = InputType::button;
 	int crouchPad = GLFW_GAMEPAD_BUTTON_LEFT_BUMPER;
 
+
+	InputType climbUpPadType = InputType::stickNeg;
 	int climbUpPad = GLFW_GAMEPAD_AXIS_LEFT_Y;
+
+	InputType climbDownPadType = InputType::stickPos;
 	int climbDownPad = GLFW_GAMEPAD_AXIS_LEFT_Y;
 
+	InputType moveRightPadType = InputType::stickPos;
 	int moveRightPad = GLFW_GAMEPAD_AXIS_LEFT_X;
+
+	InputType moveLeftPadType = InputType::stickNeg;
 	int moveLeftPad = GLFW_GAMEPAD_AXIS_LEFT_X;
 
+	InputType dashUpPadType = InputType::stickNeg;
 	int dashUpPad = GLFW_GAMEPAD_AXIS_LEFT_Y;
+
+	InputType dashDownPadType = InputType::stickPos;
 	int dashDownPad = GLFW_GAMEPAD_AXIS_LEFT_Y;
+
+	InputType dashRightPadType = InputType::stickPos;
 	int dashRightPad = GLFW_GAMEPAD_AXIS_LEFT_X;
+
+	InputType dashLeftPadType = InputType::stickNeg;
 	int dashLeftPad = GLFW_GAMEPAD_AXIS_LEFT_X;
 
+
 	int swordRotXPad = GLFW_GAMEPAD_AXIS_RIGHT_X;
+
 	int swordRotYPad = GLFW_GAMEPAD_AXIS_RIGHT_Y;
 };
 
