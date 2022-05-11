@@ -117,9 +117,17 @@ public:
 	int dashLeftPad = GLFW_GAMEPAD_AXIS_LEFT_X;
 
 
-	int swordRotXPad = GLFW_GAMEPAD_AXIS_RIGHT_X;
+	InputType swordRotRightPadType = InputType::stickPos;
+	int swordRotRightPad = GLFW_GAMEPAD_AXIS_RIGHT_X;
 
-	int swordRotYPad = GLFW_GAMEPAD_AXIS_RIGHT_Y;
+	InputType swordRotLeftPadType = InputType::stickNeg;
+	int swordRotLeftPad = GLFW_GAMEPAD_AXIS_RIGHT_X;
+
+	InputType swordRotUpPadType = InputType::stickNeg;
+	int swordRotUpPad = GLFW_GAMEPAD_AXIS_RIGHT_Y;
+
+	InputType swordRotDownPadType = InputType::stickPos;
+	int swordRotDownPad = GLFW_GAMEPAD_AXIS_RIGHT_Y;
 };
 
 #endif

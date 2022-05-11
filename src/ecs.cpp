@@ -1823,6 +1823,8 @@ void InputSystem::Update(int activeScene, float deltaTime)
 		if (m->active && m->entity->Get_Scene() == activeScene ||
 			m->active && m->entity->Get_Scene() == 0)
 		{
+			bool usingGamepad = false;
+
 			bool bladeManualTarget = ((glfwGetKey(Game::main.window, Game::main.bladeManualTargetKey) == GLFW_PRESS) || (glfwGetMouseButton(Game::main.window, Game::main.bladeManualTargetKey) == GLFW_PRESS));
 			bool bladeThrow = ((glfwGetKey(Game::main.window, Game::main.bladeThrowKey) == GLFW_PRESS) || (glfwGetMouseButton(Game::main.window, Game::main.bladeThrowKey) == GLFW_PRESS));
 			bool dash = ((glfwGetKey(Game::main.window, Game::main.dashKey) == GLFW_PRESS) || (glfwGetMouseButton(Game::main.window, Game::main.dashKey) == GLFW_PRESS));
@@ -1839,8 +1841,16 @@ void InputSystem::Update(int activeScene, float deltaTime)
 			bool dashRight = ((glfwGetKey(Game::main.window, Game::main.dashRightKey) == GLFW_PRESS) || (glfwGetMouseButton(Game::main.window, Game::main.dashRightKey) == GLFW_PRESS));
 			bool dashLeft = ((glfwGetKey(Game::main.window, Game::main.dashLeftKey) == GLFW_PRESS) || (glfwGetMouseButton(Game::main.window, Game::main.dashLeftKey) == GLFW_PRESS));
 
+			bool swordRotRight = false;
+			bool swordRotLeft = false;
+			bool swordRotUp = false;
+			bool swordRotDown = false;
+			glm::vec2 swordNormal = glm::vec2(0, 0);
+
 			if (glfwJoystickIsGamepad(GLFW_JOYSTICK_1))
 			{
+				usingGamepad = true;
+
 				GLFWgamepadstate state;
 				glfwGetGamepadState(GLFW_JOYSTICK_1, &state);
 
@@ -1921,6 +1931,44 @@ void InputSystem::Update(int activeScene, float deltaTime)
 																Game::main.dashLeftPadType == InputType::stickPos && state.axes[Game::main.dashLeftPad] > 0.1f ||
 																Game::main.dashLeftPadType == InputType::stickNeg && state.axes[Game::main.dashLeftPad] < -0.1f ||
 																Game::main.dashLeftPadType == InputType::button && state.buttons[Game::main.dashLeftPad]);
+
+				swordRotRight =									(Game::main.swordRotRightPadType == InputType::trigger && state.axes[Game::main.swordRotRightPad] + 1 ||
+																Game::main.swordRotRightPadType == InputType::stickPos && state.axes[Game::main.swordRotRightPad] > 0.1f ||
+																Game::main.swordRotRightPadType == InputType::stickNeg && state.axes[Game::main.swordRotRightPad] < -0.1f ||
+																Game::main.swordRotRightPadType == InputType::button && state.buttons[Game::main.swordRotRightPad]);
+
+				swordRotLeft =									(Game::main.swordRotLeftPadType == InputType::trigger && state.axes[Game::main.swordRotLeftPad] + 1 ||
+																Game::main.swordRotLeftPadType == InputType::stickPos && state.axes[Game::main.swordRotLeftPad] > 0.1f ||
+																Game::main.swordRotLeftPadType == InputType::stickNeg && state.axes[Game::main.swordRotLeftPad] < -0.1f ||
+																Game::main.swordRotLeftPadType == InputType::button && state.buttons[Game::main.swordRotLeftPad]);
+
+				swordRotUp =									(Game::main.swordRotUpPadType == InputType::trigger && state.axes[Game::main.swordRotUpPad] + 1 ||
+																Game::main.swordRotUpPadType == InputType::stickPos && state.axes[Game::main.swordRotUpPad] > 0.1f ||
+																Game::main.swordRotUpPadType == InputType::stickNeg && state.axes[Game::main.swordRotUpPad] < -0.1f ||
+																Game::main.swordRotUpPadType == InputType::button && state.buttons[Game::main.swordRotUpPad]);
+
+				swordRotDown =									(Game::main.swordRotDownPadType == InputType::trigger && state.axes[Game::main.swordRotDownPad] + 1 ||
+																Game::main.swordRotDownPadType == InputType::stickPos && state.axes[Game::main.swordRotDownPad] > 0.1f ||
+																Game::main.swordRotDownPadType == InputType::stickNeg && state.axes[Game::main.swordRotDownPad] < -0.1f ||
+																Game::main.swordRotDownPadType == InputType::button && state.buttons[Game::main.swordRotDownPad]);
+
+
+				if (swordRotRight)
+				{
+					swordNormal.x += 1;
+				}
+				if (swordRotLeft)
+				{
+					swordNormal.x -= 1;
+				}
+				if (swordRotUp)
+				{
+					swordNormal.y += 1;
+				}
+				if (swordRotDown)
+				{
+					swordNormal.y -= 1;
+				}
 			}
 
 			MovementComponent* move = (MovementComponent*)m->entity->componentIDMap[movementComponentID];
@@ -1998,7 +2046,15 @@ void InputSystem::Update(int activeScene, float deltaTime)
 				if (bladeManualTarget && blade->manualTarget.x == 0 && blade->manualTarget.y == 0 && blade->lastTargetSet > blade->minTargetSetDelay)
 				{
 					blade->lastTargetSet = 0.0f;
-					blade->manualTarget = glm::vec2(Game::main.mouseX, Game::main.mouseY);
+
+					if (!usingGamepad)
+					{
+						blade->manualTarget = glm::vec2(Game::main.mouseX, Game::main.mouseY);
+					}
+					else
+					{
+						blade->manualTarget += glm::vec2((1 * swordRotRight) + (-1 * swordRotLeft), (1 * swordRotUp) + (-1 * swordRotDown));
+					}
 
 					if (blade->lodged)
 					{
@@ -2013,7 +2069,7 @@ void InputSystem::Update(int activeScene, float deltaTime)
 						blade->thrown = false;
 					}
 				}
-				else if (bladeManualTarget && blade->lastTargetSet > blade->minTargetSetDelay)
+				else if (bladeManualTarget && blade->lastTargetSet > blade->minTargetSetDelay && !usingGamepad)
 				{
 					blade->lastTargetSet = 0.0f;
 					blade->manualTarget = glm::vec2(0, 0);
@@ -2024,6 +2080,14 @@ void InputSystem::Update(int activeScene, float deltaTime)
 				if (bladeThrow && m->lastTarget >= m->targetDelay && !blade->thrown && !bladeComponent->attacking)
 				{
 					glm::vec2 projVel = Normalize(glm::vec2(Game::main.mouseX - bladePos.x, Game::main.mouseY - bladePos.y)) * bladeComponent->projectileSpeed;
+
+					if (swordNormal.x != 0 || swordNormal.y != 0)
+					{
+						swordNormal = Normalize(swordNormal);
+
+						projVel = swordNormal * bladeComponent->projectileSpeed;
+					}
+
 					m->lastTarget = 0.0f;
 					blade->thrown = true;
 
@@ -2965,6 +3029,58 @@ void BladeSystem::Update(int activeScene, float deltaTime)
 				// Look
 				// I'll need to change this later if I want this to handle animations.
 				float r = std::atan2(mouse.y - position.y, mouse.x - position.x) * (180 / M_PI);
+
+				if (glfwJoystickIsGamepad(GLFW_JOYSTICK_1))
+				{
+					GLFWgamepadstate state;
+					glfwGetGamepadState(GLFW_JOYSTICK_1, &state);
+
+					bool swordRotRight =		(Game::main.swordRotRightPadType == InputType::trigger && state.axes[Game::main.swordRotRightPad] + 1 ||
+												Game::main.swordRotRightPadType == InputType::stickPos && state.axes[Game::main.swordRotRightPad] > 0.1f ||
+												Game::main.swordRotRightPadType == InputType::stickNeg && state.axes[Game::main.swordRotRightPad] < -0.1f ||
+												Game::main.swordRotRightPadType == InputType::button && state.buttons[Game::main.swordRotRightPad]);
+
+					bool swordRotLeft =			(Game::main.swordRotLeftPadType == InputType::trigger && state.axes[Game::main.swordRotLeftPad] + 1 ||
+												Game::main.swordRotLeftPadType == InputType::stickPos && state.axes[Game::main.swordRotLeftPad] > 0.1f ||
+												Game::main.swordRotLeftPadType == InputType::stickNeg && state.axes[Game::main.swordRotLeftPad] < -0.1f ||
+												Game::main.swordRotLeftPadType == InputType::button && state.buttons[Game::main.swordRotLeftPad]);
+					
+					bool swordRotUp =			(Game::main.swordRotUpPadType == InputType::trigger && state.axes[Game::main.swordRotUpPad] + 1 ||
+												Game::main.swordRotUpPadType == InputType::stickPos && state.axes[Game::main.swordRotUpPad] > 0.1f ||
+												Game::main.swordRotUpPadType == InputType::stickNeg && state.axes[Game::main.swordRotUpPad] < -0.1f ||
+												Game::main.swordRotUpPadType == InputType::button && state.buttons[Game::main.swordRotUpPad]);
+					
+					bool swordRotDown =			(Game::main.swordRotDownPadType == InputType::trigger && state.axes[Game::main.swordRotDownPad] + 1 ||
+												Game::main.swordRotDownPadType == InputType::stickPos && state.axes[Game::main.swordRotDownPad] > 0.1f ||
+												Game::main.swordRotDownPadType == InputType::stickNeg && state.axes[Game::main.swordRotDownPad] < -0.1f ||
+												Game::main.swordRotDownPadType == InputType::button && state.buttons[Game::main.swordRotDownPad]);
+
+					glm::vec2 swordNormal = glm::vec2(0, 0);
+
+					if (swordRotRight)
+					{
+						swordNormal.x += 1;
+					}
+					if (swordRotLeft)
+					{
+						swordNormal.x -= 1;
+					}
+					if (swordRotUp)
+					{
+						swordNormal.y += 1;
+					}
+					if (swordRotDown)
+					{
+						swordNormal.y -= 1;
+					}
+
+					if (swordNormal.x != 0 || swordNormal.y != 0)
+					{
+						swordNormal = Normalize(swordNormal);
+
+						r = std::atan2(swordNormal.y, swordNormal.x) * (180 / M_PI);
+					}
+				}
 
 				// std::cout << std::to_string(r) + "\n";
 
