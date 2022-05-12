@@ -291,7 +291,7 @@ void ECS::Update(float deltaTime)
 		ECS::main.RegisterComponent(new ColliderComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], false, false, false, false, false, true, false, EntityClass::player, 1.0f, 1.0f, 10.0f, 20.0f, 50.0f, 0.0f, -7.75f), player);
 		ECS::main.RegisterComponent(new MovementComponent(player, true, true, 4000.0f, 500.0f, 2.5f, 0.5f, 1000.0f, 0.7f, true, false, 0.9f, glm::vec2(100.0f, 400.0f), 50.0f, 20.0f, 1.5f, 0.15f, 0.3f, 5, 3.0f), player);
 		ECS::main.RegisterComponent(new InputComponent(player, true, moonlightBlade, true, 0.5f, 2, 1, 0.25f, 0.5f, lilyMap, lilyWreathedMap), player);
-		ECS::main.RegisterComponent(new CameraFollowComponent(player, true, 10.0f), player);
+		ECS::main.RegisterComponent(new CameraFollowComponent(player, true, 10.0f, false, false), player);
 		ECS::main.RegisterComponent(new HealthComponent(player, true, 1000.0f, false), player);
 		ECS::main.RegisterComponent(new AnimationComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], anim1, "idle", lilyMap, 1.0f, 1.0f, false, false), player);
 		AnimationComponent* a = (AnimationComponent*)player->componentIDMap[animationComponentID];
@@ -672,13 +672,15 @@ MovementComponent::MovementComponent(Entity* entity, bool active, bool canMove, 
 
 #pragma region Camera Follow Component
 
-CameraFollowComponent::CameraFollowComponent(Entity* entity, bool active, float speed)
+CameraFollowComponent::CameraFollowComponent(Entity* entity, bool active, float speed, bool lockX, bool lockY)
 {
 	this->ID = cameraFollowComponentID;
 	this->active = active;
 	this->entity = entity;
 
 	this->speed = speed;
+	this->lockX = lockX;
+	this->lockY = lockY;
 }
 
 #pragma endregion
@@ -2564,8 +2566,14 @@ void CameraFollowSystem::Update(int activeScene, float deltaTime)
 		{
 			PositionComponent* pos = (PositionComponent*)f->entity->componentIDMap[positionComponentID];
 
-			Game::main.camX = Lerp(Game::main.camX, pos->x, f->speed * deltaTime);
-			Game::main.camY = Lerp(Game::main.camY, pos->y, f->speed * deltaTime);
+			if (!f->lockX)
+			{
+				Game::main.camX = Lerp(Game::main.camX, pos->x, f->speed * deltaTime);
+			}
+			if (!f->lockY)
+			{
+				Game::main.camY = Lerp(Game::main.camY, pos->y, f->speed * deltaTime);
+			}
 		}
 	}
 }

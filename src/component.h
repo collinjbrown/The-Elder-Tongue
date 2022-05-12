@@ -268,7 +268,10 @@ class CameraFollowComponent : public Component
 public:
 	float speed;
 
-	CameraFollowComponent(Entity* entity, bool active, float speed);
+	bool lockX;
+	bool lockY;
+
+	CameraFollowComponent(Entity* entity, bool active, float speed, bool lockX, bool lockY);
 };
 
 class AnimationComponent : public Component
