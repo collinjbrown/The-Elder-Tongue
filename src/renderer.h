@@ -21,6 +21,7 @@ struct Vertex
 {
     float xCoord;
     float yCoord;
+    float zCoord;
 
     float rColor;
     float gColor;
@@ -88,8 +89,8 @@ public:
     Bundle DetermineBatch(int textureID, int mapID);
     void prepareQuad(PositionComponent* pos, float width, float height, float scaleX, float scaleY, glm::vec4 rgb, int textureID, int mapID, bool tiled, bool flippedX, bool flippedY);
     void prepareQuad(PositionComponent* pos, ColliderComponent* col, float width, float height, float scaleX, float scaleY, glm::vec4 rgb, int textureID, int mapID);
-    void prepareQuad(glm::vec2 topRight, glm::vec2 bottomRight, glm::vec2 bottomLeft, glm::vec2 topLeft, glm::vec4 rgb, float scaleX, float scaleY, int textureID, int mapID);
-    void prepareQuad(glm::vec2 position, float width, float height, float scaleX, float scaleY, glm::vec4 rgb, int textureID, int mapID); // Specify texture ID rather than index?
+    void prepareQuad(glm::vec2 topRight, glm::vec2 bottomRight, glm::vec2 bottomLeft, glm::vec2 topLeft, float z, glm::vec4 rgb, float scaleX, float scaleY, int textureID, int mapID);
+    void prepareQuad(glm::vec3 position, float width, float height, float scaleX, float scaleY, glm::vec4 rgb, int textureID, int mapID); // Specify texture ID rather than index?
     // NOTE: Directly sending a texture index rather than ID can result in the wrong texture being drawn (due to being in the wrong batch)
     void prepareQuad(PositionComponent* pos, float width, float height, float scaleX, float scaleY, glm::vec4 rgb, int animID, int mapID, int cellX, int cellY, int cols, int rows, bool flippedX, bool flippedY);
     void prepareQuad(int batchIndex, Quad& input);

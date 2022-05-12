@@ -50,7 +50,7 @@ public:
 	// Keyboard and Mouse Mappings
 	int bladeManualTargetKey = GLFW_MOUSE_BUTTON_3;
 	int bladeThrowKey = GLFW_MOUSE_BUTTON_2;
-	int dashKey = GLFW_KEY_E;
+	int dashKey = GLFW_KEY_LEFT_ALT;
 	int attackKey = GLFW_MOUSE_BUTTON_1;
 
 	int climbKey = GLFW_KEY_LEFT_SHIFT;

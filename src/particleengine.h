@@ -15,14 +15,18 @@ struct Particle
 {
 	float x;
 	float y;
+	float z;
+	
 	Element element;
 	int ticks;
 	int lifetime;
 
-	Particle(float x, float y, Element element, int lifetime)
+	Particle(float x, float y, float z, Element element, int lifetime)
 	{
 		this->x = x;
 		this->y = y;
+		this->z = z;
+
 		this->element = element;
 		this->lifetime = lifetime;
 
@@ -45,17 +49,17 @@ public:
 		this->tickDelay = tickDelay;
 	}
 
-	void AddParticle(float x, float y, Element element, int lifetime)
+	void AddParticle(float x, float y, float z, Element element, int lifetime)
 	{
-		Particle* p = new Particle(x, y, element, lifetime);
+		Particle* p = new Particle(x, y, z, element, lifetime);
 		particles.push_back(p);
 	}
 
-	void AddParticles(int number, float x, float y, Element element, int lifetime)
+	void AddParticles(int number, float x, float y, float z, Element element, int lifetime)
 	{
 		for (int i = 0; i < number; i++)
 		{
-			Particle* p = new Particle(x, y, element, lifetime);
+			Particle* p = new Particle(x, y, z, element, lifetime);
 			particles.push_back(p);
 		}
 	}
@@ -147,7 +151,7 @@ public:
 				{
 					particle->ticks += 1;
 					// Game::main.renderer->prepareQuad(glm::vec2(particle->x, particle->y), 1.0f, 1.0f, color, s->ID);
-					Game::main.renderer->prepareQuad(glm::vec2(particle->x, particle->y), s->width / 4.0f, s->height / 4.0f, 1.0f, 1.0f, color, s->ID, Game::main.textureMap["base_map"]->ID);
+					Game::main.renderer->prepareQuad(glm::vec3(particle->x, particle->y, particle->z), s->width / 4.0f, s->height / 4.0f, 1.0f, 1.0f, color, s->ID, Game::main.textureMap["base_map"]->ID);
 				}
 				else
 				{
@@ -184,7 +188,7 @@ public:
 					color = glm::vec4(0.5f, cr, 0.5f, 1.0f);
 				}
 
-				Game::main.renderer->prepareQuad(glm::vec2(particle->x, particle->y), s->width / 4.0f, s->height / 4.0f, 1.0f, 1.0f, color, s->ID, Game::main.textureMap["base_map"]->ID);
+				Game::main.renderer->prepareQuad(glm::vec3(particle->x, particle->y, particle->z), s->width / 4.0f, s->height / 4.0f, 1.0f, 1.0f, color, s->ID, Game::main.textureMap["base_map"]->ID);
 			}
 		}
 	}

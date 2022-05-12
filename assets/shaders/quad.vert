@@ -1,6 +1,6 @@
 #version 330
 
-layout (location = 0) in vec2 posCoords;
+layout (location = 0) in vec3 posCoords;
 layout (location = 1) in vec4 vertRgbaColor;
 layout (location = 2) in vec2 vertTexCoords;
 layout (location = 3) in float vertTexIndex;
@@ -24,5 +24,5 @@ void main()
     mapMod = vertMapMod;
     // mLod = vertLod;
     
-    gl_Position = MVP * vec4(posCoords, 0.0, 1.0);
+    gl_Position = MVP * vec4(posCoords, 1.0);
 }

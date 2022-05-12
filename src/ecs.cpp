@@ -289,7 +289,7 @@ void ECS::Update(float deltaTime)
 		ECS::main.RegisterComponent(new PositionComponent(player, true, false, 0, 100, 0, 0.0f), player);
 		ECS::main.RegisterComponent(new PhysicsComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 5000.0f, 2000.0f), player);
 		ECS::main.RegisterComponent(new ColliderComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], false, false, false, false, false, true, false, EntityClass::player, 1.0f, 1.0f, 10.0f, 20.0f, 50.0f, 0.0f, -7.75f), player);
-		ECS::main.RegisterComponent(new MovementComponent(player, true, true, 4000.0f, 500.0f, 2.5f, 0.5f, 1000.0f, 0.7f, true, false, 0.9f, glm::vec2(100.0f, 400.0f), 50.0f, 20.0f, 1.5f, 0.25f, 0.5f, 5, 3.0f), player);
+		ECS::main.RegisterComponent(new MovementComponent(player, true, true, 4000.0f, 500.0f, 2.5f, 0.5f, 1000.0f, 0.7f, true, false, 0.9f, glm::vec2(100.0f, 400.0f), 50.0f, 20.0f, 1.5f, 0.15f, 0.3f, 5, 3.0f), player);
 		ECS::main.RegisterComponent(new InputComponent(player, true, moonlightBlade, true, 0.5f, 2, 1, 0.25f, 0.5f, lilyMap, lilyWreathedMap), player);
 		ECS::main.RegisterComponent(new CameraFollowComponent(player, true, 10.0f), player);
 		ECS::main.RegisterComponent(new HealthComponent(player, true, 1000.0f, false), player);
@@ -1256,7 +1256,7 @@ void ColliderSystem::Update(int activeScene, float deltaTime)
 						{
 							if (aDamage->lodges)
 							{
-								ParticleEngine::main.AddParticles(5, physA->pos->x, physA->pos->y, Element::dust, rand() % 10 + 1);
+								ParticleEngine::main.AddParticles(5, physA->pos->x, physA->pos->y, physA->pos->z, Element::dust, rand() % 10 + 1);
 								aDamage->lodged = true;
 
 								cA->active = false;
@@ -1305,7 +1305,7 @@ void ColliderSystem::Update(int activeScene, float deltaTime)
 							{
 								bDamage->lodged = true;
 
-								ParticleEngine::main.AddParticles(5, physB->pos->x, physB->pos->y, Element::dust, rand() % 10 + 1);
+								ParticleEngine::main.AddParticles(5, physB->pos->x, physB->pos->y, physA->pos->z, Element::dust, rand() % 10 + 1);
 								cB->active = false;
 
 								physB->velocityX = 0.0f;
@@ -2052,7 +2052,7 @@ void InputSystem::Update(int activeScene, float deltaTime)
 					move->dashing = false;
 				}
 
-				if (move->dashing)
+				if (move->dashing || move->attacking)
 				{
 					phys->gravityMod = 0.0f;
 				}
@@ -2163,7 +2163,7 @@ void InputSystem::Update(int activeScene, float deltaTime)
 					{
 						for (int k = 0; k < 5; k++)
 						{
-							ParticleEngine::main.AddParticles(1, playerPos.x + (j * 5), playerPos.y + (k * 5), magicParticles, rand() % 10 + 1);
+							ParticleEngine::main.AddParticles(1, playerPos.x + (j * 5), playerPos.y + (k * 5), 0, magicParticles, rand() % 10 + 1);
 						}
 					}
 					anComp->mapTex = m->wreathedMap;
@@ -2187,7 +2187,7 @@ void InputSystem::Update(int activeScene, float deltaTime)
 
 						if ((int)(m->lastDash * 100) % 2 == 0 && move->dashing)
 						{
-							ParticleEngine::main.AddParticles(3, playerPos.x, playerPos.y, magicParticles, rand() % 10 + 1);
+							ParticleEngine::main.AddParticles(3, playerPos.x, playerPos.y, 0, magicParticles, rand() % 10 + 1);
 						}
 					}
 
@@ -2198,7 +2198,7 @@ void InputSystem::Update(int activeScene, float deltaTime)
 						{
 							for (int k = 0; k < 5; k++)
 							{
-								ParticleEngine::main.AddParticles(1, playerPos.x + (j * 5), playerPos.y + (k * 5), magicParticles, rand() % 10 + 1);
+								ParticleEngine::main.AddParticles(1, playerPos.x + (j * 5), playerPos.y + (k * 5), 0, magicParticles, rand() % 10 + 1);
 							}
 						}
 
@@ -2247,15 +2247,13 @@ void InputSystem::Update(int activeScene, float deltaTime)
 
 							projVel *= move->slashSpeed;
 
-							if (abs(phys->velocityY) < 100.0f)
+							phys->velocityX = 0;
+							phys->velocityY = 0;
+
+							/*if (move->attackNumber == 1 && col->onPlatform || move->attackNumber == 1 && abs(phys->velocityY) < 100.0f && !move->jumping)
 							{
 								phys->velocityY += move->attackThrust.y;
-							}
-
-							if (phys->velocityY < 0)
-							{
-								phys->velocityY = 0;
-							}
+							}*/
 
 							if (move->attackNumber % 2 == 0)
 							{
@@ -2307,7 +2305,7 @@ void InputSystem::Update(int activeScene, float deltaTime)
 							{
 								for (int k = 0; k < 5; k++)
 								{
-									ParticleEngine::main.AddParticles(1, playerPos.x + (j * 5), playerPos.y + (k * 5), magicParticles, rand() % 10 + 1);
+									ParticleEngine::main.AddParticles(1, playerPos.x + (j * 5), playerPos.y + (k * 5), 0, magicParticles, rand() % 10 + 1);
 								}
 							}
 
@@ -2368,7 +2366,7 @@ void InputSystem::Update(int activeScene, float deltaTime)
 					blade->manualTarget = glm::vec2(0, 0);
 				}
 
-				if (!move->dashing)
+				if (!move->dashing && !move->attacking)
 				{
 					if (m->coyoteTime < m->maxCoyoteTime && !col->onPlatform)
 					{
@@ -2399,7 +2397,7 @@ void InputSystem::Update(int activeScene, float deltaTime)
 							phys->velocityY = 0;
 						}
 
-						ParticleEngine::main.AddParticles(25, phys->pos->x, phys->pos->y, magicParticles, rand() % 40 + 1);
+						ParticleEngine::main.AddParticles(25, phys->pos->x, phys->pos->y, 0, magicParticles, rand() % 40 + 1);
 
 						m->releasedJump = false;
 						m->coyoteTime = m->maxCoyoteTime;
@@ -2451,7 +2449,7 @@ void InputSystem::Update(int activeScene, float deltaTime)
 
 					if (move->crouching && abs(phys->velocityX) - 10.0f > move->maxSpeed * move->crouchMod && col->onPlatform)
 					{
-						ParticleEngine::main.AddParticles(1, phys->pos->x, phys->pos->y - 30.0f, mundaneParticles, rand() % 10 + 1);
+						ParticleEngine::main.AddParticles(1, phys->pos->x, phys->pos->y - 30.0f, 0, mundaneParticles, rand() % 10 + 1);
 
 						phys->drag = phys->baseDrag * 0.1f;
 					}
@@ -2492,7 +2490,7 @@ void InputSystem::Update(int activeScene, float deltaTime)
 
 					if (climbDown && move->canMove && move->climbing)
 					{
-						ParticleEngine::main.AddParticles(1, phys->pos->x, phys->pos->y + 20.0f, mundaneParticles, rand() % 10 + 1);
+						ParticleEngine::main.AddParticles(1, phys->pos->x, phys->pos->y + 20.0f, 0, mundaneParticles, rand() % 10 + 1);
 						if (phys->velocityY > -move->maxSpeed * mod)
 						{
 							phys->velocityY -= move->acceleration * deltaTime * mod;
@@ -2505,7 +2503,7 @@ void InputSystem::Update(int activeScene, float deltaTime)
 						{
 							if (abs(phys->velocityX) < 0.5f && col->onPlatform)
 							{
-								ParticleEngine::main.AddParticles(10, phys->pos->x, phys->pos->y - 30.0f, mundaneParticles, rand() % 10 + 1);
+								ParticleEngine::main.AddParticles(10, phys->pos->x, phys->pos->y - 30.0f, 0, mundaneParticles, rand() % 10 + 1);
 							}
 
 							phys->velocityX += move->acceleration * deltaTime * mod;
@@ -2517,7 +2515,7 @@ void InputSystem::Update(int activeScene, float deltaTime)
 						{
 							if (abs(phys->velocityX) < 0.5f && col->onPlatform)
 							{
-								ParticleEngine::main.AddParticles(10, phys->pos->x, phys->pos->y - 30.0f, mundaneParticles, rand() % 10 + 1);
+								ParticleEngine::main.AddParticles(10, phys->pos->x, phys->pos->y - 30.0f, 0, mundaneParticles, rand() % 10 + 1);
 							}
 
 							phys->velocityX -= move->acceleration * deltaTime * mod;
@@ -2898,7 +2896,7 @@ void ParticleSystem::Update(int activeScene, float deltaTime)
 				{
 					float lifetime = p->minLifetime + static_cast<float>(rand()) * static_cast<float>(p->maxLifetime - p->minLifetime) / RAND_MAX;
 
-					ParticleEngine::main.AddParticles(p->number, pPos.x, pPos.y, p->element, lifetime);
+					ParticleEngine::main.AddParticles(p->number, pPos.x, pPos.y, pos->z, p->element, lifetime);
 				}
 			}
 			else
@@ -3233,6 +3231,10 @@ void BladeSystem::Update(int activeScene, float deltaTime)
 
 					if (dist > b->rushRange)
 					{
+						float distMod = dist / b->rushRange;
+
+						distMod = min(distMod, 5.0f);
+
 						posA->x += vel.x * (1.0f / b->followSpeed) * (followSpeedModifier * 200 * deltaTime);
 						posA->y += vel.y * (1.0f / b->followSpeed) * (followSpeedModifier * 200 * deltaTime);
 					}
@@ -3297,7 +3299,7 @@ void BladeSystem::Update(int activeScene, float deltaTime)
 			else
 			{
 				// We are in flight.
-				ParticleEngine::main.AddParticles(1, physA->pos->x, physA->pos->y, Element::aether, rand() % 10 + 1);
+				ParticleEngine::main.AddParticles(1, physA->pos->x, physA->pos->y, 0, Element::aether, rand() % 10 + 1);
 				b->platformCollider->active = false;
 				colA->active = true;
 				damA->active = true;
