@@ -289,7 +289,7 @@ void ECS::Update(float deltaTime)
 		ECS::main.RegisterComponent(new PositionComponent(player, true, false, 0, 100, 0, 0.0f), player);
 		ECS::main.RegisterComponent(new PhysicsComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 5000.0f, 2000.0f), player);
 		ECS::main.RegisterComponent(new ColliderComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], false, false, false, false, false, true, false, EntityClass::player, 1.0f, 1.0f, 10.0f, 20.0f, 50.0f, 0.0f, -7.75f), player);
-		ECS::main.RegisterComponent(new MovementComponent(player, true, true, 4000.0f, 500.0f, 2.5f, 0.5f, 1000.0f, 0.7f, true, false, 0.9f), player);
+		ECS::main.RegisterComponent(new MovementComponent(player, true, true, 4000.0f, 500.0f, 2.5f, 0.5f, 1000.0f, 0.7f, true, false, 0.9f, glm::vec2(100.0f, 400.0f), 50.0f, 20.0f, 1.5f, 0.25f, 0.5f, 5, 3.0f), player);
 		ECS::main.RegisterComponent(new InputComponent(player, true, moonlightBlade, true, 0.5f, 2, 1, 0.25f, 0.5f, lilyMap, lilyWreathedMap), player);
 		ECS::main.RegisterComponent(new CameraFollowComponent(player, true, 10.0f), player);
 		ECS::main.RegisterComponent(new HealthComponent(player, true, 1000.0f, false), player);
@@ -315,17 +315,17 @@ void ECS::Update(float deltaTime)
 			a->AddAnimation(s + "slide", Game::main.animationMap[s + "baseSlide"]);
 			a->AddAnimation(s + "slideDown", Game::main.animationMap[s + "baseSlideDown"]);
 			a->AddAnimation(s + "jumpDown", Game::main.animationMap[s + "baseJumpDown"]);
-			/*a->AddAnimation(s + "slashOne", Game::main.animationMap[s + "baseSlashOne"]);
-			a->AddAnimation(s + "slashTwo", Game::main.animationMap[s + "baseSlashTwo"]);*/
+			a->AddAnimation(s + "slashOne", Game::main.animationMap[s + "baseSlashOne"]);
+			a->AddAnimation(s + "slashTwo", Game::main.animationMap[s + "baseSlashTwo"]);
 			a->AddAnimation(s + "dead", Game::main.animationMap[s + "baseDeath"]);
 		}
 		#pragma endregion
 
-		Texture2D* wallTex = Game::main.textureMap["wall"];
+		/*Texture2D* wallTex = Game::main.textureMap["wall"];
 		Texture2D* wallTexMap = Game::main.textureMap["wallMap"];
 		Entity* wall = CreateEntity(0, "wall");
 		ECS::main.RegisterComponent(new PositionComponent(wall, true, true, 0, 0, -100, 0.0f), wall);
-		ECS::main.RegisterComponent(new StaticSpriteComponent(wall, true, (PositionComponent*)wall->componentIDMap[positionComponentID], wallTex->width, wallTex->height, 1000.0f, 1000.0f, wallTex, wallTexMap, false, false, true), wall);
+		ECS::main.RegisterComponent(new StaticSpriteComponent(wall, true, (PositionComponent*)wall->componentIDMap[positionComponentID], wallTex->width, wallTex->height, 1000.0f, 1000.0f, wallTex, wallTexMap, false, false, true), wall);*/
 
 		Texture2D* tex3 = Game::main.textureMap["blank"];
 		Texture2D* tex3Map = Game::main.textureMap["base_map"];
@@ -614,7 +614,8 @@ InputComponent::InputComponent(Entity* entity, bool active, Entity* moonlightBla
 
 #pragma region Movement Component
 
-MovementComponent::MovementComponent(Entity* entity, bool active, bool canMove, float acceleration, float maxSpeed, float maxJumpHeight, float airControl, float dashSpeed, float crouchMod, bool canClimb, bool shouldClimb, float climbMod)
+MovementComponent::MovementComponent(Entity* entity, bool active, bool canMove, float acceleration, float maxSpeed, float maxJumpHeight, float airControl, float dashSpeed, float crouchMod, bool canClimb, bool shouldClimb, float climbMod,
+									glm::vec2 attackThrust, float slashSpeed, float damage, float attackMultiplier, float minAttackDelay, float maxAttackDelay, int maxFlurry, float flurryDelay)
 {
 	this->canMove = canMove;
 	this->enwreathed = false;
@@ -648,6 +649,23 @@ MovementComponent::MovementComponent(Entity* entity, bool active, bool canMove, 
 
 	this->maxClimbHeight = 0.0f;
 	this->minClimbHeight = 0.0f;
+
+
+	this->attacking = false;
+	this->attackThrust = attackThrust;
+	this->slashSpeed = slashSpeed;
+
+	this->damage = damage;
+	this->attackMultiplier = attackMultiplier;
+	this->attackNumber = 0;
+
+	this->lastAttack = 0.0f;
+	this->minAttackDelay = minAttackDelay;
+	this->maxAttackDelay = maxAttackDelay;
+
+	this->maxFlurry = maxFlurry;
+	this->lastFlurry = 0.0f;
+	this->flurryDelay = flurryDelay;
 }
 
 #pragma endregion
@@ -1833,6 +1851,7 @@ void InputSystem::Update(int activeScene, float deltaTime)
 
 			bool bladeManualTarget = ((glfwGetKey(Game::main.window, Game::main.bladeManualTargetKey) == GLFW_PRESS) || (glfwGetMouseButton(Game::main.window, Game::main.bladeManualTargetKey) == GLFW_PRESS));
 			bool bladeThrow = ((glfwGetKey(Game::main.window, Game::main.bladeThrowKey) == GLFW_PRESS) || (glfwGetMouseButton(Game::main.window, Game::main.bladeThrowKey) == GLFW_PRESS));
+			bool attack = ((glfwGetKey(Game::main.window, Game::main.attackKey) == GLFW_PRESS) || (glfwGetMouseButton(Game::main.window, Game::main.attackKey) == GLFW_PRESS));
 			bool dash = ((glfwGetKey(Game::main.window, Game::main.dashKey) == GLFW_PRESS) || (glfwGetMouseButton(Game::main.window, Game::main.dashKey) == GLFW_PRESS));
 			bool climb = ((glfwGetKey(Game::main.window, Game::main.climbKey) == GLFW_PRESS) || (glfwGetMouseButton(Game::main.window, Game::main.climbKey) == GLFW_PRESS));
 			bool dropWeapon = ((glfwGetKey(Game::main.window, Game::main.dropWeaponKey) == GLFW_PRESS) || (glfwGetMouseButton(Game::main.window, Game::main.dropWeaponKey) == GLFW_PRESS));
@@ -1872,6 +1891,11 @@ void InputSystem::Update(int activeScene, float deltaTime)
 																Game::main.bladeThrowPadType == InputType::stickPos && state.axes[Game::main.bladeThrowPad] > 0.1f ||
 																Game::main.bladeThrowPadType == InputType::stickNeg && state.axes[Game::main.bladeThrowPad] < -0.1f ||
 																Game::main.bladeThrowPadType == InputType::button && state.buttons[Game::main.bladeThrowPad]);
+
+				if (!attack) attack =							(Game::main.attackPadType == InputType::trigger && state.axes[Game::main.attackPad] + 1 ||
+																Game::main.attackPadType == InputType::stickPos && state.axes[Game::main.attackPad] > 0.1f ||
+																Game::main.attackPadType == InputType::stickNeg && state.axes[Game::main.attackPad] < -0.1f ||
+																Game::main.attackPadType == InputType::button && state.buttons[Game::main.attackPad]);
 
 				if (!dash) dash =								(Game::main.dashPadType == InputType::trigger && state.axes[Game::main.dashPad] + 1 ||
 																Game::main.dashPadType == InputType::stickPos && state.axes[Game::main.dashPad] > 0.1f ||
@@ -2189,56 +2213,145 @@ void InputSystem::Update(int activeScene, float deltaTime)
 
 						m->lastDash = m->dashLength - 0.1f;
 					}
-					else if (dash && m->dashes < m->maxDashes && m->lastDash >= m->dashLength)
+					else
 					{
-						for (int j = 0; j < 5; j++)
+						if (attack && move->lastAttack > move->minAttackDelay && move->lastFlurry > move->flurryDelay && move->attackNumber < move->maxFlurry && !move->climbing)
 						{
-							for (int k = 0; k < 5; k++)
+							move->attacking = true;
+							move->attackNumber++;
+
+							if (move->attackNumber >= move->maxFlurry)
 							{
-								ParticleEngine::main.AddParticles(1, playerPos.x + (j * 5), playerPos.y + (k * 5), magicParticles, rand() % 10 + 1);
+								move->lastFlurry = 0.0f;
+							}
+
+							move->climbing = false;
+							move->shouldClimb = false;
+
+							move->lastAttack = 0.0f;
+
+							glm::vec2 projVel;
+
+							Texture2D* sMap = Game::main.textureMap["wreathed_slashMap"];
+							Animation2D* anim;
+
+							if (phys->velocityX < 0)
+							{
+								projVel = glm::vec2(-1, 0);
+
+							}
+							else
+							{
+								projVel = glm::vec2(1, 0);
+							}
+
+							projVel *= move->slashSpeed;
+
+							if (abs(phys->velocityY) < 100.0f)
+							{
+								phys->velocityY += move->attackThrust.y;
+							}
+
+							if (phys->velocityY < 0)
+							{
+								phys->velocityY = 0;
+							}
+
+							if (move->attackNumber % 2 == 0)
+							{
+								anim = Game::main.animationMap["wreathed_slashDown"];
+							}
+							else
+							{
+								anim = Game::main.animationMap["wreathed_slashUp"];
+							}
+
+							float t = anim->speed * (anim->columns * anim->rows);
+
+							Entity* projectile = ECS::main.CreateEntity(0, "Slash");
+
+							ECS::main.RegisterComponent(new PositionComponent(projectile, true, false, playerPos.x, playerPos.y, playerPos.z, 0.0f), projectile);
+							ECS::main.RegisterComponent(new PhysicsComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], phys->velocityX + projVel.x, phys->velocityY + projVel.y, 0.0f, 0.0f, 0.0f), projectile);
+							ECS::main.RegisterComponent(new ColliderComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], false, false, true, false, true, false, true, EntityClass::object, 1.0f, 0.0f, 0.0f, 5.0f, 5.0f, 0.0f, 0.0f), projectile);
+							ECS::main.RegisterComponent(new AnimationComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], anim, "default", sMap, 1.0f, 1.0f, false, false), projectile);
+							ECS::main.RegisterComponent(new DamageComponent(projectile, true, move->entity, true, t, true, true, 1, 20.0f, false, true, true, false), projectile);
+
+							PhysicsComponent* p = (PhysicsComponent*)projectile->componentIDMap[physicsComponentID];
+							if (p->velocityX < 0 || anComp->flippedX)
+							{
+								AnimationComponent* a = (AnimationComponent*)projectile->componentIDMap[animationComponentID];
+
+								a->flippedX = true;
+							}
+
+						}
+						else
+						{
+							move->lastFlurry += deltaTime;
+							move->lastAttack += deltaTime;
+						}
+
+						if (move->lastAttack > move->maxAttackDelay)
+						{
+							move->attacking = false;
+
+							if (col->onPlatform)
+							{
+								move->attackNumber = 0;
 							}
 						}
 
-						glm::vec2 dashDirection = glm::vec2(0, 0);
-
-						if (dashRight)
+						if (dash && m->dashes < m->maxDashes && m->lastDash >= m->dashLength && !move->attacking)
 						{
-							dashDirection.x = 1.0f;
+							for (int j = 0; j < 5; j++)
+							{
+								for (int k = 0; k < 5; k++)
+								{
+									ParticleEngine::main.AddParticles(1, playerPos.x + (j * 5), playerPos.y + (k * 5), magicParticles, rand() % 10 + 1);
+								}
+							}
+
+							glm::vec2 dashDirection = glm::vec2(0, 0);
+
+							if (dashRight)
+							{
+								dashDirection.x = 1.0f;
+							}
+							else if (dashLeft)
+							{
+								dashDirection.x = -1.0f;
+							}
+
+							if (dashUp)
+							{
+								dashDirection.y = 1.0f;
+							}
+							else if (dashDown)
+							{
+								dashDirection.y = -1.0f;
+							}
+
+							if (dashDirection.x == 0 && dashDirection.y == 0)
+							{
+								dashDirection = glm::vec2(0, 1);
+							}
+
+							glm::vec2 projVel = Normalize(dashDirection) * move->dashSpeed;
+
+							m->dashes++;
+							m->lastDash = 0.0f;
+
+							move->dashing = true;
+							move->jumping = false;
+							move->climbing = false;
+							move->shouldClimb = false;
+
+							phys->velocityX = projVel.x;
+							phys->velocityY = projVel.y;
 						}
-						else if (dashLeft)
-						{
-							dashDirection.x = -1.0f;
-						}
-
-						if (dashUp)
-						{
-							dashDirection.y = 1.0f;
-						}
-						else if (dashDown)
-						{
-							dashDirection.y = -1.0f;
-						}
-
-						if (dashDirection.x == 0 && dashDirection.y == 0)
-						{
-							dashDirection = glm::vec2(0, 1);
-						}
-
-						glm::vec2 projVel = Normalize(dashDirection) * move->dashSpeed;
-
-						m->dashes++;
-						m->lastDash = 0.0f;
-
-						move->dashing = true;
-						move->jumping = false;
-						move->climbing = false;
-						move->shouldClimb = false;
-
-						phys->velocityX = projVel.x;
-						phys->velocityY = projVel.y;
 					}
 				}
-				else if (dash && !blade->held && !blade->returningToHand)
+				else if (attack && !blade->held && !blade->returningToHand)
 				{
 					bladeComponent->returningToHand = true;
 					bladePhys->velocityX = 0.0f;
@@ -2531,21 +2644,21 @@ void AnimationControllerSystem::Update(int activeScene, float deltaTime)
 						c->animator->flippedX = false;
 					}
 
-					/*if (move->isAttacking && move->attackNumber % 2 == 0)
+					if (move->attacking && move->attackNumber % 2 == 0)
 					{
 						if (c->animator->activeAnimation != s + "slashTwo")
 						{
 							c->animator->SetAnimation(s + "slashTwo");
 						}
 					}
-					else if (move->isAttacking && move->attackNumber % 2 != 0)
+					else if (move->attacking && move->attackNumber % 2 != 0)
 					{
 						if (c->animator->activeAnimation != s + "slashOne")
 						{
 							c->animator->SetAnimation(s + "slashOne");
 						}
-					}*/
-					if (abs(p->velocityY) > 200.0f && !col->onPlatform && !move->climbing && !move->wallRunning)
+					}
+					else if (abs(p->velocityY) > 200.0f && !col->onPlatform && !move->climbing && !move->wallRunning)
 					{
 						if (c->animator->activeAnimation != s + "jumpUp" && p->velocityY > 0)
 						{

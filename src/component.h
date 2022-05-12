@@ -243,7 +243,24 @@ public:
 	float maxClimbHeight;
 	float minClimbHeight;
 
-	MovementComponent(Entity* entity, bool active, bool canMove, float acceleration, float maxSpeed, float maxJumpHeight, float airControl, float dashSpeed, float crouchMod, bool canClimb, bool shouldClimb, float climbMod);
+	bool attacking;
+	glm::vec2 attackThrust;
+	float slashSpeed;
+
+	float damage;
+	float attackMultiplier;
+	int attackNumber;
+
+	float lastAttack;
+	float minAttackDelay;
+	float maxAttackDelay;
+
+	int maxFlurry;
+	float lastFlurry;
+	float flurryDelay;
+
+	MovementComponent(Entity* entity, bool active, bool canMove, float acceleration, float maxSpeed, float maxJumpHeight, float airControl, float dashSpeed, float crouchMod, bool canClimb, bool shouldClimb, float climbMod,
+						glm::vec2 attackThrust, float slashSpeed, float damage, float attackMultiplier, float minAttackDelay, float maxAttackDelay, int maxFlurry, float flurryDelay);
 };
 
 class CameraFollowComponent : public Component
