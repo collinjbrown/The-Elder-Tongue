@@ -206,16 +206,15 @@ public:
 	float targetDelay;
 
 	Texture2D* baseMap;
-	Texture2D* wreathedMap;
+	Texture2D* swordMap;
+	Texture2D* rifleMap;
 
-	InputComponent(Entity* entity, bool active, Entity* moonlightBlade, bool acceptInput, float maxCoyoteTime, int maxJumps, float maxDashes, float dashLength, float targetDelay, Texture2D* baseMap, Texture2D* wreathedMap);
+	InputComponent(Entity* entity, bool active, Entity* moonlightBlade, bool acceptInput, float maxCoyoteTime, int maxJumps, float maxDashes, float dashLength, float targetDelay, Texture2D* baseMap, Texture2D* swordMap, Texture2D* rifleMap);
 };
 
 class MovementComponent : public Component
 {
 public:
-	// Does Lily have her sword and is she kicking ass?
-	bool enwreathed;
 	bool canMove;
 
 	float acceleration;
@@ -382,10 +381,13 @@ public:
 	AIComponent(Entity* entity, bool active, bool proc, float procRange, float chaseRange, float movementSpeed, float projectileSpeed, float attackRate, AIType aiType);
 };
 
+enum class BladeState { floating, heldSword, heldRifle };
 class BladeComponent : public Component
 {
 public:
-	bool held;
+	BladeState bladeState;
+	BladeState storedBladeState;
+
 	bool returningToHand;
 
 	bool attacking;
@@ -408,7 +410,7 @@ public:
 	float lastTargetSet;
 	float minTargetSetDelay;
 
-	BladeComponent(Entity* entity, bool active, float rushRange, float slowRange, float catchRange, float followSpeed, float projectileSpeed, ColliderComponent* platformCollider, Texture2D* corporealMap, Texture2D* incorporealMap, float minTargetSetDelay);
+	BladeComponent(Entity* entity, bool active, BladeState bladeState, float rushRange, float slowRange, float catchRange, float followSpeed, float projectileSpeed, ColliderComponent* platformCollider, Texture2D* corporealMap, Texture2D* incorporealMap, float minTargetSetDelay);
 };
 
 enum class Anchor { topLeft, bottomLeft, topRight, bottomRight };

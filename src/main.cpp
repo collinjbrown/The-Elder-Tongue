@@ -142,17 +142,17 @@ int main(void)
     renderer.textureIDs.push_back(moonlightSlashMap.ID);
     Game::main.textureMap.emplace("moonlightSlashMap", &moonlightSlashMap);*/
 
-    Texture2D wreathedSlashMap{ "assets/animations/slash/wreathed_slash_map.png", true, GL_NEAREST };
-    renderer.textureIDs.push_back(wreathedSlashMap.ID);
-    Game::main.textureMap.emplace("wreathed_slashMap", &wreathedSlashMap);
+    Texture2D swordSlashMap{ "assets/animations/slash/sword_slash_map.png", true, GL_NEAREST };
+    renderer.textureIDs.push_back(swordSlashMap.ID);
+    Game::main.textureMap.emplace("sword_slashMap", &swordSlashMap);
 
-    Animation2D wreathedSlashUp{ "assets/animations/slash/wreathed_slashOne.png", true, 3, 3, 0.01f, { 2, 3, 3 }, false, GL_NEAREST };
-    renderer.textureIDs.push_back(wreathedSlashUp.ID);
-    Game::main.animationMap.emplace("wreathed_slashUp", &wreathedSlashUp);
+    Animation2D swordSlashUp{ "assets/animations/slash/sword_slashOne.png", true, 3, 3, 0.01f, { 2, 3, 3 }, false, GL_NEAREST };
+    renderer.textureIDs.push_back(swordSlashUp.ID);
+    Game::main.animationMap.emplace("sword_slashUp", &swordSlashUp);
 
-    Animation2D wreathedSlashDown{ "assets/animations/slash/wreathed_slashTwo.png", true, 3, 3, 0.01f, { 2, 3, 3 }, false, GL_NEAREST };
-    renderer.textureIDs.push_back(wreathedSlashDown.ID);
-    Game::main.animationMap.emplace("wreathed_slashDown", &wreathedSlashDown);
+    Animation2D swordSlashDown{ "assets/animations/slash/sword_slashTwo.png", true, 3, 3, 0.01f, { 2, 3, 3 }, false, GL_NEAREST };
+    renderer.textureIDs.push_back(swordSlashDown.ID);
+    Game::main.animationMap.emplace("sword_slashDown", &swordSlashDown);
 
     /*Texture2D slashMap{ "assets/animations/slash/slash_map.png", true, GL_NEAREST };
     renderer.textureIDs.push_back(slashMap.ID);
@@ -282,90 +282,110 @@ int main(void)
 
     #pragma endregion
 
-    #pragma region Offensive (as in Combat) Player Animations
+    #pragma region Sword-Wielding Player Animations
 
-    Texture2D lilyWreathedMap{ "assets/animations/lily/wreathed/lily_wreathed_map.png", true, GL_NEAREST };
-    renderer.textureIDs.push_back(lilyWreathedMap.ID);
-    Game::main.textureMap.emplace("lilyWreathedMap", &lilyWreathedMap);
+    Texture2D lilySwordMap{ "assets/animations/lily/armed/sword/lily_sword_map.png", true, GL_NEAREST };
+    renderer.textureIDs.push_back(lilySwordMap.ID);
+    Game::main.textureMap.emplace("lilySwordMap", &lilySwordMap);
 
-    Animation2D wreathedIdle{ "assets/animations/lily/wreathed/wreathed_lily_idle.png", true, 2, 2, 0.5f, { 2, 2 }, true, GL_NEAREST };
-    renderer.textureIDs.push_back(wreathedIdle.ID);
-    Game::main.animationMap.emplace("wreathed_baseIdle", &wreathedIdle);
+    Animation2D swordIdle{ "assets/animations/lily/armed/sword/sword_lily_idle.png", true, 2, 2, 0.5f, { 2, 2 }, true, GL_NEAREST };
+    renderer.textureIDs.push_back(swordIdle.ID);
+    Game::main.animationMap.emplace("sword_baseIdle", &swordIdle);
 
-    Animation2D wreathedWalk{ "assets/animations/lily/wreathed/wreathed_lily_run.png", true, 3, 4, 0.05f, { 1, 3, 3, 3 }, true, GL_NEAREST };
-    renderer.textureIDs.push_back(wreathedWalk.ID);
-    Game::main.animationMap.emplace("wreathed_baseWalk", &wreathedWalk);
+    Animation2D swordWalk{ "assets/animations/lily/armed/sword/sword_lily_run.png", true, 3, 4, 0.05f, { 1, 3, 3, 3 }, true, GL_NEAREST };
+    renderer.textureIDs.push_back(swordWalk.ID);
+    Game::main.animationMap.emplace("sword_baseWalk", &swordWalk);
 
-    Animation2D wreathedJumpUp{ "assets/animations/lily/wreathed/wreathed_lily_up.png", true, 2, 2, 0.1f, { 1, 2 }, true, GL_NEAREST };
-    renderer.textureIDs.push_back(wreathedJumpUp.ID);
-    Game::main.animationMap.emplace("wreathed_baseJumpUp", &wreathedJumpUp);
+    Animation2D swordJumpUp{ "assets/animations/lily/armed/sword/sword_lily_up.png", true, 2, 2, 0.1f, { 1, 2 }, true, GL_NEAREST };
+    renderer.textureIDs.push_back(swordJumpUp.ID);
+    Game::main.animationMap.emplace("sword_baseJumpUp", &swordJumpUp);
 
-    Animation2D wreathedJumpDown{ "assets/animations/lily/wreathed/wreathed_lily_down.png", true,  2, 2, 0.5f, { 2, 2 }, true, GL_NEAREST };
-    renderer.textureIDs.push_back(wreathedJumpDown.ID);
-    Game::main.animationMap.emplace("wreathed_baseJumpDown", &wreathedJumpDown);
+    Animation2D swordJumpDown{ "assets/animations/lily/armed/sword/sword_lily_down.png", true,  2, 2, 0.5f, { 2, 2 }, true, GL_NEAREST };
+    renderer.textureIDs.push_back(swordJumpDown.ID);
+    Game::main.animationMap.emplace("sword_baseJumpDown", &swordJumpDown);
 
-    Animation2D wreathedWallRun{ "assets/animations/lily/wreathed/wreathed_lily_wallRun.png", true,  3, 4, 0.1f, { 1, 3, 3, 3 }, true, GL_NEAREST };
-    renderer.textureIDs.push_back(wreathedWallRun.ID);
-    Game::main.animationMap.emplace("wreathed_baseWallRun", &wreathedWallRun);
+    Animation2D swordWallRun{ "assets/animations/lily/armed/sword/sword_lily_wallRun.png", true,  3, 4, 0.1f, { 1, 3, 3, 3 }, true, GL_NEAREST };
+    renderer.textureIDs.push_back(swordWallRun.ID);
+    Game::main.animationMap.emplace("sword_baseWallRun", &swordWallRun);
 
-    Animation2D wreathedSlideDown{ "assets/animations/lily/wreathed/wreathed_lily_slideDown.png", true,  1, 1, 5.0f, { 1 }, true, GL_NEAREST };
-    renderer.textureIDs.push_back(wreathedSlideDown.ID);
-    Game::main.animationMap.emplace("wreathed_baseSlideDown", &wreathedSlideDown);
+    Animation2D swordSlideDown{ "assets/animations/lily/armed/sword/sword_lily_slideDown.png", true,  1, 1, 5.0f, { 1 }, true, GL_NEAREST };
+    renderer.textureIDs.push_back(swordSlideDown.ID);
+    Game::main.animationMap.emplace("sword_baseSlideDown", &swordSlideDown);
 
-    Animation2D wreathedSlide{ "assets/animations/lily/wreathed/wreathed_lily_slide.png", true,  1, 2, 1.0f, { 1, 1 }, true, GL_NEAREST };
-    renderer.textureIDs.push_back(wreathedSlide.ID);
-    Game::main.animationMap.emplace("wreathed_baseSlide", &wreathedSlide);
+    Animation2D swordSlide{ "assets/animations/lily/armed/sword/sword_lily_slide.png", true,  1, 2, 1.0f, { 1, 1 }, true, GL_NEAREST };
+    renderer.textureIDs.push_back(swordSlide.ID);
+    Game::main.animationMap.emplace("sword_baseSlide", &swordSlide);
 
-    Animation2D wreathedCrouch{ "assets/animations/lily/wreathed/wreathed_lily_crouch.png", true, 2, 2, 0.5f, { 2, 2 }, true, GL_NEAREST };
-    renderer.textureIDs.push_back(wreathedCrouch.ID);
-    Game::main.animationMap.emplace("wreathed_baseCrouch", &wreathedCrouch);
+    Animation2D swordCrouch{ "assets/animations/lily/armed/sword/sword_lily_crouch.png", true, 2, 2, 0.5f, { 2, 2 }, true, GL_NEAREST };
+    renderer.textureIDs.push_back(swordCrouch.ID);
+    Game::main.animationMap.emplace("sword_baseCrouch", &swordCrouch);
 
-    Animation2D wreathedCrouchWalk{ "assets/animations/lily/wreathed/wreathed_lily_crouchWalk.png", true, 3, 4, 0.1f, { 1, 3, 3, 3 }, true, GL_NEAREST };
-    renderer.textureIDs.push_back(wreathedCrouchWalk.ID);
-    Game::main.animationMap.emplace("wreathed_baseCrouchWalk", &wreathedCrouchWalk);
+    Animation2D swordCrouchWalk{ "assets/animations/lily/armed/sword/sword_lily_crouchWalk.png", true, 3, 4, 0.1f, { 1, 3, 3, 3 }, true, GL_NEAREST };
+    renderer.textureIDs.push_back(swordCrouchWalk.ID);
+    Game::main.animationMap.emplace("sword_baseCrouchWalk", &swordCrouchWalk);
 
     /*Animation2D baseDeath{ "assets/animations/base/baseDying.png", true, 4, 4, 1.0f, { 2, 4, 4, 4 }, false, GL_NEAREST };
     renderer.textureIDs.push_back(baseDeath.ID);*/
-    Game::main.animationMap.emplace("wreathed_baseDeath", &baseDeath);
+    Game::main.animationMap.emplace("sword_baseDeath", &baseDeath);
 
-    Animation2D wreathedSlashOne{ "assets/animations/lily/wreathed/wreathed_lily_slashOne.png", true, 3, 3, 0.01f, { 2, 3, 3 }, false, GL_NEAREST };
-    renderer.textureIDs.push_back(wreathedSlashOne.ID);
-    Game::main.animationMap.emplace("wreathed_baseSlashOne", &wreathedSlashOne);
+    Animation2D swordSlashOne{ "assets/animations/lily/armed/sword/sword_lily_slashOne.png", true, 3, 3, 0.01f, { 2, 3, 3 }, false, GL_NEAREST };
+    renderer.textureIDs.push_back(swordSlashOne.ID);
+    Game::main.animationMap.emplace("sword_baseSlashOne", &swordSlashOne);
 
-    Animation2D wreathedSlashTwo{ "assets/animations/lily/wreathed/wreathed_lily_slashTwo.png", true, 3, 3, 0.01f, { 2, 3, 3 }, false, GL_NEAREST };
-    renderer.textureIDs.push_back(wreathedSlashTwo.ID);
-    Game::main.animationMap.emplace("wreathed_baseSlashTwo", &wreathedSlashTwo);
+    Animation2D swordSlashTwo{ "assets/animations/lily/armed/sword/sword_lily_slashTwo.png", true, 3, 3, 0.01f, { 2, 3, 3 }, false, GL_NEAREST };
+    renderer.textureIDs.push_back(swordSlashTwo.ID);
+    Game::main.animationMap.emplace("sword_baseSlashTwo", &swordSlashTwo);
 
     #pragma endregion
-    //Animation2D swordBaseIdle{ "assets/animations/lily/lily_idle.png", true, 3, 2, 0.5f, { 3, 3 }, true, GL_NEAREST };
-    //renderer.textureIDs.push_back(swordBaseIdle.ID);
-    //Game::main.animationMap.emplace("sword_baseIdle", &swordBaseIdle);
 
-    //Animation2D swordBaseWalk{ "assets/animations/lily/lily_run.png", true, 3, 4, 0.05f, { 3, 3, 3, 3 }, true, GL_NEAREST };
-    //renderer.textureIDs.push_back(swordBaseWalk.ID);
-    //Game::main.animationMap.emplace("sword_baseWalk", &swordBaseWalk);
 
-    //Animation2D swordBaseJumpUp{ "assets/animations/lily/lily_up.png", true,  1, 1, 5.0f, { 1 }, true, GL_NEAREST };
-    //renderer.textureIDs.push_back(swordBaseJumpUp.ID);
-    //Game::main.animationMap.emplace("sword_baseJumpUp", &swordBaseJumpUp);
+    #pragma region Rifle-Wielding Player Animations
 
-    //Animation2D swordBaseJumpDown{ "assets/animations/lily/lily_up.png", true,  1, 1, 5.0f, { 1 }, true, GL_NEAREST };
-    //renderer.textureIDs.push_back(swordBaseJumpDown.ID);
-    //Game::main.animationMap.emplace("sword_baseJumpDown", &swordBaseJumpDown);
+    Texture2D lilyRifleMap{ "assets/animations/lily/armed/sword/lily_sword_map.png", true, GL_NEAREST };
+    renderer.textureIDs.push_back(lilyRifleMap.ID);
+    Game::main.textureMap.emplace("lilyRifleMap", &lilyRifleMap);
 
-    //Animation2D swordBaseStab{ "assets/animations/base/sword_baseStab.png", true, 2, 2, 0.05f, { 2, 2 }, false, GL_NEAREST };
-    //renderer.textureIDs.push_back(swordBaseStab.ID);
-    //Game::main.animationMap.emplace("sword_baseStab", &swordBaseStab);
+    Animation2D rifleIdle{ "assets/animations/lily/armed/sword/sword_lily_idle.png", true, 2, 2, 0.5f, { 2, 2 }, true, GL_NEAREST };
+    renderer.textureIDs.push_back(rifleIdle.ID);
+    Game::main.animationMap.emplace("rifle_baseIdle", &rifleIdle);
 
-    //Animation2D swordBaseAerialOne{ "assets/animations/base/sword_baseAerialOne.png", true, 2, 3, 0.05f, { 2, 2, 2 }, false, GL_NEAREST };
-    //renderer.textureIDs.push_back(swordBaseAerialOne.ID);
-    //Game::main.animationMap.emplace("sword_baseAerialOne", &swordBaseAerialOne);
+    Animation2D rifleWalk{ "assets/animations/lily/armed/sword/sword_lily_run.png", true, 3, 4, 0.05f, { 1, 3, 3, 3 }, true, GL_NEAREST };
+    renderer.textureIDs.push_back(rifleWalk.ID);
+    Game::main.animationMap.emplace("rifle_baseWalk", &rifleWalk);
 
-    //Animation2D slashBaseAerialOne{ "assets/animations/base/slash_baseAerialOne.png", true, 2, 3, 0.05f, { 2, 2, 2 }, false, GL_NEAREST };
-    //renderer.textureIDs.push_back(slashBaseAerialOne.ID);
-    //Game::main.animationMap.emplace("slash_baseAerialOne", &slashBaseAerialOne);
+    Animation2D rifleJumpUp{ "assets/animations/lily/armed/sword/sword_lily_up.png", true, 2, 2, 0.1f, { 1, 2 }, true, GL_NEAREST };
+    renderer.textureIDs.push_back(rifleJumpUp.ID);
+    Game::main.animationMap.emplace("rifle_baseJumpUp", &rifleJumpUp);
 
-    //#pragma endregion
+    Animation2D rifleJumpDown{ "assets/animations/lily/armed/sword/sword_lily_down.png", true,  2, 2, 0.5f, { 2, 2 }, true, GL_NEAREST };
+    renderer.textureIDs.push_back(rifleJumpDown.ID);
+    Game::main.animationMap.emplace("rifle_baseJumpDown", &rifleJumpDown);
+
+    Animation2D rifleWallRun{ "assets/animations/lily/armed/sword/sword_lily_wallRun.png", true,  3, 4, 0.1f, { 1, 3, 3, 3 }, true, GL_NEAREST };
+    renderer.textureIDs.push_back(rifleWallRun.ID);
+    Game::main.animationMap.emplace("rifle_baseWallRun", &rifleWallRun);
+
+    Animation2D rifleSlideDown{ "assets/animations/lily/armed/sword/sword_lily_slideDown.png", true,  1, 1, 5.0f, { 1 }, true, GL_NEAREST };
+    renderer.textureIDs.push_back(rifleSlideDown.ID);
+    Game::main.animationMap.emplace("rifle_baseSlideDown", &rifleSlideDown);
+
+    Animation2D rifleSlide{ "assets/animations/lily/armed/sword/sword_lily_slide.png", true,  1, 2, 1.0f, { 1, 1 }, true, GL_NEAREST };
+    renderer.textureIDs.push_back(rifleSlide.ID);
+    Game::main.animationMap.emplace("rifle_baseSlide", &rifleSlide);
+
+    Animation2D rifleCrouch{ "assets/animations/lily/armed/sword/sword_lily_crouch.png", true, 2, 2, 0.5f, { 2, 2 }, true, GL_NEAREST };
+    renderer.textureIDs.push_back(rifleCrouch.ID);
+    Game::main.animationMap.emplace("rifle_baseCrouch", &rifleCrouch);
+
+    Animation2D rifleCrouchWalk{ "assets/animations/lily/armed/sword/sword_lily_crouchWalk.png", true, 3, 4, 0.1f, { 1, 3, 3, 3 }, true, GL_NEAREST };
+    renderer.textureIDs.push_back(rifleCrouchWalk.ID);
+    Game::main.animationMap.emplace("rifle_baseCrouchWalk", &rifleCrouchWalk);
+
+    /*Animation2D baseDeath{ "assets/animations/base/baseDying.png", true, 4, 4, 1.0f, { 2, 4, 4, 4 }, false, GL_NEAREST };
+    renderer.textureIDs.push_back(baseDeath.ID);*/
+    Game::main.animationMap.emplace("sword_baseDeath", &baseDeath);
+
+    #pragma endregion
 
     //#pragma region Test Character Animations
 
