@@ -284,14 +284,13 @@ void ECS::Update(float deltaTime)
 		#pragma region Player Instantiation
 		Texture2D* lilyMap = Game::main.textureMap["lilyMap"];
 		Texture2D* lilySwordMap = Game::main.textureMap["lilySwordMap"];
-		Texture2D* lilyRifleMap = Game::main.textureMap["lilyRifleMap"];
 		Animation2D* anim1 = Game::main.animationMap["baseIdle"];
 
 		ECS::main.RegisterComponent(new PositionComponent(player, true, false, 0, 100, 0, 0.0f), player);
 		ECS::main.RegisterComponent(new PhysicsComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 5000.0f, 2000.0f), player);
 		ECS::main.RegisterComponent(new ColliderComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], false, false, false, false, false, true, false, EntityClass::player, 1.0f, 1.0f, 10.0f, 20.0f, 50.0f, 0.0f, -7.75f), player);
-		ECS::main.RegisterComponent(new MovementComponent(player, true, true, 4000.0f, 500.0f, 2.5f, 0.5f, 1000.0f, 0.7f, true, false, 0.9f, glm::vec2(100.0f, 400.0f), 50.0f, 20.0f, 1.5f, 0.15f, 0.3f, 5, 3.0f), player);
-		ECS::main.RegisterComponent(new InputComponent(player, true, moonlightBlade, true, 0.5f, 2, 1, 0.25f, 0.5f, lilyMap, lilySwordMap, lilyRifleMap), player);
+		ECS::main.RegisterComponent(new MovementComponent(player, true, true, 4000.0f, 500.0f, 2.5f, 0.5f, 1000.0f, 0.7f, true, false, 0.9f, 2.5f, 50.0f, 0.25f, 20.0f, 1.5f, 0.5f, 1.0f, 5, 3.0f), player);
+		ECS::main.RegisterComponent(new InputComponent(player, true, moonlightBlade, true, 0.5f, 2, 1, 0.25f, 0.5f, lilyMap, lilySwordMap), player);
 		ECS::main.RegisterComponent(new CameraFollowComponent(player, true, 10.0f, false, false), player);
 		ECS::main.RegisterComponent(new HealthComponent(player, true, 1000.0f, false), player);
 		ECS::main.RegisterComponent(new AnimationComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], anim1, "idle", lilyMap, 1.0f, 1.0f, false, false), player);
@@ -299,18 +298,13 @@ void ECS::Update(float deltaTime)
 		ECS::main.RegisterComponent(new PlayerAnimationControllerComponent(player, true, a), player);
 
 		a->AddAnimation("sword_idle", Game::main.animationMap["sword_baseIdle"]);
-		a->AddAnimation("rifle_idle", Game::main.animationMap["rifle_baseIdle"]);
 
 		string s = "";
-		for (int i = 0; i < 3; i++)
+		for (int i = 0; i < 2; i++)
 		{
 			if (i == 1)
 			{
 				s = "sword_";
-			}
-			else if (i == 2)
-			{
-				s = "rifle_";
 			}
 
 			a->AddAnimation(s + "walk", Game::main.animationMap[s + "baseWalk"]);
@@ -587,7 +581,7 @@ ColliderComponent::ColliderComponent(Entity* entity, bool active, PositionCompon
 
 #pragma region Input Component
 
-InputComponent::InputComponent(Entity* entity, bool active, Entity* moonlightBlade, bool acceptInput, float maxCoyoteTime, int maxJumps, float maxDashes, float dashLength, float targetDelay, Texture2D* baseMap, Texture2D* swordMap, Texture2D* rifleMap)
+InputComponent::InputComponent(Entity* entity, bool active, Entity* moonlightBlade, bool acceptInput, float maxCoyoteTime, int maxJumps, float maxDashes, float dashLength, float targetDelay, Texture2D* baseMap, Texture2D* swordMap)
 {
 	this->ID = inputComponentID;
 	this->active = active;
@@ -614,7 +608,6 @@ InputComponent::InputComponent(Entity* entity, bool active, Entity* moonlightBla
 
 	this->baseMap = baseMap;
 	this->swordMap = swordMap;
-	this->rifleMap = rifleMap;
 }
 
 #pragma endregion
@@ -622,7 +615,7 @@ InputComponent::InputComponent(Entity* entity, bool active, Entity* moonlightBla
 #pragma region Movement Component
 
 MovementComponent::MovementComponent(Entity* entity, bool active, bool canMove, float acceleration, float maxSpeed, float maxJumpHeight, float airControl, float dashSpeed, float crouchMod, bool canClimb, bool shouldClimb, float climbMod,
-									glm::vec2 attackThrust, float slashSpeed, float damage, float attackMultiplier, float minAttackDelay, float maxAttackDelay, int maxFlurry, float flurryDelay)
+									float attackThrust, float slashSpeed, float attackLength, float damage, float attackMultiplier, float minAttackDelay, float maxAttackDelay, int maxFlurry, float flurryDelay)
 {
 	this->canMove = canMove;
 
@@ -660,6 +653,7 @@ MovementComponent::MovementComponent(Entity* entity, bool active, bool canMove, 
 	this->attacking = false;
 	this->attackThrust = attackThrust;
 	this->slashSpeed = slashSpeed;
+	this->attackLength = attackLength;
 
 	this->damage = damage;
 	this->attackMultiplier = attackMultiplier;
@@ -843,7 +837,6 @@ AIComponent::AIComponent(Entity* entity, bool active, bool proc, float procRange
 BladeComponent::BladeComponent(Entity* entity, bool active, BladeState bladeState, float rushRange, float slowRange, float catchRange, float followSpeed, float projectileSpeed, ColliderComponent* platformCollider, Texture2D* corporealMap, Texture2D* incorporealMap, float minTargetSetDelay)
 {
 	this->bladeState = BladeState::floating;
-	this->storedBladeState = BladeState::heldRifle;
 
 	this->returningToHand = false;
 
@@ -2167,19 +2160,11 @@ void InputSystem::Update(int activeScene, float deltaTime)
 							ParticleEngine::main.AddParticles(1, playerPos.x + (j * 5), playerPos.y + (k * 5), 0, magicParticles, rand() % 10 + 1);
 						}
 					}
-					
-					if (blade->storedBladeState == BladeState::heldSword)
-					{
-						bladeSprite->active = false;
-						anComp->mapTex = m->swordMap;
-					}
-					else
-					{
-						bladeSprite->active = true;
-						anComp->mapTex = m->rifleMap;
-					}
 
-					blade->bladeState = blade->storedBladeState;
+					bladeSprite->active = false;
+					anComp->mapTex = m->swordMap;
+
+					blade->bladeState = BladeState::heldSword;
 					blade->attacking = true;
 					blade->returningToHand = false;
 				}
@@ -2240,10 +2225,13 @@ void InputSystem::Update(int activeScene, float deltaTime)
 							Texture2D* sMap = Game::main.textureMap["sword_slashMap"];
 							Animation2D* anim;
 
+							glm::vec2 playerVel = glm::vec2(Game::main.mouseX - playerPos.x, Game::main.mouseY - playerPos.y) * move->attackThrust;
+							phys->velocityX = playerVel.x;
+							phys->velocityY = playerVel.y;
+
 							if (phys->velocityX < 0)
 							{
 								projVel = glm::vec2(-1, 0);
-
 							}
 							else
 							{
@@ -2251,14 +2239,6 @@ void InputSystem::Update(int activeScene, float deltaTime)
 							}
 
 							projVel *= move->slashSpeed;
-
-							phys->velocityX = 0;
-							phys->velocityY = 0;
-
-							/*if (move->attackNumber == 1 && col->onPlatform || move->attackNumber == 1 && abs(phys->velocityY) < 100.0f && !move->jumping)
-							{
-								phys->velocityY += move->attackThrust.y;
-							}*/
 
 							if (move->attackNumber % 2 == 0)
 							{
@@ -2294,7 +2274,7 @@ void InputSystem::Update(int activeScene, float deltaTime)
 							move->lastAttack += deltaTime;
 						}
 
-						if (move->lastAttack > move->maxAttackDelay)
+						if (move->lastAttack > move->attackLength)
 						{
 							move->attacking = false;
 
@@ -2639,11 +2619,6 @@ void AnimationControllerSystem::Update(int activeScene, float deltaTime)
 				{
 					s = "sword_";
 				}
-				else if (blade->bladeState == BladeState::heldRifle)
-				{
-					s = "rifle_";
-				}
-
 				if (!health->dead)
 				{
 					if (p->velocityX < -100.0f)
@@ -3122,83 +3097,6 @@ void BladeSystem::Update(int activeScene, float deltaTime)
 				posA->z = -10.0f;
 				posA->x = posB->x;
 				posA->y = posB->y;
-			}
-			else if (b->bladeState == BladeState::heldRifle)
-			{
-				glm::vec2 position = glm::vec2(posA->x, posA->y);
-				glm::vec2 mouse = glm::vec2(Game::main.mouseX, Game::main.mouseY);
-
-				posA->x = posB->x;
-				posA->y = posB->y;
-				posA->z = 10.0f;
-				float r = std::atan2(mouse.y - position.y, mouse.x - position.x) * (180 / M_PI);
-
-				if (glfwJoystickIsGamepad(GLFW_JOYSTICK_1))
-				{
-					GLFWgamepadstate state;
-					glfwGetGamepadState(GLFW_JOYSTICK_1, &state);
-
-					bool swordRotRight =			(Game::main.swordRotRightPadType == InputType::trigger && state.axes[Game::main.swordRotRightPad] + 1 ||
-													Game::main.swordRotRightPadType == InputType::stickPos && state.axes[Game::main.swordRotRightPad] > 0.1f ||
-													Game::main.swordRotRightPadType == InputType::stickNeg && state.axes[Game::main.swordRotRightPad] < -0.1f ||
-													Game::main.swordRotRightPadType == InputType::button && state.buttons[Game::main.swordRotRightPad]);
-
-					bool swordRotLeft =				(Game::main.swordRotLeftPadType == InputType::trigger && state.axes[Game::main.swordRotLeftPad] + 1 ||
-													Game::main.swordRotLeftPadType == InputType::stickPos && state.axes[Game::main.swordRotLeftPad] > 0.1f ||
-													Game::main.swordRotLeftPadType == InputType::stickNeg && state.axes[Game::main.swordRotLeftPad] < -0.1f ||
-													Game::main.swordRotLeftPadType == InputType::button && state.buttons[Game::main.swordRotLeftPad]);
-
-					bool swordRotUp =				(Game::main.swordRotUpPadType == InputType::trigger && state.axes[Game::main.swordRotUpPad] + 1 ||
-													Game::main.swordRotUpPadType == InputType::stickPos && state.axes[Game::main.swordRotUpPad] > 0.1f ||
-													Game::main.swordRotUpPadType == InputType::stickNeg && state.axes[Game::main.swordRotUpPad] < -0.1f ||
-													Game::main.swordRotUpPadType == InputType::button && state.buttons[Game::main.swordRotUpPad]);
-
-					bool swordRotDown =				(Game::main.swordRotDownPadType == InputType::trigger && state.axes[Game::main.swordRotDownPad] + 1 ||
-													Game::main.swordRotDownPadType == InputType::stickPos && state.axes[Game::main.swordRotDownPad] > 0.1f ||
-													Game::main.swordRotDownPadType == InputType::stickNeg && state.axes[Game::main.swordRotDownPad] < -0.1f ||
-													Game::main.swordRotDownPadType == InputType::button && state.buttons[Game::main.swordRotDownPad]);
-
-					glm::vec2 swordNormal = glm::vec2(0, 0);
-
-					if (swordRotRight)
-					{
-						swordNormal.x += state.axes[Game::main.swordRotRightPad];
-					}
-					if (swordRotLeft)
-					{
-						swordNormal.x -= state.axes[Game::main.swordRotLeftPad];
-					}
-					if (swordRotUp)
-					{
-						swordNormal.y += state.axes[Game::main.swordRotUpPad];
-					}
-					if (swordRotDown)
-					{
-						swordNormal.y -= state.axes[Game::main.swordRotDownPad];
-					}
-
-					if (swordNormal.x != 0 || swordNormal.y != 0)
-					{
-						swordNormal = Normalize(swordNormal);
-
-						r = std::atan2(swordNormal.y, swordNormal.x) * (180 / M_PI);
-					}
-				}
-
-				// std::cout << std::to_string(r) + "\n";
-
-				if (r > 100 || r < -100)
-				{
-					sprite->flippedX = true;
-					r += 180;
-				}
-				else
-				{
-					sprite->flippedX = false;
-				}
-
-				posA->rotation = r;
-				// Point towards mouse.
 			}
 			else if (!b->thrown)
 			{

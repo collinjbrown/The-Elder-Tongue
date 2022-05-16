@@ -207,9 +207,8 @@ public:
 
 	Texture2D* baseMap;
 	Texture2D* swordMap;
-	Texture2D* rifleMap;
 
-	InputComponent(Entity* entity, bool active, Entity* moonlightBlade, bool acceptInput, float maxCoyoteTime, int maxJumps, float maxDashes, float dashLength, float targetDelay, Texture2D* baseMap, Texture2D* swordMap, Texture2D* rifleMap);
+	InputComponent(Entity* entity, bool active, Entity* moonlightBlade, bool acceptInput, float maxCoyoteTime, int maxJumps, float maxDashes, float dashLength, float targetDelay, Texture2D* baseMap, Texture2D* swordMap);
 };
 
 class MovementComponent : public Component
@@ -243,8 +242,9 @@ public:
 	float minClimbHeight;
 
 	bool attacking;
-	glm::vec2 attackThrust;
+	float attackThrust;
 	float slashSpeed;
+	float attackLength;
 
 	float damage;
 	float attackMultiplier;
@@ -259,7 +259,7 @@ public:
 	float flurryDelay;
 
 	MovementComponent(Entity* entity, bool active, bool canMove, float acceleration, float maxSpeed, float maxJumpHeight, float airControl, float dashSpeed, float crouchMod, bool canClimb, bool shouldClimb, float climbMod,
-						glm::vec2 attackThrust, float slashSpeed, float damage, float attackMultiplier, float minAttackDelay, float maxAttackDelay, int maxFlurry, float flurryDelay);
+						float attackThrust, float slashSpeed, float attackLength, float damage, float attackMultiplier, float minAttackDelay, float maxAttackDelay, int maxFlurry, float flurryDelay);
 };
 
 class CameraFollowComponent : public Component
@@ -381,12 +381,11 @@ public:
 	AIComponent(Entity* entity, bool active, bool proc, float procRange, float chaseRange, float movementSpeed, float projectileSpeed, float attackRate, AIType aiType);
 };
 
-enum class BladeState { floating, heldSword, heldRifle };
+enum class BladeState { floating, heldSword };
 class BladeComponent : public Component
 {
 public:
 	BladeState bladeState;
-	BladeState storedBladeState;
 
 	bool returningToHand;
 
