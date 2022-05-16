@@ -354,10 +354,6 @@ void ECS::Update(float deltaTime)
 			ECS::main.RegisterComponent(new PositionComponent(earth, true, true, i * 500, -1000, 0, 0.0f), earth);
 			ECS::main.RegisterComponent(new StaticSpriteComponent(earth, true, (PositionComponent*)earth->componentIDMap[positionComponentID], tex3->width * 35, tex3->height * 100.0f, 1.0f, 1.0f, tex3, tex3Map, false, false, false), earth);*/
 		}
-
-		// Do this after we instantiate objects so that it can properly sort out which nodes
-		// are blocked and which aren't.
-		// CreateNodeMap();
 	}
 
 	for (int i = 0; i < componentBlocks.size(); i++)
@@ -366,34 +362,6 @@ void ECS::Update(float deltaTime)
 	}
 
 	PurgeDeadEntities();
-}
-
-// We probably aren't actually gonna use this, but I'll leave it here just in case.
-void ECS::CreateNodeMap()
-{
-	for (int x = 0; x < mWidth; x++)
-	{
-		for (int y = 0; y < mHeight; y++)
-		{
-			bool blocked = false;
-			Node* n = new Node(x, y);
-
-			for (int e = 0; e < entities.size(); e++)
-			{
-				PositionComponent* pos = (PositionComponent*)entities[e]->componentIDMap[positionComponentID];
-				ColliderComponent* col = (ColliderComponent*)entities[e]->componentIDMap[colliderComponentID];
-
-				blocked = (PointOverlapRect(glm::vec2(x * nodeSize, y * nodeSize), glm::vec2(pos->x, pos->y) + glm::vec2(col->offsetX, col->offsetY), col->width, col->height) && !col->trigger && pos->stat);
-				
-				if (blocked)
-				{
-					n->col = col;
-				}
-
-				nodeMap[x][y] = n;
-			}
-		}
-	}
 }
 
 void ECS::AddDeadEntity(Entity* e)

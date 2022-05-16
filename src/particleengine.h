@@ -129,7 +129,7 @@ public:
 						particle->y += 2.0f;
 					}
 				}
-				else if (particle->element == Element::dust)
+				else // if (particle->element == Element::dust)
 				{
 					color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 

@@ -39,8 +39,6 @@ public:
     void        Set_Name(std::string newName);
 
     Entity(int ID, int scene, std::string name);
-
-    Entity() {};
 };
 
 

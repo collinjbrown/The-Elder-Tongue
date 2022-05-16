@@ -46,8 +46,6 @@ struct Node
 	bool blocked;
 	bool ground;
 
-	ColliderComponent* col;
-
 	float g;
 	float h;
 	float F() { return g + h; }
@@ -92,26 +90,20 @@ class ECS
 private:
 	uint32_t entityIDCounter = 0;
 	int round = 0;
-	static const int mWidth = 100;
-	static const int mHeight = 100;
 
 public:
 	static ECS main;
-	int activeScene;
+	int activeScene = 0;
 	Entity* player;
 
 	vector<Entity*> entities;
 	vector<Entity*> dyingEntities;
-
-	float nodeSize = 5.0f;
-	Node* nodeMap[mWidth][mHeight];
 
 	vector<ComponentBlock*> componentBlocks;
 
 	uint32_t GetID();
 	void Init();
 	void Update(float deltaTime);
-	void CreateNodeMap();
 	Entity* CreateEntity(int scene, std::string name);
 	void DeleteEntity(Entity* e);
 	void AddDeadEntity(Entity* e);

@@ -15,8 +15,6 @@
 #include "shader.h"
 #include "game.h"
 #include "check_error.h"
-// #include "texture_2D.h"
-// #include "renderer.h"
 #include "entity.h"
 #include "particleengine.h"
 #include "ecs.h"
@@ -38,7 +36,6 @@ void WindowPosCallback(GLFWwindow* window, int xpos, int ypos)
 {
     windowMoved = 1;
 }
-
 
 void MessageCallback(GLenum source,
     GLenum type,

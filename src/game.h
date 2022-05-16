@@ -36,10 +36,10 @@ public:
 	float deltaMouseX = 0.0f;
 	float deltaMouseY = 0.0f;
 
-	float topY;
-	float bottomY;
-	float leftX;
-	float rightX;
+	float topY = 0;
+	float bottomY = 0;
+	float leftX = 0;
+	float rightX = 0;
 
 	glm::mat4 view;
 	glm::mat4 projection;
