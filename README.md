@@ -49,5 +49,9 @@
 ## Audio
 - Add music / sound effects.
 ## Gameplay
-- ~~Add movement.~~
-- Who knows?
+- ~~Responsive but natural movement.~~
+- ~~Different modes of movement: running, crouch-walking, sliding, climbing, etc.~~
+- ~~Movement that is just plainly fun.~~
+- Some basic puzzle components like doors and (in-world) buttons and whatnot.
+- I'm still debating whether I want to amalgamate two game ideas I've had into this one project: it could be interesting to fold a constructed language into this in a neat way
+but I'll have to think more about this before going through with it.
