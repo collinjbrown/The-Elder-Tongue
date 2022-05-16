@@ -196,19 +196,12 @@ public:
 	int jumps;
 	int maxJumps;
 
-	int dashes;
-	int maxDashes;
-
-	float lastDash;
-	float dashLength;
-
 	float lastTarget;
 	float targetDelay;
 
 	Texture2D* baseMap;
-	Texture2D* swordMap;
 
-	InputComponent(Entity* entity, bool active, Entity* moonlightBlade, bool acceptInput, float maxCoyoteTime, int maxJumps, float maxDashes, float dashLength, float targetDelay, Texture2D* baseMap, Texture2D* swordMap);
+	InputComponent(Entity* entity, bool active, Entity* moonlightBlade, bool acceptInput, float maxCoyoteTime, int maxJumps, float targetDelay, Texture2D* baseMap);
 };
 
 class MovementComponent : public Component
@@ -224,9 +217,6 @@ public:
 	bool jumping;
 	float airControl;
 
-	bool dashing;
-	float dashSpeed;
-
 	bool crouching;
 	float crouchMod;
 
@@ -241,25 +231,7 @@ public:
 	float maxClimbHeight;
 	float minClimbHeight;
 
-	bool attacking;
-	float attackThrust;
-	float slashSpeed;
-	float attackLength;
-
-	float damage;
-	float attackMultiplier;
-	int attackNumber;
-
-	float lastAttack;
-	float minAttackDelay;
-	float maxAttackDelay;
-
-	int maxFlurry;
-	float lastFlurry;
-	float flurryDelay;
-
-	MovementComponent(Entity* entity, bool active, bool canMove, float acceleration, float maxSpeed, float maxJumpHeight, float airControl, float dashSpeed, float crouchMod, bool canClimb, bool shouldClimb, float climbMod,
-						float attackThrust, float slashSpeed, float attackLength, float damage, float attackMultiplier, float minAttackDelay, float maxAttackDelay, int maxFlurry, float flurryDelay);
+	MovementComponent(Entity* entity, bool active, bool canMove, float acceleration, float maxSpeed, float maxJumpHeight, float airControl, float crouchMod, bool canClimb, bool shouldClimb, float climbMod);
 };
 
 class CameraFollowComponent : public Component
@@ -381,21 +353,15 @@ public:
 	AIComponent(Entity* entity, bool active, bool proc, float procRange, float chaseRange, float movementSpeed, float projectileSpeed, float attackRate, AIType aiType);
 };
 
-enum class BladeState { floating, heldSword };
 class BladeComponent : public Component
 {
 public:
-	BladeState bladeState;
-
-	bool returningToHand;
-
 	bool attacking;
 	bool thrown;
 	bool lodged;
 
 	float rushRange;
 	float slowRange;
-	float catchRange;
 
 	float followSpeed;
 	float projectileSpeed;
@@ -409,7 +375,7 @@ public:
 	float lastTargetSet;
 	float minTargetSetDelay;
 
-	BladeComponent(Entity* entity, bool active, BladeState bladeState, float rushRange, float slowRange, float catchRange, float followSpeed, float projectileSpeed, ColliderComponent* platformCollider, Texture2D* corporealMap, Texture2D* incorporealMap, float minTargetSetDelay);
+	BladeComponent(Entity* entity, bool active, float rushRange, float slowRange, float followSpeed, float projectileSpeed, ColliderComponent* platformCollider, Texture2D* corporealMap, Texture2D* incorporealMap, float minTargetSetDelay);
 };
 
 enum class Anchor { topLeft, bottomLeft, topRight, bottomRight };

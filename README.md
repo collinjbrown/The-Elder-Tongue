@@ -5,15 +5,25 @@
 ---
 
 # The Moonlight Tongue
- A Metroidvania game about....
+ A puzzle-platformer about.... Well, that has yet to be entirely decided. I originally intended this to be a Metroidvania, but after having designed the incorporeal and corporeal blade
+ mechanics, I realized that they lend themselves well to a puzzle-platformer-style game. I'm a big Ursula K. Le Guin fan, so her writings on narrative have shaped the sort of art I
+ want to make: I'm inclined to design a game whose core mechanics are nonviolent in nature. Of course, this presents a conundrum: in a game where the central tool is a claymore, how do
+ you make an engaging and satisfying game in which you don't use it against your enemies? If your only tool is a sword, what is every problem but something to cut down?
 
+ The answer, as I've found it, is to blunt the blade. If your only tool is impotent for its intended purpose, how can you still wield it to achieve your goal?
+
+ If your only tool is a sword that can't kill, how do you use it to surmount obstacles? Well, you literally use it to surmount obstacles.
+ 
+ Instead of using your blade as a weapon, you use it to augment your maneuverability and puzzle-solving skills: it can serve as a barricade when thrust into the ground or as a platform
+ when thrust into a wall; it can hold down buttons, hold open doors, or hold objects in place; and most importantly it can serve as a paperweight for our protagonist, a pacifist monk
+ on a journey to place this supernatural blade atop a mountain where it will remain out of reach of those who would use it for the very purpose for which it was forged.
+
+ ---
+
+ # Tools & Secondary Programs
  Check out [Pixapper](https://github.com/collinjbrown/Pixapper), a little program I made for this game that takes in two pngs and maps one to the other for easy implementation into *The Moonlight Tongue*'s rendering system.
  
 # To Do ~ Short Term:
-- ~~Make it so that you can grab your sword out of the air, at which point you are able to attack. Holding your sword causes a status effect to build up which slows you down and eventually forces you to let go of the sword, but this can be staved off by killing with the blade.~~
-- Part of me wants to kinda go for a slash-em-up style, *Metal Gear Revengance*-esque combat system, but that might conflict with the narrative I have kicking around in my head right now.
-- I'd also like to consider the type of health system we're gonna use. I assumed everything was a one-hit KO, but it might be interesting to have a little more depth.
-- Reimplement tiling to work with our new texture mapping system (there seems to be an issue here, but I still need to figure out what exactly is broken).
 - Add scenes / global state.
 - Maybe write a scene editor.
 
@@ -36,5 +46,4 @@
 - Add music / sound effects.
 ## Gameplay
 - ~~Add movement.~~
-- ~~Add some basic combat.~~
 - Who knows?

@@ -245,7 +245,7 @@ void ECS::Update(float deltaTime)
 
 	if (round == 1)
 	{
-		#pragma region UI Instantiation
+#pragma region UI Instantiation
 
 		Entity* alphaWatermark = CreateEntity(0, "Alpha Watermark");
 		Texture2D* watermark = Game::main.textureMap["watermark"];
@@ -255,9 +255,9 @@ void ECS::Update(float deltaTime)
 		ECS::main.RegisterComponent(new StaticSpriteComponent(alphaWatermark, true, (PositionComponent*)alphaWatermark->componentIDMap[positionComponentID], watermark->width, watermark->height, 1.0f, 1.0f, watermark, watermarkMap, false, false, false), alphaWatermark);
 		ECS::main.RegisterComponent(new ImageComponent(alphaWatermark, true, Anchor::topRight, 0, 0), alphaWatermark);
 
-		#pragma endregion
+#pragma endregion
 
-		#pragma region Moonlight Blade Instantiation
+#pragma region Moonlight Blade Instantiation
 
 		player = CreateEntity(0, "The Player");
 		Entity* moonlightBlade = CreateEntity(0, "Moonlight Blade");
@@ -277,49 +277,37 @@ void ECS::Update(float deltaTime)
 		ECS::main.RegisterComponent(new PhysicsComponent(hilt, true, (PositionComponent*)hilt->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), hilt);
 		ColliderComponent* platformCollider = new ColliderComponent(hilt, false, (PositionComponent*)hilt->componentIDMap[positionComponentID], true, true, true, false, false, false, false, EntityClass::object, 1.0f, 0.0f, 0.0f, 35.0f, 5.0f, 0.0f, 0.0f);
 		ECS::main.RegisterComponent(platformCollider, hilt);
-		ECS::main.RegisterComponent(new BladeComponent(moonlightBlade, true, BladeState::floating, 1010.0f, 1000.0f, 2000.0f, 0.5f, 1000.0f, platformCollider, moonlightBladeMap, moonlightBladeIncorporealMap, 0.5f), moonlightBlade);
+		ECS::main.RegisterComponent(new BladeComponent(moonlightBlade, true, 1010.0f, 1000.0f, 0.5f, 1000.0f, platformCollider, moonlightBladeMap, moonlightBladeIncorporealMap, 0.5f), moonlightBlade);
 
-		#pragma endregion
+#pragma endregion
 
-		#pragma region Player Instantiation
+#pragma region Player Instantiation
 		Texture2D* lilyMap = Game::main.textureMap["lilyMap"];
-		Texture2D* lilySwordMap = Game::main.textureMap["lilySwordMap"];
 		Animation2D* anim1 = Game::main.animationMap["baseIdle"];
 
 		ECS::main.RegisterComponent(new PositionComponent(player, true, false, 0, 100, 0, 0.0f), player);
 		ECS::main.RegisterComponent(new PhysicsComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 5000.0f, 2000.0f), player);
 		ECS::main.RegisterComponent(new ColliderComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], false, false, false, false, false, true, false, EntityClass::player, 1.0f, 1.0f, 10.0f, 20.0f, 50.0f, 0.0f, -7.75f), player);
-		ECS::main.RegisterComponent(new MovementComponent(player, true, true, 4000.0f, 500.0f, 2.5f, 0.5f, 1000.0f, 0.7f, true, false, 0.9f, 500.0f, 50.0f, 0.25f, 20.0f, 1.5f, 0.5f, 1.0f, 5, 3.0f), player);
-		ECS::main.RegisterComponent(new InputComponent(player, true, moonlightBlade, true, 0.5f, 2, 1, 0.25f, 0.5f, lilyMap, lilySwordMap), player);
+		ECS::main.RegisterComponent(new MovementComponent(player, true, true, 4000.0f, 500.0f, 2.5f, 0.5f, 0.7f, true, false, 0.5f), player);
+		ECS::main.RegisterComponent(new InputComponent(player, true, moonlightBlade, true, 0.5f, 2, 0.5f, lilyMap), player);
 		ECS::main.RegisterComponent(new CameraFollowComponent(player, true, 10.0f, false, false), player);
 		ECS::main.RegisterComponent(new HealthComponent(player, true, 1000.0f, false), player);
 		ECS::main.RegisterComponent(new AnimationComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], anim1, "idle", lilyMap, 1.0f, 1.0f, false, false), player);
 		AnimationComponent* a = (AnimationComponent*)player->componentIDMap[animationComponentID];
 		ECS::main.RegisterComponent(new PlayerAnimationControllerComponent(player, true, a), player);
 
-		a->AddAnimation("sword_idle", Game::main.animationMap["sword_baseIdle"]);
-
-		string s = "";
-		for (int i = 0; i < 2; i++)
-		{
-			if (i == 1)
-			{
-				s = "sword_";
-			}
-
-			a->AddAnimation(s + "walk", Game::main.animationMap[s + "baseWalk"]);
-			a->AddAnimation(s + "crouch", Game::main.animationMap[s + "baseCrouch"]);
-			a->AddAnimation(s + "crouchWalk", Game::main.animationMap[s + "baseCrouchWalk"]);
-			a->AddAnimation(s + "jumpUp", Game::main.animationMap[s + "baseJumpUp"]);
-			a->AddAnimation(s + "wallRun", Game::main.animationMap[s + "baseWallRun"]);
-			a->AddAnimation(s + "slide", Game::main.animationMap[s + "baseSlide"]);
-			a->AddAnimation(s + "slideDown", Game::main.animationMap[s + "baseSlideDown"]);
-			a->AddAnimation(s + "jumpDown", Game::main.animationMap[s + "baseJumpDown"]);
-			a->AddAnimation(s + "slashOne", Game::main.animationMap[s + "baseSlashOne"]);
-			a->AddAnimation(s + "slashTwo", Game::main.animationMap[s + "baseSlashTwo"]);
-			a->AddAnimation(s + "dead", Game::main.animationMap[s + "baseDeath"]);
-		}
-		#pragma endregion
+		a->AddAnimation("walk", Game::main.animationMap["baseWalk"]);
+		a->AddAnimation("crouch", Game::main.animationMap["baseCrouch"]);
+		a->AddAnimation("crouchWalk", Game::main.animationMap["baseCrouchWalk"]);
+		a->AddAnimation("jumpUp", Game::main.animationMap["baseJumpUp"]);
+		a->AddAnimation("wallRun", Game::main.animationMap["baseWallRun"]);
+		a->AddAnimation("slide", Game::main.animationMap["baseSlide"]);
+		a->AddAnimation("slideDown", Game::main.animationMap["baseSlideDown"]);
+		a->AddAnimation("jumpDown", Game::main.animationMap["baseJumpDown"]);
+		a->AddAnimation("slashOne", Game::main.animationMap["baseSlashOne"]);
+		a->AddAnimation("slashTwo", Game::main.animationMap["baseSlashTwo"]);
+		a->AddAnimation("dead", Game::main.animationMap["baseDeath"]);
+#pragma endregion
 
 		/*Texture2D* wallTex = Game::main.textureMap["wall"];
 		Texture2D* wallTexMap = Game::main.textureMap["wallMap"];
@@ -549,7 +537,7 @@ ColliderComponent::ColliderComponent(Entity* entity, bool active, PositionCompon
 
 #pragma region Input Component
 
-InputComponent::InputComponent(Entity* entity, bool active, Entity* moonlightBlade, bool acceptInput, float maxCoyoteTime, int maxJumps, float maxDashes, float dashLength, float targetDelay, Texture2D* baseMap, Texture2D* swordMap)
+InputComponent::InputComponent(Entity* entity, bool active, Entity* moonlightBlade, bool acceptInput, float maxCoyoteTime, int maxJumps, float targetDelay, Texture2D* baseMap)
 {
 	this->ID = inputComponentID;
 	this->active = active;
@@ -566,24 +554,17 @@ InputComponent::InputComponent(Entity* entity, bool active, Entity* moonlightBla
 	this->maxJumps = maxJumps;
 	this->releasedJump = true;
 
-	this->dashes = 0;
-	this->maxDashes = maxDashes;
-	this->lastDash = 0.0f;
-	this->dashLength = dashLength;
-
 	this->lastTarget = 0.0f;
 	this->targetDelay = targetDelay;
 
 	this->baseMap = baseMap;
-	this->swordMap = swordMap;
 }
 
 #pragma endregion
 
 #pragma region Movement Component
 
-MovementComponent::MovementComponent(Entity* entity, bool active, bool canMove, float acceleration, float maxSpeed, float maxJumpHeight, float airControl, float dashSpeed, float crouchMod, bool canClimb, bool shouldClimb, float climbMod,
-									float attackThrust, float slashSpeed, float attackLength, float damage, float attackMultiplier, float minAttackDelay, float maxAttackDelay, int maxFlurry, float flurryDelay)
+MovementComponent::MovementComponent(Entity* entity, bool active, bool canMove, float acceleration, float maxSpeed, float maxJumpHeight, float airControl, float crouchMod, bool canClimb, bool shouldClimb, float climbMod)
 {
 	this->canMove = canMove;
 
@@ -599,10 +580,6 @@ MovementComponent::MovementComponent(Entity* entity, bool active, bool canMove, 
 	this->jumping = false;
 
 	this->airControl = airControl;
-
-	this->dashSpeed = dashSpeed;
-	this->dashing = false;
-
 	this->crouching = false;
 	this->crouchMod = crouchMod;
 
@@ -616,24 +593,6 @@ MovementComponent::MovementComponent(Entity* entity, bool active, bool canMove, 
 
 	this->maxClimbHeight = 0.0f;
 	this->minClimbHeight = 0.0f;
-
-
-	this->attacking = false;
-	this->attackThrust = attackThrust;
-	this->slashSpeed = slashSpeed;
-	this->attackLength = attackLength;
-
-	this->damage = damage;
-	this->attackMultiplier = attackMultiplier;
-	this->attackNumber = 0;
-
-	this->lastAttack = 0.0f;
-	this->minAttackDelay = minAttackDelay;
-	this->maxAttackDelay = maxAttackDelay;
-
-	this->maxFlurry = maxFlurry;
-	this->lastFlurry = 0.0f;
-	this->flurryDelay = flurryDelay;
 }
 
 #pragma endregion
@@ -802,12 +761,8 @@ AIComponent::AIComponent(Entity* entity, bool active, bool proc, float procRange
 
 #pragma region Blade Component
 
-BladeComponent::BladeComponent(Entity* entity, bool active, BladeState bladeState, float rushRange, float slowRange, float catchRange, float followSpeed, float projectileSpeed, ColliderComponent* platformCollider, Texture2D* corporealMap, Texture2D* incorporealMap, float minTargetSetDelay)
+BladeComponent::BladeComponent(Entity* entity, bool active, float rushRange, float slowRange, float followSpeed, float projectileSpeed, ColliderComponent* platformCollider, Texture2D* corporealMap, Texture2D* incorporealMap, float minTargetSetDelay)
 {
-	this->bladeState = BladeState::floating;
-
-	this->returningToHand = false;
-
 	this->ID = bladeComponentID;
 	this->entity = entity;
 	this->active = active;
@@ -818,7 +773,6 @@ BladeComponent::BladeComponent(Entity* entity, bool active, BladeState bladeStat
 
 	this->rushRange = rushRange;
 	this->slowRange = slowRange;
-	this->catchRange = catchRange;
 
 	this->followSpeed = followSpeed;
 	this->projectileSpeed = projectileSpeed;
@@ -1822,20 +1776,13 @@ void InputSystem::Update(int activeScene, float deltaTime)
 
 			bool bladeManualTarget = ((glfwGetKey(Game::main.window, Game::main.bladeManualTargetKey) == GLFW_PRESS) || (glfwGetMouseButton(Game::main.window, Game::main.bladeManualTargetKey) == GLFW_PRESS));
 			bool bladeThrow = ((glfwGetKey(Game::main.window, Game::main.bladeThrowKey) == GLFW_PRESS) || (glfwGetMouseButton(Game::main.window, Game::main.bladeThrowKey) == GLFW_PRESS));
-			bool attack = ((glfwGetKey(Game::main.window, Game::main.attackKey) == GLFW_PRESS) || (glfwGetMouseButton(Game::main.window, Game::main.attackKey) == GLFW_PRESS));
-			bool dash = ((glfwGetKey(Game::main.window, Game::main.dashKey) == GLFW_PRESS) || (glfwGetMouseButton(Game::main.window, Game::main.dashKey) == GLFW_PRESS));
 			bool climb = ((glfwGetKey(Game::main.window, Game::main.climbKey) == GLFW_PRESS) || (glfwGetMouseButton(Game::main.window, Game::main.climbKey) == GLFW_PRESS));
-			bool dropWeapon = ((glfwGetKey(Game::main.window, Game::main.dropWeaponKey) == GLFW_PRESS) || (glfwGetMouseButton(Game::main.window, Game::main.dropWeaponKey) == GLFW_PRESS));
 			bool jump = ((glfwGetKey(Game::main.window, Game::main.jumpKey) == GLFW_PRESS) || (glfwGetMouseButton(Game::main.window, Game::main.jumpKey) == GLFW_PRESS));
 			bool crouch = ((glfwGetKey(Game::main.window, Game::main.crouchKey) == GLFW_PRESS) || (glfwGetMouseButton(Game::main.window, Game::main.crouchKey) == GLFW_PRESS));
 			bool climbUp = ((glfwGetKey(Game::main.window, Game::main.climbUpKey) == GLFW_PRESS) || (glfwGetMouseButton(Game::main.window, Game::main.climbUpKey) == GLFW_PRESS));
 			bool climbDown = ((glfwGetKey(Game::main.window, Game::main.climbDownKey) == GLFW_PRESS) || (glfwGetMouseButton(Game::main.window, Game::main.climbDownKey) == GLFW_PRESS));
 			bool moveRight = ((glfwGetKey(Game::main.window, Game::main.moveRightKey) == GLFW_PRESS) || (glfwGetMouseButton(Game::main.window, Game::main.moveRightKey) == GLFW_PRESS));
 			bool moveLeft = ((glfwGetKey(Game::main.window, Game::main.moveLeftKey) == GLFW_PRESS) || (glfwGetMouseButton(Game::main.window, Game::main.moveLeftKey) == GLFW_PRESS));
-			bool dashUp = ((glfwGetKey(Game::main.window, Game::main.dashUpKey) == GLFW_PRESS) || (glfwGetMouseButton(Game::main.window, Game::main.dashUpKey) == GLFW_PRESS));
-			bool dashDown = ((glfwGetKey(Game::main.window, Game::main.dashDownKey) == GLFW_PRESS) || (glfwGetMouseButton(Game::main.window, Game::main.dashDownKey) == GLFW_PRESS));
-			bool dashRight = ((glfwGetKey(Game::main.window, Game::main.dashRightKey) == GLFW_PRESS) || (glfwGetMouseButton(Game::main.window, Game::main.dashRightKey) == GLFW_PRESS));
-			bool dashLeft = ((glfwGetKey(Game::main.window, Game::main.dashLeftKey) == GLFW_PRESS) || (glfwGetMouseButton(Game::main.window, Game::main.dashLeftKey) == GLFW_PRESS));
 
 			bool swordRotRight = false;
 			bool swordRotLeft = false;
@@ -1863,26 +1810,10 @@ void InputSystem::Update(int activeScene, float deltaTime)
 																Game::main.bladeThrowPadType == InputType::stickNeg && state.axes[Game::main.bladeThrowPad] < -0.1f ||
 																Game::main.bladeThrowPadType == InputType::button && state.buttons[Game::main.bladeThrowPad]);
 
-				if (!attack) attack =							(Game::main.attackPadType == InputType::trigger && state.axes[Game::main.attackPad] + 1 ||
-																Game::main.attackPadType == InputType::stickPos && state.axes[Game::main.attackPad] > 0.1f ||
-																Game::main.attackPadType == InputType::stickNeg && state.axes[Game::main.attackPad] < -0.1f ||
-																Game::main.attackPadType == InputType::button && state.buttons[Game::main.attackPad]);
-
-				if (!dash) dash =								(Game::main.dashPadType == InputType::trigger && state.axes[Game::main.dashPad] + 1 ||
-																Game::main.dashPadType == InputType::stickPos && state.axes[Game::main.dashPad] > 0.1f ||
-																Game::main.dashPadType == InputType::stickNeg && state.axes[Game::main.dashPad] < -0.1f ||
-																Game::main.dashPadType == InputType::button && state.buttons[Game::main.dashPad]);
-
 				if (!climb) climb =								(Game::main.climbPadType == InputType::trigger && state.axes[Game::main.climbPad] + 1 ||
 																Game::main.climbPadType == InputType::stickPos && state.axes[Game::main.climbPad] > 0.1f ||
 																Game::main.climbPadType == InputType::stickNeg && state.axes[Game::main.climbPad] < -0.1f ||
 																Game::main.climbPadType == InputType::button && state.buttons[Game::main.climbPad]);
-
-				if (!dropWeapon) dropWeapon =					(Game::main.dropWeaponPadType == InputType::trigger && state.axes[Game::main.dropWeaponPad] + 1 ||
-																Game::main.dropWeaponPadType == InputType::stickPos && state.axes[Game::main.dropWeaponPad] > 0.1f ||
-																Game::main.dropWeaponPadType == InputType::stickNeg && state.axes[Game::main.dropWeaponPad] < -0.1f ||
-																Game::main.dropWeaponPadType == InputType::button && state.buttons[Game::main.dropWeaponPad]);
-
 				if (!jump) jump =								(Game::main.jumpPadType == InputType::trigger && state.axes[Game::main.jumpPad] + 1 ||
 																Game::main.jumpPadType == InputType::stickPos && state.axes[Game::main.jumpPad] > 0.1f ||
 																Game::main.jumpPadType == InputType::stickNeg && state.axes[Game::main.jumpPad] < -0.1f ||
@@ -1912,26 +1843,6 @@ void InputSystem::Update(int activeScene, float deltaTime)
 																Game::main.moveLeftPadType == InputType::stickPos && state.axes[Game::main.moveLeftPad] > 0.1f ||
 																Game::main.moveLeftPadType == InputType::stickNeg && state.axes[Game::main.moveLeftPad] < -0.1f ||
 																Game::main.moveLeftPadType == InputType::button && state.buttons[Game::main.moveLeftPad]);
-
-				if (!dashUp) dashUp =							(Game::main.dashUpPadType == InputType::trigger && state.axes[Game::main.dashUpPad] + 1 ||
-																Game::main.dashUpPadType == InputType::stickPos && state.axes[Game::main.dashUpPad] > 0.1f ||
-																Game::main.dashUpPadType == InputType::stickNeg && state.axes[Game::main.dashUpPad] < -0.1f ||
-																Game::main.dashUpPadType == InputType::button && state.buttons[Game::main.dashUpPad]);
-
-				if (!dashDown) dashDown =						(Game::main.dashDownPadType == InputType::trigger && state.axes[Game::main.dashDownPad] + 1 ||
-																Game::main.dashDownPadType == InputType::stickPos && state.axes[Game::main.dashDownPad] > 0.1f ||
-																Game::main.dashDownPadType == InputType::stickNeg && state.axes[Game::main.dashDownPad] < -0.1f ||
-																Game::main.dashDownPadType == InputType::button && state.buttons[Game::main.dashDownPad]);
-
-				if (!dashRight) dashRight =						(Game::main.dashRightPadType == InputType::trigger && state.axes[Game::main.dashRightPad] + 1 ||
-																Game::main.dashRightPadType == InputType::stickPos && state.axes[Game::main.dashRightPad] > 0.1f ||
-																Game::main.dashRightPadType == InputType::stickNeg && state.axes[Game::main.dashRightPad] < -0.1f ||
-																Game::main.dashRightPadType == InputType::button && state.buttons[Game::main.dashRightPad]);
-				
-				if (!dashLeft) dashLeft =						(Game::main.dashLeftPadType == InputType::trigger && state.axes[Game::main.dashLeftPad] + 1 ||
-																Game::main.dashLeftPadType == InputType::stickPos && state.axes[Game::main.dashLeftPad] > 0.1f ||
-																Game::main.dashLeftPadType == InputType::stickNeg && state.axes[Game::main.dashLeftPad] < -0.1f ||
-																Game::main.dashLeftPadType == InputType::button && state.buttons[Game::main.dashLeftPad]);
 
 				swordRotRight =									(Game::main.swordRotRightPadType == InputType::trigger && state.axes[Game::main.swordRotRightPad] + 1 ||
 																Game::main.swordRotRightPadType == InputType::stickPos && state.axes[Game::main.swordRotRightPad] > 0.1f ||
@@ -1974,13 +1885,9 @@ void InputSystem::Update(int activeScene, float deltaTime)
 
 			BladeComponent* blade = (BladeComponent*)m->moonlightBlade->componentIDMap[bladeComponentID];
 			MovementComponent* move = (MovementComponent*)m->entity->componentIDMap[movementComponentID];
+
 			Element magicParticles = Element::aether;
 			Element mundaneParticles = Element::dust;
-
-			if (blade->bladeState != BladeState::floating)
-			{
-				mundaneParticles = Element::aether;
-			}
 
 			PhysicsComponent* phys = (PhysicsComponent*)m->entity->componentIDMap[physicsComponentID];
 			ColliderComponent* col = (ColliderComponent*)m->entity->componentIDMap[colliderComponentID];
@@ -2015,20 +1922,14 @@ void InputSystem::Update(int activeScene, float deltaTime)
 				{
 					move->jumping = false;
 					m->jumps = 0;
-					m->dashes = 0;
 					m->coyoteTime = 0.0f;
 				}
 				else if (move->climbing)
 				{
 					move->jumping = false;
-					move->dashing = false;
 				}
 
-				if (move->dashing || move->attacking)
-				{
-					phys->gravityMod = 0.0f;
-				}
-				else if (!m->releasedJump && move->jumping && phys->velocityY > 0)
+				if (!m->releasedJump && move->jumping && phys->velocityY > 0)
 				{
 					phys->gravityMod = phys->baseGravityMod * 0.6f;
 				}
@@ -2091,8 +1992,6 @@ void InputSystem::Update(int activeScene, float deltaTime)
 					m->lastTarget = 0.0f;
 					blade->thrown = true;
 
-					blade->bladeState = BladeState::floating;
-
 					bladePhys->velocityX = projVel.x;
 					bladePhys->velocityY = projVel.y;
 
@@ -2117,214 +2016,6 @@ void InputSystem::Update(int activeScene, float deltaTime)
 					m->lastTarget += deltaTime;
 				}
 
-				StaticSpriteComponent* bladeSprite = (StaticSpriteComponent*)blade->entity->componentIDMap[spriteComponentID];
-				AnimationComponent* anComp = (AnimationComponent*)m->entity->componentIDMap[animationComponentID];
-				if (blade->returningToHand && bladeDist <= blade->catchRange)
-				{
-					for (int j = 0; j < 5; j++)
-					{
-						for (int k = 0; k < 5; k++)
-						{
-							ParticleEngine::main.AddParticles(1, playerPos.x + (j * 5), playerPos.y + (k * 5), 0, magicParticles, rand() % 10 + 1);
-						}
-					}
-
-					bladeSprite->active = false;
-					anComp->mapTex = m->swordMap;
-
-					blade->bladeState = BladeState::heldSword;
-					blade->attacking = true;
-					blade->returningToHand = false;
-				}
-				else if (blade->bladeState != BladeState::floating)
-				{
-					if (m->lastDash >= m->dashLength)
-					{
-						move->dashing = false;
-					}
-					else
-					{
-						m->lastDash += deltaTime;
-
-						if ((int)(m->lastDash * 100) % 2 == 0 && move->dashing)
-						{
-							ParticleEngine::main.AddParticles(3, playerPos.x, playerPos.y, 0, magicParticles, rand() % 10 + 1);
-						}
-					}
-
-					if (dropWeapon && !move->dashing ||
-						bladeThrow && !move->dashing)
-					{
-						for (int j = 0; j < 5; j++)
-						{
-							for (int k = 0; k < 5; k++)
-							{
-								ParticleEngine::main.AddParticles(1, playerPos.x + (j * 5), playerPos.y + (k * 5), 0, magicParticles, rand() % 10 + 1);
-							}
-						}
-
-						anComp->mapTex = m->baseMap;
-
-						blade->bladeState = BladeState::floating;
-						bladeSprite->active = true;
-						blade->attacking = false;
-
-						m->lastDash = m->dashLength - 0.1f;
-					}
-					else
-					{
-						if (attack && move->lastAttack > move->minAttackDelay && move->lastFlurry > move->flurryDelay && move->attackNumber < move->maxFlurry && !move->climbing && blade->bladeState == BladeState::heldSword)
-						{
-							move->attacking = true;
-							move->attackNumber++;
-
-							if (move->attackNumber >= move->maxFlurry)
-							{
-								move->lastFlurry = 0.0f;
-							}
-
-							move->climbing = false;
-							move->shouldClimb = false;
-
-							move->lastAttack = 0.0f;
-
-							glm::vec2 projVel;
-
-							Texture2D* sMap = Game::main.textureMap["sword_slashMap"];
-							Animation2D* anim;
-
-							glm::vec2 playerVel = Normalize(glm::vec2(Game::main.mouseX, Game::main.mouseY) - glm::vec2(playerPos.x, playerPos.y)) * move->attackThrust;
-							phys->velocityX = playerVel.x;
-							phys->velocityY = playerVel.y;
-
-							if (phys->velocityX < 0)
-							{
-								projVel = glm::vec2(-1, 0);
-							}
-							else
-							{
-								projVel = glm::vec2(1, 0);
-							}
-
-							projVel *= move->slashSpeed;
-
-							if (move->attackNumber % 2 == 0)
-							{
-								anim = Game::main.animationMap["sword_slashDown"];
-							}
-							else
-							{
-								anim = Game::main.animationMap["sword_slashUp"];
-							}
-
-							float t = anim->speed * (anim->columns * anim->rows);
-
-							Entity* projectile = ECS::main.CreateEntity(0, "Slash");
-
-							ECS::main.RegisterComponent(new PositionComponent(projectile, true, false, playerPos.x, playerPos.y, playerPos.z, 0.0f), projectile);
-							ECS::main.RegisterComponent(new PhysicsComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], phys->velocityX + projVel.x, phys->velocityY + projVel.y, 0.0f, 0.0f, 0.0f), projectile);
-							ECS::main.RegisterComponent(new ColliderComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], false, false, true, false, true, false, true, EntityClass::object, 1.0f, 0.0f, 0.0f, 5.0f, 5.0f, 0.0f, 0.0f), projectile);
-							ECS::main.RegisterComponent(new AnimationComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], anim, "default", sMap, 1.0f, 1.0f, false, false), projectile);
-							ECS::main.RegisterComponent(new DamageComponent(projectile, true, move->entity, true, t, true, true, 1, 20.0f, false, true, true, false), projectile);
-
-							PhysicsComponent* p = (PhysicsComponent*)projectile->componentIDMap[physicsComponentID];
-							AnimationComponent* a = (AnimationComponent*)projectile->componentIDMap[animationComponentID];
-							if (p->velocityX < 0 || anComp->flippedX)
-							{
-								anComp->flippedX = true;
-								a->flippedX = true;
-							}
-							else
-							{
-								anComp->flippedX = false;
-								a->flippedX = false;
-							}
-
-						}
-						else
-						{
-							move->lastFlurry += deltaTime;
-							move->lastAttack += deltaTime;
-						}
-
-						if (move->lastAttack > move->attackLength)
-						{
-							move->attacking = false;
-
-							if (col->onPlatform && move->lastAttack > move->maxAttackDelay)
-							{
-								move->attackNumber = 0;
-							}
-						}
-
-						if (dash && m->dashes < m->maxDashes && m->lastDash >= m->dashLength && !move->attacking)
-						{
-							for (int j = 0; j < 5; j++)
-							{
-								for (int k = 0; k < 5; k++)
-								{
-									ParticleEngine::main.AddParticles(1, playerPos.x + (j * 5), playerPos.y + (k * 5), 0, magicParticles, rand() % 10 + 1);
-								}
-							}
-
-							glm::vec2 dashDirection = glm::vec2(0, 0);
-
-							if (dashRight)
-							{
-								dashDirection.x = 1.0f;
-							}
-							else if (dashLeft)
-							{
-								dashDirection.x = -1.0f;
-							}
-
-							if (dashUp)
-							{
-								dashDirection.y = 1.0f;
-							}
-							else if (dashDown)
-							{
-								dashDirection.y = -1.0f;
-							}
-
-							if (dashDirection.x == 0 && dashDirection.y == 0)
-							{
-								dashDirection = glm::vec2(0, 1);
-							}
-
-							glm::vec2 projVel = Normalize(dashDirection) * move->dashSpeed;
-
-							m->dashes++;
-							m->lastDash = 0.0f;
-
-							move->dashing = true;
-							move->jumping = false;
-							move->climbing = false;
-							move->shouldClimb = false;
-
-							phys->velocityX = projVel.x;
-							phys->velocityY = projVel.y;
-						}
-					}
-				}
-				else if (attack && blade->bladeState == BladeState::floating && !blade->returningToHand)
-				{
-				blade->returningToHand = true;
-					bladePhys->velocityX = 0.0f;
-					bladePhys->velocityY = 0.0f;
-
-					m->lastTarget = 0.0f;
-
-					DamageComponent* bladeDamage = (DamageComponent*)blade->entity->componentIDMap[damageComponentID];
-
-					bladeDamage->lodged = false;
-					blade->lodged = false;
-					blade->thrown = false;
-
-					blade->manualTarget = glm::vec2(0, 0);
-				}
-
-
 				if (climb && move->canClimb)
 				{
 					move->shouldClimb = true;
@@ -2334,146 +2025,144 @@ void InputSystem::Update(int activeScene, float deltaTime)
 					move->shouldClimb = false;
 				}
 
-				if (!move->dashing && !move->attacking)
+				if (m->coyoteTime < m->maxCoyoteTime && !col->onPlatform)
 				{
-					if (m->coyoteTime < m->maxCoyoteTime && !col->onPlatform)
+					m->coyoteTime += deltaTime;
+				}
+
+				if (!jump && !m->releasedJump)
+				{
+					m->releasedJump = true;
+				}
+
+				if (jump && move->canMove && col->onPlatform && m->releasedJump
+					|| jump && move->canMove && m->releasedJump && m->coyoteTime < m->maxCoyoteTime
+					|| jump && move->canMove && m->releasedJump && !col->onPlatform && m->maxJumps > 1 && m->jumps < m->maxJumps
+					|| jump && move->canMove && m->releasedJump && move->wallRunning)
+				{
+					AnimationComponent* anComp = (AnimationComponent*)m->entity->componentIDMap[animationComponentID];
+					if (!col->onPlatform && m->jumps == 0 && m->coyoteTime > m->maxCoyoteTime)
 					{
-						m->coyoteTime += deltaTime;
-					}
-
-					if (!jump && !m->releasedJump)
-					{
-						m->releasedJump = true;
-					}
-
-					if (jump && move->canMove && col->onPlatform && m->releasedJump
-						|| jump && move->canMove && m->releasedJump && m->coyoteTime < m->maxCoyoteTime
-						|| jump && move->canMove && m->releasedJump && !col->onPlatform && m->maxJumps > 1 && m->jumps < m->maxJumps
-						|| jump && move->canMove && m->releasedJump && move->wallRunning)
-					{
-						if (!col->onPlatform && m->jumps == 0 && m->coyoteTime > m->maxCoyoteTime)
-						{
-							m->jumps += 2;
-						}
-						else
-						{
-							m->jumps++;
-						}
-
-						if (phys->velocityY < 0)
-						{
-							phys->velocityY = 0;
-						}
-
-						ParticleEngine::main.AddParticles(25, phys->pos->x, phys->pos->y, 0, magicParticles, rand() % 40 + 1);
-
-						m->releasedJump = false;
-						m->coyoteTime = m->maxCoyoteTime;
-
-						move->canMove = true;
-						move->jumping = true;
-
-						move->shouldClimb = false;
-						phys->velocityY += 250 * move->maxJumpHeight;
-
-						if (move->wallRunning && anComp->flippedX)
-						{
-							phys->velocityX += 250 * move->maxJumpHeight;
-						}
-						else if (move->wallRunning)
-						{
-							phys->velocityX -= 250 * move->maxJumpHeight;
-						}
-
-						move->wallRunning = false;
-					}
-
-					if (crouch && !move->jumping)
-					{
-						if (col->height == col->baseHeight && col->offsetY == col->baseOffsetY)
-						{
-							phys->pos->y += 5.0f;
-						}
-
-						move->crouching = true;
-						col->height = col->baseHeight * 0.75f;
-						col->offsetY = col->baseOffsetY - 5.0f;
-
-						col->ignoreOnewayPlatforms = true;
+						m->jumps += 2;
 					}
 					else
 					{
-						if (col->height == col->baseHeight * 0.75f && col->offsetY == col->baseOffsetY - 5.0f)
+						m->jumps++;
+					}
+
+					if (phys->velocityY < 0)
+					{
+						phys->velocityY = 0;
+					}
+
+					ParticleEngine::main.AddParticles(25, phys->pos->x, phys->pos->y, 0, magicParticles, rand() % 40 + 1);
+
+					m->releasedJump = false;
+					m->coyoteTime = m->maxCoyoteTime;
+
+					move->canMove = true;
+					move->jumping = true;
+
+					move->shouldClimb = false;
+					phys->velocityY += 250 * move->maxJumpHeight;
+
+					if (move->wallRunning && anComp->flippedX)
+					{
+						phys->velocityX += 250 * move->maxJumpHeight;
+					}
+					else if (move->wallRunning)
+					{
+						phys->velocityX -= 250 * move->maxJumpHeight;
+					}
+
+					move->wallRunning = false;
+				}
+
+				if (crouch && !move->jumping)
+				{
+					if (col->height == col->baseHeight && col->offsetY == col->baseOffsetY)
+					{
+						phys->pos->y += 5.0f;
+					}
+
+					move->crouching = true;
+					col->height = col->baseHeight * 0.75f;
+					col->offsetY = col->baseOffsetY - 5.0f;
+
+					col->ignoreOnewayPlatforms = true;
+				}
+				else
+				{
+					if (col->height == col->baseHeight * 0.75f && col->offsetY == col->baseOffsetY - 5.0f)
+					{
+						phys->pos->y += 5.0f;
+					}
+
+					move->crouching = false;
+					col->height = col->baseHeight;
+					col->offsetY = col->baseOffsetY;
+
+					col->ignoreOnewayPlatforms = false;
+				}
+
+				if (move->crouching && abs(phys->velocityX) - 10.0f > move->maxSpeed * move->crouchMod && col->onPlatform)
+				{
+					ParticleEngine::main.AddParticles(1, phys->pos->x, phys->pos->y - 30.0f, 0, mundaneParticles, rand() % 10 + 1);
+
+					phys->drag = phys->baseDrag * 0.1f;
+				}
+				else
+				{
+					phys->drag = phys->baseDrag;
+				}
+
+				float mod = 1.0f;
+
+				if (move->crouching)
+				{
+					mod = move->crouchMod;
+				}
+
+				if (move->climbing)
+				{
+					mod = move->climbMod;
+				}
+				else if (move->jumping || !col->onPlatform && abs(phys->velocityY) > 100.0f)
+				{
+					mod = move->airControl;
+				}
+
+				if (climbDown && move->canMove && move->climbing)
+				{
+					ParticleEngine::main.AddParticles(1, phys->pos->x, phys->pos->y + 20.0f, 0, mundaneParticles, rand() % 10 + 1);
+					if (phys->velocityY > -move->maxSpeed * mod)
+					{
+						phys->velocityY -= move->acceleration * deltaTime * mod;
+					}
+				}
+
+				if (moveRight && move->canMove && !move->climbing)
+				{
+					if (phys->velocityX < move->maxSpeed * mod)
+					{
+						if (abs(phys->velocityX) < 0.5f && col->onPlatform)
 						{
-							phys->pos->y += 5.0f;
+							ParticleEngine::main.AddParticles(10, phys->pos->x, phys->pos->y - 30.0f, 0, mundaneParticles, rand() % 10 + 1);
 						}
 
-						move->crouching = false;
-						col->height = col->baseHeight;
-						col->offsetY = col->baseOffsetY;
-
-						col->ignoreOnewayPlatforms = false;
+						phys->velocityX += move->acceleration * deltaTime * mod;
 					}
-
-					if (move->crouching && abs(phys->velocityX) - 10.0f > move->maxSpeed * move->crouchMod && col->onPlatform)
+				}
+				else if (moveLeft && move->canMove && !move->climbing)
+				{
+					if (phys->velocityX > -move->maxSpeed * mod)
 					{
-						ParticleEngine::main.AddParticles(1, phys->pos->x, phys->pos->y - 30.0f, 0, mundaneParticles, rand() % 10 + 1);
-
-						phys->drag = phys->baseDrag * 0.1f;
-					}
-					else
-					{
-						phys->drag = phys->baseDrag;
-					}
-
-					float mod = 1.0f;
-
-					if (move->crouching)
-					{
-						mod = move->crouchMod;
-					}
-
-					if (move->climbing)
-					{
-						mod = move->climbMod;
-					}
-					else if (move->jumping || !col->onPlatform && abs(phys->velocityY) > 100.0f)
-					{
-						mod = move->airControl;
-					}
-
-					if (climbDown && move->canMove && move->climbing)
-					{
-						ParticleEngine::main.AddParticles(1, phys->pos->x, phys->pos->y + 20.0f, 0, mundaneParticles, rand() % 10 + 1);
-						if (phys->velocityY > -move->maxSpeed * mod)
+						if (abs(phys->velocityX) < 0.5f && col->onPlatform)
 						{
-							phys->velocityY -= move->acceleration * deltaTime * mod;
+							ParticleEngine::main.AddParticles(10, phys->pos->x, phys->pos->y - 30.0f, 0, mundaneParticles, rand() % 10 + 1);
 						}
-					}
 
-					if (moveRight && move->canMove && !move->climbing)
-					{
-						if (phys->velocityX < move->maxSpeed * mod)
-						{
-							if (abs(phys->velocityX) < 0.5f && col->onPlatform)
-							{
-								ParticleEngine::main.AddParticles(10, phys->pos->x, phys->pos->y - 30.0f, 0, mundaneParticles, rand() % 10 + 1);
-							}
-
-							phys->velocityX += move->acceleration * deltaTime * mod;
-						}
-					}
-					else if (moveLeft && move->canMove && !move->climbing)
-					{
-						if (phys->velocityX > -move->maxSpeed * mod)
-						{
-							if (abs(phys->velocityX) < 0.5f && col->onPlatform)
-							{
-								ParticleEngine::main.AddParticles(10, phys->pos->x, phys->pos->y - 30.0f, 0, mundaneParticles, rand() % 10 + 1);
-							}
-
-							phys->velocityX -= move->acceleration * deltaTime * mod;
-						}
+						phys->velocityX -= move->acceleration * deltaTime * mod;
 					}
 				}
 			}
@@ -2586,12 +2275,6 @@ void AnimationControllerSystem::Update(int activeScene, float deltaTime)
 				InputComponent* input = (InputComponent*)d->entity->componentIDMap[inputComponentID];
 				BladeComponent* blade = (BladeComponent*)input->moonlightBlade->componentIDMap[bladeComponentID];
 
-				string s = "";
-
-				if (blade->bladeState == BladeState::heldSword)
-				{
-					s = "sword_";
-				}
 				if (!health->dead)
 				{
 					if (p->velocityX < -100.0f)
@@ -2603,7 +2286,7 @@ void AnimationControllerSystem::Update(int activeScene, float deltaTime)
 						c->animator->flippedX = false;
 					}
 
-					if (move->attacking && move->attackNumber % 2 == 0)
+					/*if (move->attacking && move->attackNumber % 2 == 0)
 					{
 						if (c->animator->activeAnimation != s + "slashTwo")
 						{
@@ -2616,50 +2299,50 @@ void AnimationControllerSystem::Update(int activeScene, float deltaTime)
 						{
 							c->animator->SetAnimation(s + "slashOne");
 						}
-					}
-					else if (abs(p->velocityY) > 200.0f && !col->onPlatform && !move->climbing && !move->wallRunning)
+					}*/
+					if (abs(p->velocityY) > 200.0f && !col->onPlatform && !move->climbing && !move->wallRunning)
 					{
-						if (c->animator->activeAnimation != s + "jumpUp" && p->velocityY > 0)
+						if (c->animator->activeAnimation != "jumpUp" && p->velocityY > 0)
 						{
-							c->animator->SetAnimation(s + "jumpUp");
+							c->animator->SetAnimation("jumpUp");
 						}
-						else if (c->animator->activeAnimation != s + "jumpDown" && p->velocityY < 0)
+						else if (c->animator->activeAnimation != "jumpDown" && p->velocityY < 0)
 						{
-							c->animator->SetAnimation(s + "jumpDown");
+							c->animator->SetAnimation("jumpDown");
 						}
 					}
-					else if (move->wallRunning && abs(p->velocityX) < 100.0f && c->animator->activeAnimation != s + "wallRun")
+					else if (move->wallRunning && abs(p->velocityX) < 100.0f && c->animator->activeAnimation != "wallRun")
 					{
-						c->animator->SetAnimation(s + "wallRun");
+						c->animator->SetAnimation("wallRun");
 					}
-					else if (p->velocityY <= 0.0f && move->climbing && c->animator->activeAnimation != s + "slideDown")
+					else if (p->velocityY <= 0.0f && move->climbing && c->animator->activeAnimation != "slideDown")
 					{
-						c->animator->SetAnimation(s + "slideDown");
+						c->animator->SetAnimation("slideDown");
 					}
-					else if (abs(p->velocityX) - 10.0f > move->maxSpeed * move->crouchMod && move->crouching && col->onPlatform && move->canMove && c->animator->activeAnimation != s + "slide")
+					else if (abs(p->velocityX) - 10.0f > move->maxSpeed * move->crouchMod && move->crouching && col->onPlatform && move->canMove && c->animator->activeAnimation != "slide")
 					{
-						c->animator->SetAnimation(s + "slide");
+						c->animator->SetAnimation("slide");
 					}
-					else if (abs(p->velocityX) - 10.0f < move->maxSpeed * move->crouchMod && abs(p->velocityX) > 25.0f && move->crouching && col->onPlatform && move->canMove && c->animator->activeAnimation != s + "crouchWalk")
+					else if (abs(p->velocityX) - 10.0f < move->maxSpeed * move->crouchMod && abs(p->velocityX) > 25.0f && move->crouching && col->onPlatform && move->canMove && c->animator->activeAnimation != "crouchWalk")
 					{
-						c->animator->SetAnimation(s + "crouchWalk");
+						c->animator->SetAnimation("crouchWalk");
 					}
-					else if (abs(p->velocityX) < 25.0f && move->crouching && col->onPlatform && move->canMove && c->animator->activeAnimation != s + "crouch")
+					else if (abs(p->velocityX) < 25.0f && move->crouching && col->onPlatform && move->canMove && c->animator->activeAnimation != "crouch")
 					{
-						c->animator->SetAnimation(s + "crouch");
+						c->animator->SetAnimation("crouch");
 					}
-					else if (abs(p->velocityX) > 100.0f && !move->crouching && col->onPlatform && move->canMove && c->animator->activeAnimation != s + "walk")
+					else if (abs(p->velocityX) > 100.0f && !move->crouching && col->onPlatform && move->canMove && c->animator->activeAnimation != "walk")
 					{
-						c->animator->SetAnimation(s + "walk");
+						c->animator->SetAnimation("walk");
 					}
-					else if (abs(p->velocityX) < 100.0f && !move->crouching && col->onPlatform && move->canMove && c->animator->activeAnimation != s + "idle")
+					else if (abs(p->velocityX) < 100.0f && !move->crouching && col->onPlatform && move->canMove && c->animator->activeAnimation != "idle")
 					{
-						c->animator->SetAnimation(s + "idle");
+						c->animator->SetAnimation("idle");
 					}
 				}
-				else if (c->animator->activeAnimation != s + "dead")
+				else if (c->animator->activeAnimation != "dead")
 				{
-					c->animator->SetAnimation(s + "dead");
+					c->animator->SetAnimation("dead");
 				}
 			}
 		}
@@ -3065,13 +2748,7 @@ void BladeSystem::Update(int activeScene, float deltaTime)
 				b->lodged = true;
 			}
 
-			if (b->bladeState == BladeState::heldSword)
-			{
-				posA->z = -10.0f;
-				posA->x = posB->x;
-				posA->y = posB->y;
-			}
-			else if (!b->thrown)
+			if (!b->thrown)
 			{
 				posA->z = -10.0f;
 				sprite->mapTex = b->incorporealMap;
@@ -3175,13 +2852,6 @@ void BladeSystem::Update(int activeScene, float deltaTime)
 				}
 
 				float followSpeedModifier = 1.0f;
-
-				if (b->returningToHand)
-				{
-					target = glm::vec2(posB->x, posB->y);
-					r = std::atan2(target.y - position.y, target.x - position.x) * (180 / M_PI);
-					followSpeedModifier = 2.0f;
-				}
 
 				posA->rotation = r;
 				// std::cout << std::to_string(r) + "\n";

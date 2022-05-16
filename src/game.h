@@ -50,11 +50,8 @@ public:
 	// Keyboard and Mouse Mappings
 	int bladeManualTargetKey = GLFW_MOUSE_BUTTON_3;
 	int bladeThrowKey = GLFW_MOUSE_BUTTON_2;
-	int dashKey = GLFW_KEY_LEFT_ALT;
-	int attackKey = GLFW_MOUSE_BUTTON_1;
 
 	int climbKey = GLFW_KEY_LEFT_SHIFT;
-	int dropWeaponKey = GLFW_KEY_C;
 	int jumpKey = GLFW_KEY_SPACE;
 	int crouchKey = GLFW_KEY_LEFT_CONTROL;
 
@@ -77,17 +74,8 @@ public:
 	InputType bladeThrowPadType = InputType::button;
 	int bladeThrowPad = GLFW_GAMEPAD_BUTTON_RIGHT_BUMPER;
 
-	InputType attackPadType = InputType::trigger;
-	int attackPad = GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER;
-
-	InputType dashPadType = InputType::button;
-	int dashPad = GLFW_GAMEPAD_BUTTON_B;
-
 	InputType climbPadType = InputType::trigger;
 	int climbPad = GLFW_GAMEPAD_AXIS_LEFT_TRIGGER;
-
-	InputType dropWeaponPadType = InputType::button;
-	int dropWeaponPad = GLFW_GAMEPAD_BUTTON_Y;
 
 	InputType jumpPadType = InputType::button;
 	int jumpPad = GLFW_GAMEPAD_BUTTON_A;
