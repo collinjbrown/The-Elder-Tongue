@@ -289,7 +289,7 @@ void ECS::Update(float deltaTime)
 		ECS::main.RegisterComponent(new PositionComponent(player, true, false, 0, 100, 0, 0.0f), player);
 		ECS::main.RegisterComponent(new PhysicsComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 5000.0f, 2000.0f), player);
 		ECS::main.RegisterComponent(new ColliderComponent(player, true, (PositionComponent*)player->componentIDMap[positionComponentID], false, false, false, false, false, true, false, EntityClass::player, 1.0f, 1.0f, 10.0f, 20.0f, 50.0f, 0.0f, -7.75f), player);
-		ECS::main.RegisterComponent(new MovementComponent(player, true, true, 4000.0f, 500.0f, 2.5f, 0.5f, 1000.0f, 0.7f, true, false, 0.9f, 2.5f, 50.0f, 0.25f, 20.0f, 1.5f, 0.5f, 1.0f, 5, 3.0f), player);
+		ECS::main.RegisterComponent(new MovementComponent(player, true, true, 4000.0f, 500.0f, 2.5f, 0.5f, 1000.0f, 0.7f, true, false, 0.9f, 500.0f, 50.0f, 0.25f, 20.0f, 1.5f, 0.5f, 1.0f, 5, 3.0f), player);
 		ECS::main.RegisterComponent(new InputComponent(player, true, moonlightBlade, true, 0.5f, 2, 1, 0.25f, 0.5f, lilyMap, lilySwordMap), player);
 		ECS::main.RegisterComponent(new CameraFollowComponent(player, true, 10.0f, false, false), player);
 		ECS::main.RegisterComponent(new HealthComponent(player, true, 1000.0f, false), player);
@@ -2225,7 +2225,7 @@ void InputSystem::Update(int activeScene, float deltaTime)
 							Texture2D* sMap = Game::main.textureMap["sword_slashMap"];
 							Animation2D* anim;
 
-							glm::vec2 playerVel = glm::vec2(Game::main.mouseX - playerPos.x, Game::main.mouseY - playerPos.y) * move->attackThrust;
+							glm::vec2 playerVel = Normalize(glm::vec2(Game::main.mouseX, Game::main.mouseY) - glm::vec2(playerPos.x, playerPos.y)) * move->attackThrust;
 							phys->velocityX = playerVel.x;
 							phys->velocityY = playerVel.y;
 
@@ -2260,11 +2260,16 @@ void InputSystem::Update(int activeScene, float deltaTime)
 							ECS::main.RegisterComponent(new DamageComponent(projectile, true, move->entity, true, t, true, true, 1, 20.0f, false, true, true, false), projectile);
 
 							PhysicsComponent* p = (PhysicsComponent*)projectile->componentIDMap[physicsComponentID];
+							AnimationComponent* a = (AnimationComponent*)projectile->componentIDMap[animationComponentID];
 							if (p->velocityX < 0 || anComp->flippedX)
 							{
-								AnimationComponent* a = (AnimationComponent*)projectile->componentIDMap[animationComponentID];
-
+								anComp->flippedX = true;
 								a->flippedX = true;
+							}
+							else
+							{
+								anComp->flippedX = false;
+								a->flippedX = false;
 							}
 
 						}
@@ -2278,7 +2283,7 @@ void InputSystem::Update(int activeScene, float deltaTime)
 						{
 							move->attacking = false;
 
-							if (col->onPlatform)
+							if (col->onPlatform && move->lastAttack > move->maxAttackDelay)
 							{
 								move->attackNumber = 0;
 							}
