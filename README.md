@@ -20,9 +20,11 @@
 
  ---
 
- # Tools & Secondary Programs
+# Tools & Secondary Programs
  Check out [Pixapper](https://github.com/collinjbrown/Pixapper), a little program I made for this game that takes in two pngs and maps one to the other for easy implementation into *The Moonlight Tongue*'s rendering system.
  
+ ---
+
 # To Do ~ Short Term:
 - Add scenes / global state.
 - Maybe write a scene editor.
