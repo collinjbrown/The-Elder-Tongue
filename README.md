@@ -12,7 +12,7 @@
 
  The answer, as I've found it, is to blunt the blade. If your only tool is impotent for its intended purpose, how can you still wield it to achieve your goal?
 
- If your only tool is a sword that can't kill, how do you use it to surmount obstacles? Well, you literally use it to surmount obstacles.
+ How do you use a blunt blade to surmount obstacles? Well, you literally use it to surmount obstacles.
  
  Instead of using your blade as a weapon, you use it to augment your maneuverability and puzzle-solving skills: it can serve as a barricade when thrust into the ground or as a platform
  when thrust into a wall; it can hold down buttons, hold open doors, or hold objects in place; and most importantly it can serve as a paperweight for our protagonist, a pacifist monk
