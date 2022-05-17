@@ -245,7 +245,7 @@ void ECS::Update(float deltaTime)
 
 	if (round == 1)
 	{
-#pragma region UI Instantiation
+		#pragma region UI Instantiation
 
 		Entity* alphaWatermark = CreateEntity(0, "Alpha Watermark");
 		Texture2D* watermark = Game::main.textureMap["watermark"];
@@ -255,9 +255,9 @@ void ECS::Update(float deltaTime)
 		ECS::main.RegisterComponent(new StaticSpriteComponent(alphaWatermark, true, (PositionComponent*)alphaWatermark->componentIDMap[positionComponentID], watermark->width, watermark->height, 1.0f, 1.0f, watermark, watermarkMap, false, false, false), alphaWatermark);
 		ECS::main.RegisterComponent(new ImageComponent(alphaWatermark, true, Anchor::topRight, 0, 0), alphaWatermark);
 
-#pragma endregion
+		#pragma endregion
 
-#pragma region Moonlight Blade Instantiation
+		#pragma region Moonlight Blade Instantiation
 
 		player = CreateEntity(0, "The Player");
 		Entity* moonlightBlade = CreateEntity(0, "Moonlight Blade");
@@ -279,9 +279,9 @@ void ECS::Update(float deltaTime)
 		ECS::main.RegisterComponent(platformCollider, hilt);
 		ECS::main.RegisterComponent(new BladeComponent(moonlightBlade, true, 1010.0f, 1000.0f, 0.5f, 1000.0f, platformCollider, moonlightBladeMap, moonlightBladeIncorporealMap, 0.5f), moonlightBlade);
 
-#pragma endregion
+		#pragma endregion
 
-#pragma region Player Instantiation
+		#pragma region Player Instantiation
 		Texture2D* lilyMap = Game::main.textureMap["lilyMap"];
 		Animation2D* anim1 = Game::main.animationMap["baseIdle"];
 
@@ -307,7 +307,7 @@ void ECS::Update(float deltaTime)
 		a->AddAnimation("slashOne", Game::main.animationMap["baseSlashOne"]);
 		a->AddAnimation("slashTwo", Game::main.animationMap["baseSlashTwo"]);
 		a->AddAnimation("dead", Game::main.animationMap["baseDeath"]);
-#pragma endregion
+		#pragma endregion
 
 		/*Texture2D* wallTex = Game::main.textureMap["wall"];
 		Texture2D* wallTexMap = Game::main.textureMap["wallMap"];
