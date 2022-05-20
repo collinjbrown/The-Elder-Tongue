@@ -48,7 +48,7 @@ add_custom_target(copy_assets
 
 add_dependencies(the-moonlight-tongue copy_assets)
 
-add_subdirectory(libs/glfw-3.3.4)
+add_subdirectory(libs/glfw-3.3.7)
 add_subdirectory(libs/glad)
 add_subdirectory(libs/glm-0.9.9.8)
 
