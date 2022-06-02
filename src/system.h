@@ -25,6 +25,7 @@ class CameraFollowComponent;
 class AnimationComponent;
 class AnimationControllerComponent;
 class PlayerAnimationControllerComponent;
+class MoonlightBladeAnimationControllerComponent;
 class HealthComponent;
 class DuelistComponent;
 class DamageComponent;
@@ -246,4 +247,5 @@ public:
 
 	void PurgeEntity(Entity* e);
 };
+
 #endif

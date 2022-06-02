@@ -33,7 +33,8 @@ static int aiComponentID = 14;
 static int bladeComponentID = 15;
 static int imageComponentID = 16;
 
-static int lilyAnimControllerSubID = 1;
+static int playerAnimControllerSubID = 1;
+static int moonlightBladeAnimControllerSubID = 2;
 
 enum EntityClass { player, enemy, object };
 
@@ -285,6 +286,12 @@ public:
 	PlayerAnimationControllerComponent(Entity* entity, bool active, AnimationComponent* animator);
 };
 
+class MoonlightBladeAnimationControllerComponent : public AnimationControllerComponent
+{
+public:
+	MoonlightBladeAnimationControllerComponent(Entity* entity, bool active, AnimationComponent* animator);
+};
+
 class HealthComponent : public Component
 {
 public:
@@ -356,7 +363,6 @@ public:
 class BladeComponent : public Component
 {
 public:
-	bool attacking;
 	bool thrown;
 	bool lodged;
 
@@ -365,6 +371,10 @@ public:
 
 	float followSpeed;
 	float projectileSpeed;
+
+	float bulletSpeed;
+	float shootDelay;
+	float lastShot;
 
 	ColliderComponent* platformCollider;
 
@@ -375,7 +385,7 @@ public:
 	float lastTargetSet;
 	float minTargetSetDelay;
 
-	BladeComponent(Entity* entity, bool active, float rushRange, float slowRange, float followSpeed, float projectileSpeed, ColliderComponent* platformCollider, Texture2D* corporealMap, Texture2D* incorporealMap, float minTargetSetDelay);
+	BladeComponent(Entity* entity, bool active, float rushRange, float slowRange, float followSpeed, float projectileSpeed, float bulletSpeed, float shootDelay, ColliderComponent* platformCollider, Texture2D* corporealMap, Texture2D* incorporealMap, float minTargetSetDelay);
 };
 
 enum class Anchor { topLeft, bottomLeft, topRight, bottomRight };

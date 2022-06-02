@@ -155,9 +155,9 @@ int main(void)
     renderer.textureIDs.push_back(blankMap.ID);
     Game::main.textureMap.emplace("base_map", &blankMap);
 
-    Texture2D moonlightBlade{ "assets/sprites/blade/moonlight_blade.png", true, GL_NEAREST };
+    Animation2D moonlightBlade{ "assets/sprites/blade/moonlight_blade.png", true, 1, 1, 5.0f, { 1 }, true, GL_NEAREST};
     renderer.textureIDs.push_back(moonlightBlade.ID);
-    Game::main.textureMap.emplace("moonlightBlade", &moonlightBlade);
+    Game::main.animationMap.emplace("moonlightBlade", &moonlightBlade);
 
     Texture2D moonlightBladeMap{ "assets/sprites/blade/moonlight_blade_map.png", true, GL_NEAREST };
     renderer.textureIDs.push_back(moonlightBladeMap.ID);

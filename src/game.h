@@ -48,6 +48,7 @@ public:
 	void updateOrtho();
 
 	// Keyboard and Mouse Mappings
+	int bladeShootKey = GLFW_MOUSE_BUTTON_1;
 	int bladeManualTargetKey = GLFW_MOUSE_BUTTON_3;
 	int bladeThrowKey = GLFW_MOUSE_BUTTON_2;
 
@@ -67,7 +68,10 @@ public:
 	int dashLeftKey = GLFW_KEY_A;
 
 	// Gamepad Mappings
-	
+
+	InputType bladeShootPadType = InputType::trigger;
+	int bladeShootPad = GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER;
+
 	InputType bladeManualTargetPadType = InputType::button;
 	int bladeManualTargetPad = GLFW_GAMEPAD_BUTTON_LEFT_THUMB;
 
