@@ -1,10 +1,10 @@
 ---
 
-<p align="center"><img src="https://github.com/collinjbrown/The-Moonlight-Tongue/blob/main/assets/sprites/readme/the_moonlight_tongue.svg" alt="The Moonlight Tongue" style="width:200px;"></p>
+<p align="center"><img src="https://github.com/collinjbrown/The-Moonlight-Blade/blob/main/assets/sprites/readme/the_moonlight_tongue.svg" alt="The Moonlight Blade" style="width:200px;"></p>
 
 ---
 
-# The Moonlight Tongue
+# The Moonlight Blade
  A puzzle-platformer about.... Well, that has yet to be entirely decided. I originally intended this to be a Metroidvania, but after having designed the incorporeal and corporeal blade
  mechanics, I realized that they lend themselves well to a puzzle-platformer-style game. I'm a big Ursula K. Le Guin fan, so her writings on narrative have shaped the sort of art I
  want to make: I'm inclined to design a game whose core mechanics are nonviolent in nature. Of course, this presents a conundrum: in a game where the central tool is a claymore, how do
@@ -21,7 +21,7 @@
  ---
 
 # Tools & Secondary Programs
- Check out [Pixapper](https://github.com/collinjbrown/Pixapper), a little program I made for this game that takes in two pngs and maps one to the other for easy implementation into *The Moonlight Tongue*'s rendering system.
+ Check out [Pixapper](https://github.com/collinjbrown/Pixapper), a little program I made for this game that takes in two pngs and maps one to the other for easy implementation into *The Moonlight Blade*'s rendering system.
  
  ---
 

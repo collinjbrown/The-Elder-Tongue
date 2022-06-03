@@ -1,9 +1,9 @@
-﻿# CMakeList.txt : CMake project for The Moonlight Tongue, include source and define
+﻿# CMakeList.txt : CMake project for The Moonlight Blade, include source and define
 # project specific logic here.
 #
 cmake_minimum_required (VERSION 3.8)
 
-project (the-moonlight-tongue LANGUAGES CXX)
+project (the-moonlight-blade LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
@@ -36,7 +36,7 @@ set(BASE_SRCS
     )
 
 # Add source to this project's executable.
-add_executable (the-moonlight-tongue ${BASE_SRCS})
+add_executable (the-moonlight-blade ${BASE_SRCS})
 
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
@@ -46,7 +46,7 @@ add_custom_target(copy_assets
     COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_LIST_DIR}/copy-assets.cmake
 )
 
-add_dependencies(the-moonlight-tongue copy_assets)
+add_dependencies(the-moonlight-blade copy_assets)
 
 add_subdirectory(libs/glfw-3.3.7)
 add_subdirectory(libs/glad)
@@ -56,4 +56,4 @@ if(NOT DEFINED CMAKE_SUPPRESS_DEVELOPER_WARNINGS)
      set(CMAKE_SUPPRESS_DEVELOPER_WARNINGS 1 CACHE INTERNAL "No dev warnings")
 endif()
 
-target_link_libraries(the-moonlight-tongue glfw glad glm)
+target_link_libraries(the-moonlight-blade glfw glad glm)
