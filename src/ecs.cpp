@@ -280,7 +280,7 @@ void ECS::Update(float deltaTime)
 		ECS::main.RegisterComponent(new PhysicsComponent(hilt, true, (PositionComponent*)hilt->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), hilt);
 		ColliderComponent* platformCollider = new ColliderComponent(hilt, false, (PositionComponent*)hilt->componentIDMap[positionComponentID], true, true, true, false, false, false, false, EntityClass::object, 1.0f, 0.0f, 0.0f, 35.0f, 5.0f, 0.0f, 0.0f);
 		ECS::main.RegisterComponent(platformCollider, hilt);
-		ECS::main.RegisterComponent(new BladeComponent(moonlightBlade, true, 1010.0f, 1000.0f, 0.5f, 1000.0f, 1000.0f, 0.5f, platformCollider, moonlightBladeMap, moonlightBladeIncorporealMap, 0.5f), moonlightBlade);
+		ECS::main.RegisterComponent(new BladeComponent(moonlightBlade, true, 1010.0f, 1000.0f, 0.5f, 1000.0f, platformCollider, moonlightBladeMap, moonlightBladeIncorporealMap, 0.5f), moonlightBlade);
 
 		#pragma endregion
 
@@ -779,7 +779,7 @@ AIComponent::AIComponent(Entity* entity, bool active, bool proc, float procRange
 
 #pragma region Blade Component
 
-BladeComponent::BladeComponent(Entity* entity, bool active, float rushRange, float slowRange, float followSpeed, float projectileSpeed, float bulletSpeed, float shootDelay, ColliderComponent* platformCollider, Texture2D* corporealMap, Texture2D* incorporealMap, float minTargetSetDelay)
+BladeComponent::BladeComponent(Entity* entity, bool active, float rushRange, float slowRange, float followSpeed, float projectileSpeed, ColliderComponent* platformCollider, Texture2D* corporealMap, Texture2D* incorporealMap, float minTargetSetDelay)
 {
 	this->ID = bladeComponentID;
 	this->entity = entity;
@@ -793,10 +793,6 @@ BladeComponent::BladeComponent(Entity* entity, bool active, float rushRange, flo
 
 	this->followSpeed = followSpeed;
 	this->projectileSpeed = projectileSpeed;
-
-	this->bulletSpeed = bulletSpeed;
-	this->shootDelay = shootDelay;
-	this->lastShot = 0.0f;
 
 	this->platformCollider = platformCollider;
 
@@ -1969,18 +1965,6 @@ void InputSystem::Update(int activeScene, float deltaTime)
 				PhysicsComponent* bladePhys = (PhysicsComponent*)blade->entity->componentIDMap[physicsComponentID];
 				DamageComponent* bladeDamage = (DamageComponent*)blade->entity->componentIDMap[damageComponentID];
 				glm::vec2 bladePos = glm::vec2(bladePosComp->x, bladePosComp->y);
-
-				if (shoot && blade->lastShot > blade->shootDelay)
-				{
-					// Shoot.
-					blade->lastShot = 0.0f;
-
-
-				}
-				else
-				{
-					blade->lastShot += deltaTime;
-				}
 
 				blade->lastTargetSet += deltaTime;
 				if (bladeManualTarget && blade->manualTarget.x == 0 && blade->manualTarget.y == 0 && blade->lastTargetSet > blade->minTargetSetDelay)

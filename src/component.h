@@ -372,10 +372,6 @@ public:
 	float followSpeed;
 	float projectileSpeed;
 
-	float bulletSpeed;
-	float shootDelay;
-	float lastShot;
-
 	ColliderComponent* platformCollider;
 
 	Texture2D* corporealMap;
@@ -385,7 +381,7 @@ public:
 	float lastTargetSet;
 	float minTargetSetDelay;
 
-	BladeComponent(Entity* entity, bool active, float rushRange, float slowRange, float followSpeed, float projectileSpeed, float bulletSpeed, float shootDelay, ColliderComponent* platformCollider, Texture2D* corporealMap, Texture2D* incorporealMap, float minTargetSetDelay);
+	BladeComponent(Entity* entity, bool active, float rushRange, float slowRange, float followSpeed, float projectileSpeed, ColliderComponent* platformCollider, Texture2D* corporealMap, Texture2D* incorporealMap, float minTargetSetDelay);
 };
 
 enum class Anchor { topLeft, bottomLeft, topRight, bottomRight };
