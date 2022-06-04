@@ -252,8 +252,8 @@ void ECS::Update(float deltaTime)
 		Texture2D* watermarkMap = Game::main.textureMap["watermarkMap"];
 
 		ECS::main.RegisterComponent(new PositionComponent(alphaWatermark, true, true, 0, 0, 100, 0), alphaWatermark);
-		ECS::main.RegisterComponent(new StaticSpriteComponent(alphaWatermark, true, (PositionComponent*)alphaWatermark->componentIDMap[positionComponentID], watermark->width, watermark->height, 1.0f, 1.0f, watermark, watermarkMap, false, false, false), alphaWatermark);
-		ECS::main.RegisterComponent(new ImageComponent(alphaWatermark, true, Anchor::topRight, 0, 0), alphaWatermark);
+		ECS::main.RegisterComponent(new StaticSpriteComponent(alphaWatermark, true, (PositionComponent*)alphaWatermark->componentIDMap[positionComponentID], watermark->width, watermark->height, 2.0f, 2.0f, watermark, watermarkMap, false, false, false), alphaWatermark);
+		ECS::main.RegisterComponent(new ImageComponent(alphaWatermark, true, Anchor::topRight, 0, 0, 2.0f, 2.0f), alphaWatermark);
 
 		#pragma endregion
 
@@ -809,7 +809,7 @@ BladeComponent::BladeComponent(Entity* entity, bool active, float rushRange, flo
 
 #pragma region Image Component
 
-ImageComponent::ImageComponent(Entity* entity, bool active, Anchor anchor, float x, float y)
+ImageComponent::ImageComponent(Entity* entity, bool active, Anchor anchor, float x, float y, float scaleX, float scaleY)
 {
 	this->ID = imageComponentID;
 	this->entity = entity;
@@ -818,6 +818,9 @@ ImageComponent::ImageComponent(Entity* entity, bool active, Anchor anchor, float
 	this->anchor = anchor;
 	this->x = x;
 	this->y = y;
+
+	this->scaleX = scaleX;
+	this->scaleY = scaleY;
 }
 
 #pragma endregion
@@ -3005,22 +3008,24 @@ void ImageSystem::Update(int activeScene, float deltaTime)
 			StaticSpriteComponent* sprite = (StaticSpriteComponent*)img->entity->componentIDMap[spriteComponentID];
 
 			glm::vec2 anchorPos;
+			sprite->scaleX = img->scaleX * Game::main.zoom;
+			sprite->scaleY = img->scaleY * Game::main.zoom;
 
 			if (img->anchor == Anchor::topLeft)
 			{
-				anchorPos = glm::vec2(Game::main.leftX, Game::main.topY) - glm::vec2(-sprite->sprite->width, sprite->sprite->height);
+				anchorPos = glm::vec2(Game::main.leftX, Game::main.topY) - glm::vec2(sprite->sprite->width * -sprite->scaleX, sprite->sprite->height * sprite->scaleY);
 			}
 			else if (img->anchor == Anchor::topRight)
 			{
-				anchorPos = glm::vec2(Game::main.rightX, Game::main.topY) - glm::vec2(sprite->sprite->width, sprite->sprite->height);;
+				anchorPos = glm::vec2(Game::main.rightX, Game::main.topY) - glm::vec2(sprite->sprite->width * sprite->scaleX, sprite->sprite->height * sprite->scaleY);;
 			}
 			else if (img->anchor == Anchor::bottomLeft)
 			{
-				anchorPos = glm::vec2(Game::main.leftX, Game::main.bottomY) + glm::vec2(sprite->sprite->width, sprite->sprite->height);;
+				anchorPos = glm::vec2(Game::main.leftX, Game::main.bottomY) + glm::vec2(sprite->sprite->width * sprite->scaleX, sprite->sprite->height * sprite->scaleY);;
 			}
 			else // if (img->anchor == Anchor::bottomRight)
 			{
-				anchorPos = glm::vec2(Game::main.rightX, Game::main.bottomY) + glm::vec2(-sprite->sprite->width, sprite->sprite->height);;
+				anchorPos = glm::vec2(Game::main.rightX, Game::main.bottomY) + glm::vec2(sprite->sprite->width * -sprite->scaleX, sprite->sprite->height * sprite->scaleY);;
 			}
 
 			pos->x = anchorPos.x + img->x;

@@ -392,7 +392,10 @@ public:
 	float x;
 	float y;
 
-	ImageComponent(Entity* entity, bool active, Anchor anchor, float x, float y);
+	float scaleX;
+	float scaleY;
+
+	ImageComponent(Entity* entity, bool active, Anchor anchor, float x, float y, float scaleX, float scaleY);
 };
 
 #endif
