@@ -64,6 +64,9 @@ Bundle Renderer::DetermineBatch(int textureID, int mapID)
     int textureBatch = floor(location / MAX_TEXTURES_PER_BATCH);
     int mapBatch = floor(locationMap / MAX_TEXTURES_PER_BATCH);
 
+    if (location == -1) textureBatch = -1;
+    if (locationMap == -1) mapBatch = -1;
+
     Bundle bundle;
     int currentBatch = floor(texturesUsed.size() / MAX_TEXTURES_PER_BATCH);
     // std::cout << std::to_string(currentBatch) + "\n";
