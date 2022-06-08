@@ -93,7 +93,7 @@ public:
     void prepareQuad(glm::vec3 position, float width, float height, float scaleX, float scaleY, glm::vec4 rgb, int textureID, int mapID); // Specify texture ID rather than index?
     // NOTE: Directly sending a texture index rather than ID can result in the wrong texture being drawn (due to being in the wrong batch)
     void prepareQuad(PositionComponent* pos, float width, float height, float scaleX, float scaleY, glm::vec4 rgb, int animID, int mapID, int cellX, int cellY, int cols, int rows, bool flippedX, bool flippedY);
-    void prepareQuad(int batchIndex, Quad& input);
+    void Renderer::prepareQuad(Quad& input, int textureID, int mapID);
     void prepareDownLine(float x, float y, float height);
     void prepareRightLine(float x, float y, float width);
     void sendToGL();

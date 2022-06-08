@@ -33,6 +33,8 @@ set(BASE_SRCS
     "src/texture_2D.cpp"
     "src/texture_2D.h"
     "src/savesystem.h"
+    "src/textrenderer.cpp"
+    "src/textrenderer.h"
     )
 
 # Add source to this project's executable.
@@ -51,9 +53,10 @@ add_dependencies(the-moonlight-blade copy_assets)
 add_subdirectory(libs/glfw-3.3.7)
 add_subdirectory(libs/glad)
 add_subdirectory(libs/glm-0.9.9.8)
+add_subdirectory(libs/freetype-2.12.1)
 
 if(NOT DEFINED CMAKE_SUPPRESS_DEVELOPER_WARNINGS)
      set(CMAKE_SUPPRESS_DEVELOPER_WARNINGS 1 CACHE INTERNAL "No dev warnings")
 endif()
 
-target_link_libraries(the-moonlight-blade glfw glad glm)
+target_link_libraries(the-moonlight-blade glfw glad glm freetype)

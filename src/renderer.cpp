@@ -440,13 +440,6 @@ void Renderer::prepareQuad(glm::vec2 topRight, glm::vec2 bottomRight, glm::vec2 
     quad.topLeft = { topLeft.x * scaleX,  topLeft.y * scaleY, z,      r, g, b, a,   0.0, 1.0,    bundle.textureLocation, bundle.mapLocation, CalculateModifier(width), CalculateModifier(height) };
 }
 
-void Renderer::prepareQuad(int batchIndex, Quad& input)
-{
-    Batch& batch = batches[batchIndex];
-    batch.quadBuffer[batch.quadIndex] = input;
-    batch.quadIndex++;
-}
-
 void Renderer::sendToGL()
 {
     shader.use();
@@ -476,6 +469,27 @@ void Renderer::sendToGL()
     flush(batches[currentBatch]);
 }
 
+void Renderer::prepareQuad(Quad& input, int textureID, int mapID)
+{
+    Bundle bundle = DetermineBatch(textureID, mapID);
+    Batch& batch = batches[bundle.batch];
+
+    input.topRight.textureIndex = bundle.textureLocation;
+    input.topRight.mapIndex = bundle.mapLocation;
+
+    input.bottomRight.textureIndex = bundle.textureLocation;
+    input.bottomRight.mapIndex = bundle.mapLocation;
+
+    input.bottomLeft.textureIndex = bundle.textureLocation;
+    input.bottomLeft.mapIndex = bundle.mapLocation;
+
+    input.topLeft.textureIndex = bundle.textureLocation;
+    input.topLeft.mapIndex = bundle.mapLocation;
+
+    batch.quadBuffer[batch.quadIndex] = input;
+    batch.quadIndex++;
+}
+
 void Renderer::prepareDownLine(float x, float y, float height)
 {
     constexpr float halfWidth = 0.5f;
@@ -484,7 +498,7 @@ void Renderer::prepareDownLine(float x, float y, float height)
     quad.bottomRight = { x + halfWidth, y - height,   1.0f, 1.0f, 1.0f, 1.0f,   1.0f, 0.0f,    whiteTextureIndex, whiteTextureIndex, 8, 8 };
     quad.bottomLeft = { x - halfWidth, y - height,   1.0f, 1.0f, 1.0f, 1.0f,   0.0f, 0.0f,    whiteTextureIndex, whiteTextureIndex, 8, 8 };
     quad.topLeft = { x - halfWidth, y,            1.0f, 1.0f, 1.0f, 1.0f,   0.0f, 1.0f,    whiteTextureIndex, whiteTextureIndex, 8, 8 };
-    prepareQuad(0, quad);
+    prepareQuad(quad, 0, 0);
 }
 
 void Renderer::prepareRightLine(float x, float y, float width)
@@ -495,7 +509,7 @@ void Renderer::prepareRightLine(float x, float y, float width)
     quad.bottomRight = { x + width, y - halfHeight, 1.0f, 1.0f, 1.0f, 1.0f,   1.0f, 0.0f,    whiteTextureIndex, whiteTextureIndex, 8, 8 };
     quad.bottomLeft = { x        , y - halfHeight, 1.0f, 1.0f, 1.0f, 1.0f,   0.0f, 0.0f,    whiteTextureIndex, whiteTextureIndex, 8, 8 };
     quad.topLeft = { x        , y + halfHeight, 1.0f, 1.0f, 1.0f, 1.0f,   0.0f, 1.0f,    whiteTextureIndex, whiteTextureIndex, 8, 8 };
-    prepareQuad(0, quad);
+    prepareQuad(quad, 0, 0);
 }
 
 void Renderer::flush(const Batch& batch)

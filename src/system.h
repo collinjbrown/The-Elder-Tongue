@@ -33,6 +33,8 @@ class ParticleComponent;
 class AIComponent;
 class BladeComponent;
 class ImageComponent;
+class ButtonComponent;
+class TextComponent;
 class Entity;
 
 struct Collision
@@ -248,4 +250,30 @@ public:
 	void PurgeEntity(Entity* e);
 };
 
+class ButtonSystem : public System
+{
+public:
+	vector<ButtonComponent*> buttons;
+
+	void Update(int activeScene, float deltaTime);
+
+	bool CheckButtonReqs(ButtonComponent* b);
+	void ToggleExclusiveButtons(ButtonComponent* b, bool click);
+
+	void AddComponent(Component* component);
+
+	void PurgeEntity(Entity* e);
+};
+
+class TextRenderingSystem : public System
+{
+public:
+	vector<TextComponent*> texts;
+
+	void Update(int activeScene, float deltaTime);
+
+	void AddComponent(Component* component);
+
+	void PurgeEntity(Entity* e);
+};
 #endif

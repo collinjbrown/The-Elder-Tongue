@@ -2,6 +2,8 @@
 #define GAME_H
 
 #include "renderer.h"
+#include "textrenderer.h"
+
 #include <glm/glm.hpp>
 #include <vector>
 #include <map>
@@ -45,9 +47,13 @@ public:
 	glm::mat4 projection;
 
 	Renderer* renderer;
-	void updateOrtho();
+	TextRenderer* textRenderer;
+
+	void UpdateOrtho();
 
 	// Keyboard and Mouse Mappings
+	int clickKey = GLFW_MOUSE_BUTTON_1;
+
 	int bladeShootKey = GLFW_MOUSE_BUTTON_1;
 	int bladeManualTargetKey = GLFW_MOUSE_BUTTON_3;
 	int bladeThrowKey = GLFW_MOUSE_BUTTON_2;
@@ -68,6 +74,10 @@ public:
 	int dashLeftKey = GLFW_KEY_A;
 
 	// Gamepad Mappings
+	bool usingGamepad = false;
+
+	InputType clickPadType = InputType::trigger;
+	int clickPad = GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER;
 
 	InputType bladeShootPadType = InputType::trigger;
 	int bladeShootPad = GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER;

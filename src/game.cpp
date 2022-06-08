@@ -4,7 +4,7 @@
 // This just holds updateOrth().
 // Nothing particularly fancy.
 
-void Game::updateOrtho()
+void Game::UpdateOrtho()
 {
     const float halfWidth = windowWidth / 2.0f;
     const float halfHeight = windowHeight / 2.0f;

@@ -111,7 +111,7 @@ int main(void)
     #pragma region Camera & Texture Setup
     // Now that we've finished that, we'll set up the camera
     // and textures that we'll need later.
-    Game::main.updateOrtho();
+    Game::main.UpdateOrtho();
 
     Texture2D* whiteTexture = Texture2D::whiteTexture();
 
@@ -234,6 +234,13 @@ int main(void)
     Game::main.renderer = &renderer;
     #pragma endregion
 
+#   pragma region Text Rendering Setup
+
+    TextRenderer textRenderer("assets/fonts/Cantarell-Bold.otf", 64);
+    Game::main.textRenderer = &textRenderer;
+
+    #pragma endregion
+
     #pragma region Game Loop
     // This is the loop where the game runs, duh.
     // Everything that should happen each frame should occur here,
@@ -352,7 +359,7 @@ int main(void)
             {
                 Game::main.zoom -= 5.0f * deltaTime;
 
-                Game::main.updateOrtho();
+                Game::main.UpdateOrtho();
             }
         }
         else if (glfwGetKey(window, GLFW_KEY_MINUS) == GLFW_PRESS)
@@ -361,7 +368,7 @@ int main(void)
             {
                 Game::main.zoom += 5.0f * deltaTime;
 
-                Game::main.updateOrtho();
+                Game::main.UpdateOrtho();
             }
         }
 

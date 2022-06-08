@@ -32,11 +32,19 @@ static int particleComponentID = 13;
 static int aiComponentID = 14;
 static int bladeComponentID = 15;
 static int imageComponentID = 16;
+static int buttonComponentID = 17;
+static int textComponentID = 18;
 
 static int playerAnimControllerSubID = 1;
 static int moonlightBladeAnimControllerSubID = 2;
 
 enum EntityClass { player, enemy, object };
+
+class Observer
+{
+public:
+	virtual void Trigger() = 0;
+};
 
 class Component
 {
@@ -136,6 +144,9 @@ public:
 	// This tells the renderer whether or not to repeat the texture over the sprite's whole size or to stretch it across instead.
 	bool tiled;
 
+	// Color, yeah.
+	glm::vec4 color;
+
 	// The "sprite" should be a texture whose each pixel contains an r and g value that are coordinates to the pixel on the map which
 	// contains the color that the renderer should apply. This is a little weird, but it allows us to switch out this map on the fly
 	// to make subtle (or sometimes unsubtle) changes to the appearance of the sprite without having to create multiple sprites for 
@@ -146,7 +157,7 @@ public:
 	// Again, a quick and dirty reference to the position component allows us to reference it directly instead of going through the entity's component map.
 	PositionComponent* pos;
 
-	StaticSpriteComponent(Entity* entity, bool active, PositionComponent* pos, float width, float height, float scaleX, float scaleY, Texture2D* sprite, Texture2D* mapTex, bool flippedX, bool flippedY, bool tiled);
+	StaticSpriteComponent(Entity* entity, bool active, PositionComponent* pos, float width, float height, float scaleX, float scaleY, Texture2D* sprite, Texture2D* mapTex, bool flippedX, bool flippedY, bool tiled, glm::vec4 color);
 };
 
 class ColliderComponent : public Component
@@ -384,6 +395,7 @@ public:
 	BladeComponent(Entity* entity, bool active, float rushRange, float slowRange, float followSpeed, float projectileSpeed, ColliderComponent* platformCollider, Texture2D* corporealMap, Texture2D* incorporealMap, float minTargetSetDelay);
 };
 
+
 enum class Anchor { topLeft, bottomLeft, topRight, bottomRight };
 class ImageComponent : public Component
 {
@@ -392,10 +404,80 @@ public:
 	float x;
 	float y;
 
+	float width;
+	float height;
+
 	float scaleX;
 	float scaleY;
 
-	ImageComponent(Entity* entity, bool active, Anchor anchor, float x, float y, float scaleX, float scaleY);
+	ImageComponent(Entity* entity, bool active, Anchor anchor, float x, float y, float width, float height, float scaleX, float scaleY);
+};
+
+class ButtonComponent : public Component
+{
+public:
+	std::vector<Observer*> observers;
+
+	bool selfTrigger;
+	float lastClick;
+	float clickDelay;
+
+	float width;
+	float height;
+
+	float xOffset;
+	float yOffset;
+
+	bool clicked;
+	bool stayClicked;
+
+	bool clickable;
+
+	bool needsAllReqs;
+
+	std::vector<ButtonComponent*> exclusiveButtons;					// Buttons that should un-click when this is clicked.
+	std::vector<std::vector<ButtonComponent*>> requiredButtons;		// Categories of buttons that are needed for this to be clickable.
+	std::vector<ButtonComponent*> illegalButtons;					// Buttons that cannot be clicked for this to be clickable.
+
+	glm::vec4 plainColor;
+	glm::vec4 hoverColor;
+	glm::vec4 clickedColor;
+	glm::vec4 unclickableColor;
+
+	ButtonComponent(Entity* entity, bool active, std::vector<Observer*> observers, bool selfTrigger, float clickDelay, float width, float height, float xOffset, float yOffset, bool clickable, bool needsAllReqs, glm::vec4 plainColor, glm::vec4 hoverColor, glm::vec4 clickedColor, glm::vec4 unclickableColor);
+};
+
+
+class TextComponent : public Component
+{
+public:
+	string text;
+	glm::vec4 color;
+
+	float scaleX;
+	float scaleY;
+
+	float xOffset;
+	float yOffset;
+
+	TextAlignment alignment;
+
+	float fontSize;
+	float boxWidth;
+	float boxHeight;
+
+	bool wrapWidth;
+
+	TextComponent(Entity* entity, bool active, string text, glm::vec4 color, float scaleX, float scaleY, float xOffset, float yOffset, TextAlignment alignment, float fontSize, float boxWidth, float boxHeight, bool wrapWidth);
+};
+
+
+class TriggerObserver : public Observer
+{
+public:
+	std::vector<ButtonComponent*> buttons;
+
+	void Trigger();
 };
 
 #endif

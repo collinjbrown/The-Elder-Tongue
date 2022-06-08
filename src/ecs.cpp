@@ -222,6 +222,10 @@ void ECS::Init()
 	ComponentBlock* imageBlock = new ComponentBlock(imageSystem, imageComponentID);
 	componentBlocks.push_back(imageBlock);
 
+	ButtonSystem* buttonSystem = new ButtonSystem();
+	ComponentBlock* buttonBlock = new ComponentBlock(buttonSystem, buttonComponentID);
+	componentBlocks.push_back(buttonBlock);
+
 	StaticRenderingSystem* renderingSystem = new StaticRenderingSystem();
 	ComponentBlock* renderingBlock = new ComponentBlock(renderingSystem, spriteComponentID);
 	componentBlocks.push_back(renderingBlock);
@@ -237,6 +241,10 @@ void ECS::Init()
 	AnimationSystem* animationSystem = new AnimationSystem();
 	ComponentBlock* animationBlock = new ComponentBlock(animationSystem, animationComponentID);
 	componentBlocks.push_back(animationBlock);
+
+	TextRenderingSystem* textSystem = new TextRenderingSystem();
+	ComponentBlock* textBlock = new ComponentBlock(textSystem, textComponentID);
+	componentBlocks.push_back(textBlock);
 }
 
 void ECS::Update(float deltaTime)
@@ -252,8 +260,8 @@ void ECS::Update(float deltaTime)
 		Texture2D* watermarkMap = Game::main.textureMap["watermarkMap"];
 
 		ECS::main.RegisterComponent(new PositionComponent(alphaWatermark, true, true, 0, 0, 100, 0), alphaWatermark);
-		ECS::main.RegisterComponent(new StaticSpriteComponent(alphaWatermark, true, (PositionComponent*)alphaWatermark->componentIDMap[positionComponentID], watermark->width, watermark->height, 2.0f, 2.0f, watermark, watermarkMap, false, false, false), alphaWatermark);
-		ECS::main.RegisterComponent(new ImageComponent(alphaWatermark, true, Anchor::topRight, 0, 0, 2.0f, 2.0f), alphaWatermark);
+		ECS::main.RegisterComponent(new StaticSpriteComponent(alphaWatermark, true, (PositionComponent*)alphaWatermark->componentIDMap[positionComponentID], watermark->width, watermark->height, 2.0f, 2.0f, watermark, watermarkMap, false, false, false, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)), alphaWatermark);
+		ECS::main.RegisterComponent(new ImageComponent(alphaWatermark, true, Anchor::topRight, 0, 0, watermark->width, watermark->height, 2.0f, 2.0f), alphaWatermark);
 
 		#pragma endregion
 
@@ -330,7 +338,7 @@ void ECS::Update(float deltaTime)
 			ECS::main.RegisterComponent(new PositionComponent(platform, true, true, rand() % 5000, rand() % 5000, 0, 0), platform);
 			ECS::main.RegisterComponent(new PhysicsComponent(platform, true, (PositionComponent*)platform->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 0.1f, 0.0f), platform);
 			ECS::main.RegisterComponent(new ColliderComponent(platform, true, (PositionComponent*)platform->componentIDMap[positionComponentID], true, false, false, true, false, false, false, EntityClass::object, 1000.0f, 0.0f, 1.0f, width, height, 0.0f, 0.0f), platform);
-			ECS::main.RegisterComponent(new StaticSpriteComponent(platform, true, (PositionComponent*)platform->componentIDMap[positionComponentID], width, height, 1.0f, 1.0f, tex3, tex3Map, false, false, false), platform);
+			ECS::main.RegisterComponent(new StaticSpriteComponent(platform, true, (PositionComponent*)platform->componentIDMap[positionComponentID], width, height, 1.0f, 1.0f, tex3, tex3Map, false, false, false, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)), platform);
 		}
 
 		for (int i = 0; i < 50; i++)
@@ -339,7 +347,7 @@ void ECS::Update(float deltaTime)
 			ECS::main.RegisterComponent(new PositionComponent(floor, true, true, i * 500, -200, 0, 0.0f), floor);
 			ECS::main.RegisterComponent(new PhysicsComponent(floor, true, (PositionComponent*)floor->componentIDMap[positionComponentID], 0.0f, 0.0f, 0.0f, 0.1f, 0.0f), floor);
 			ECS::main.RegisterComponent(new ColliderComponent(floor, true, (PositionComponent*)floor->componentIDMap[positionComponentID], true, false, false, true, false, false, false, EntityClass::object, 1000.0f, 0.0f, 1.0f, 540.0f, 80.0f, 0.0f, 0.0f), floor);
-			ECS::main.RegisterComponent(new StaticSpriteComponent(floor, true, (PositionComponent*)floor->componentIDMap[positionComponentID], 540.0f, 80.0f, 1.0f, 1.0f, tex3, tex3Map, false, false, false), floor);
+			ECS::main.RegisterComponent(new StaticSpriteComponent(floor, true, (PositionComponent*)floor->componentIDMap[positionComponentID], 540.0f, 80.0f, 1.0f, 1.0f, tex3, tex3Map, false, false, false, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)), floor);
 
 			/*Entity* earth = CreateEntity(0, "floor");
 			ECS::main.RegisterComponent(new PositionComponent(earth, true, true, i * 500, -1000, 0, 0.0f), earth);
@@ -477,7 +485,7 @@ PhysicsComponent::PhysicsComponent(Entity* entity, bool active, PositionComponen
 
 #pragma region Static Sprite Component
 
-StaticSpriteComponent::StaticSpriteComponent(Entity* entity, bool active, PositionComponent* pos, float width, float height, float scaleX, float scaleY, Texture2D* sprite, Texture2D* mapTex, bool flippedX, bool flippedY, bool tiled)
+StaticSpriteComponent::StaticSpriteComponent(Entity* entity, bool active, PositionComponent* pos, float width, float height, float scaleX, float scaleY, Texture2D* sprite, Texture2D* mapTex, bool flippedX, bool flippedY, bool tiled, glm::vec4 color)
 {
 	ID = spriteComponentID;
 	this->active = active;
@@ -497,6 +505,8 @@ StaticSpriteComponent::StaticSpriteComponent(Entity* entity, bool active, Positi
 	this->flippedY = flippedY;
 
 	this->tiled = tiled;
+
+	this->color = color;
 }
 
 #pragma endregion
@@ -809,18 +819,82 @@ BladeComponent::BladeComponent(Entity* entity, bool active, float rushRange, flo
 
 #pragma region Image Component
 
-ImageComponent::ImageComponent(Entity* entity, bool active, Anchor anchor, float x, float y, float scaleX, float scaleY)
+ImageComponent::ImageComponent(Entity* entity, bool active, Anchor anchor, float x, float y, float width, float height, float scaleX, float scaleY)
 {
 	this->ID = imageComponentID;
 	this->entity = entity;
 	this->active = active;
-	
+
 	this->anchor = anchor;
 	this->x = x;
 	this->y = y;
 
+	this->width = width;
+	this->height = height;
+
 	this->scaleX = scaleX;
 	this->scaleY = scaleY;
+}
+
+#pragma endregion
+
+#pragma region Button Component
+
+ButtonComponent::ButtonComponent(Entity* entity, bool active, std::vector<Observer*> observers, bool selfTrigger, float clickDelay, float width, float height, float xOffset, float yOffset, bool clickable, bool needsAllReqs, glm::vec4 plainColor, glm::vec4 hoverColor, glm::vec4 clickedColor, glm::vec4 unclickableColor)
+{
+	this->ID = buttonComponentID;
+	this->entity = entity;
+	this->active = active;
+
+	this->observers = observers;
+
+	this->selfTrigger = selfTrigger;
+	this->lastClick = 0.0f;
+	this->clickDelay = clickDelay;
+
+	this->width = width;
+	this->height = height;
+
+	this->xOffset = xOffset;
+	this->yOffset = yOffset;
+
+	this->clicked = false;
+	this->clickable = clickable;
+	this->needsAllReqs = needsAllReqs;
+
+	this->plainColor = plainColor;
+	this->hoverColor = hoverColor;
+	this->clickedColor = clickedColor;
+	this->unclickableColor = unclickableColor;
+}
+
+#pragma endregion
+
+#pragma region Text Component
+
+TextComponent::TextComponent(Entity* entity, bool active, string text, glm::vec4 color, float scaleX, float scaleY, float xOffset, float yOffset, TextAlignment alignment, float fontSize, float boxWidth, float boxHeight, bool wrapWidth)
+{
+	this->ID = textComponentID;
+	this->entity = entity;
+	this->active = active;
+
+	this->text = text;
+
+	this->color = color;
+
+	this->xOffset = xOffset;
+	this->yOffset = yOffset;
+
+	this->alignment = alignment;
+
+	this->scaleX = scaleX;
+	this->scaleY = scaleY;
+
+	this->fontSize = fontSize;
+	this->boxWidth = boxWidth;
+	this->boxHeight = boxHeight;
+
+	this->wrapWidth = wrapWidth;
 }
 
 #pragma endregion
@@ -2720,7 +2794,7 @@ void AISystem::Update(int activeScene, float deltaTime)
 							ECS::main.RegisterComponent(new PhysicsComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], vel.x, vel.y, 0.0f, 0.0f, 0.0f), projectile);
 							ECS::main.RegisterComponent(new ColliderComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], false, false, true, false, true, false, true, EntityClass::object, 1.0f, 0.0f, 0.0f, 5.0f, 5.0f, 0.0f, 0.0f), projectile);
 							ECS::main.RegisterComponent(new DamageComponent(projectile, true, a->entity, true, 10.0f, false, true, 1, 10.0f, true, true, true, false), projectile);
-							ECS::main.RegisterComponent(new StaticSpriteComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], s->width, s->height, 1.0f, 1.0f, s, sMap, false, false, false), projectile);
+							ECS::main.RegisterComponent(new StaticSpriteComponent(projectile, true, (PositionComponent*)projectile->componentIDMap[positionComponentID], s->width, s->height, 1.0f, 1.0f, s, sMap, false, false, false, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)), projectile);
 						}
 						else
 						{
@@ -3005,31 +3079,38 @@ void ImageSystem::Update(int activeScene, float deltaTime)
 			img->active && img->entity->Get_Scene() == 0)
 		{
 			PositionComponent* pos = (PositionComponent*)img->entity->componentIDMap[positionComponentID];
-			StaticSpriteComponent* sprite = (StaticSpriteComponent*)img->entity->componentIDMap[spriteComponentID];
 
 			glm::vec2 anchorPos;
-			sprite->scaleX = img->scaleX * Game::main.zoom;
-			sprite->scaleY = img->scaleY * Game::main.zoom;
+
+			float spriteScaleX = img->scaleX * Game::main.zoom;
+			float spriteScaleY = img->scaleY * Game::main.zoom;
 
 			if (img->anchor == Anchor::topLeft)
 			{
-				anchorPos = glm::vec2(Game::main.leftX, Game::main.topY) - glm::vec2(sprite->sprite->width * -sprite->scaleX, sprite->sprite->height * sprite->scaleY);
+				anchorPos = glm::vec2(Game::main.leftX, Game::main.topY) - glm::vec2(img->width * -spriteScaleX, img->height * spriteScaleY);
 			}
 			else if (img->anchor == Anchor::topRight)
 			{
-				anchorPos = glm::vec2(Game::main.rightX, Game::main.topY) - glm::vec2(sprite->sprite->width * sprite->scaleX, sprite->sprite->height * sprite->scaleY);;
+				anchorPos = glm::vec2(Game::main.rightX, Game::main.topY) - glm::vec2(img->width * spriteScaleX, img->height * spriteScaleY);;
 			}
 			else if (img->anchor == Anchor::bottomLeft)
 			{
-				anchorPos = glm::vec2(Game::main.leftX, Game::main.bottomY) + glm::vec2(sprite->sprite->width * sprite->scaleX, sprite->sprite->height * sprite->scaleY);;
+				anchorPos = glm::vec2(Game::main.leftX, Game::main.bottomY) + glm::vec2(img->width * spriteScaleX, img->height * spriteScaleY);;
 			}
 			else // if (img->anchor == Anchor::bottomRight)
 			{
-				anchorPos = glm::vec2(Game::main.rightX, Game::main.bottomY) + glm::vec2(sprite->sprite->width * -sprite->scaleX, sprite->sprite->height * sprite->scaleY);;
+				anchorPos = glm::vec2(Game::main.rightX, Game::main.bottomY) + glm::vec2(img->width * -spriteScaleX, img->height * spriteScaleY);;
 			}
 
 			pos->x = anchorPos.x + img->x;
 			pos->y = anchorPos.y + img->y;
+
+			StaticSpriteComponent* sprite = (StaticSpriteComponent*)img->entity->componentIDMap[spriteComponentID];
+			if (sprite != nullptr)
+			{
+				sprite->scaleX = spriteScaleX;
+				sprite->scaleY = spriteScaleY;
+			}
 		}
 	}
 }
@@ -3053,5 +3134,230 @@ void ImageSystem::PurgeEntity(Entity* e)
 }
 
 #pragma endregion
+
+#pragma region Button System
+
+void ButtonSystem::Update(int activeScene, float deltaTime)
+{
+	std::sort(buttons.begin(), buttons.end(), [](ButtonComponent* a, ButtonComponent* b)
+		{
+			PositionComponent* posA = (PositionComponent*)a->entity->componentIDMap[positionComponentID];
+			PositionComponent* posB = (PositionComponent*)b->entity->componentIDMap[positionComponentID];
+			return posA->z > posB->z;
+		});
+
+	bool hovered = false;
+
+	for (int i = 0; i < buttons.size(); i++)
+	{
+		ButtonComponent* b = buttons[i];
+
+		if (b->active && b->entity->Get_Scene() == activeScene ||
+			b->active && b->entity->Get_Scene() == 0)
+		{
+			bool click = ((glfwGetKey(Game::main.window, Game::main.clickKey) == GLFW_PRESS) || (glfwGetMouseButton(Game::main.window, Game::main.clickKey) == GLFW_PRESS));
+
+			if (glfwJoystickIsGamepad(GLFW_JOYSTICK_1))
+			{
+				Game::main.usingGamepad = true;
+
+				GLFWgamepadstate state;
+				glfwGetGamepadState(GLFW_JOYSTICK_1, &state);
+
+				if (!click) click = (Game::main.clickPadType == InputType::trigger && state.axes[Game::main.clickPad] + 1 ||
+					Game::main.clickPadType == InputType::stickPos && state.axes[Game::main.clickPad] > 0.1f ||
+					Game::main.clickPadType == InputType::stickNeg && state.axes[Game::main.clickPad] < -0.1f ||
+					Game::main.clickPadType == InputType::button && state.buttons[Game::main.clickPad]);
+			}
+
+			PositionComponent* pos = (PositionComponent*)b->entity->componentIDMap[positionComponentID];
+			StaticSpriteComponent* sprite = (StaticSpriteComponent*)b->entity->componentIDMap[spriteComponentID];
+
+			bool overlap = PointOverlapRect(glm::vec2(Game::main.mouseX, Game::main.mouseY), glm::vec2(pos->x, pos->y), b->width * sprite->scaleX, b->height * sprite->scaleY);
+
+			b->clickable = CheckButtonReqs(b);
+
+			if (b->clicked)
+			{
+				sprite->color = b->clickedColor;
+
+				if (overlap && click && b->lastClick > b->clickDelay)
+				{
+					b->lastClick = 0.0f;
+
+					b->clicked = false;
+				}
+			}
+			else if (overlap && click && b->clickable && b->lastClick > b->clickDelay)
+			{
+				b->lastClick = 0.0f;
+
+				ToggleExclusiveButtons(b, true);
+				sprite->color = b->clickedColor;
+
+				if (b->selfTrigger)
+				{
+					for (int i = 0; i < b->observers.size(); i++)
+					{
+						b->observers[i]->Trigger();
+					}
+				}
+				else
+				{
+					b->clicked = true;
+				}
+			}
+			else if (overlap && b->clickable && !hovered)
+			{
+				sprite->color = b->hoverColor;
+				hovered = true;
+			}
+			else if (!b->clickable)
+			{
+				sprite->color = b->unclickableColor;
+			}
+			else
+			{
+				sprite->color = b->plainColor;
+			}
+
+			b->lastClick += deltaTime;
+		}
+	}
+}
+
+bool ButtonSystem::CheckButtonReqs(ButtonComponent* b)
+{
+	if (b->requiredButtons.size() == 0 && b->illegalButtons.size() == 0)
+	{
+		return true;
+	}
+
+	int reqCategoriesMet = 0;
+	bool reqsMet = false;
+
+	for (int i = 0; i < b->requiredButtons.size(); i++)
+	{
+		for (int j = 0; j < b->requiredButtons[i].size(); j++)
+		{
+			if (!b->requiredButtons[i][j]->clicked && b->needsAllReqs)
+			{
+				return false;
+			}
+			else if (b->requiredButtons[i][j]->clicked && !b->needsAllReqs)
+			{
+				reqCategoriesMet++;
+			}
+		}
+	}
+
+	if (reqCategoriesMet == b->requiredButtons.size()) reqsMet = true;
+
+	if (!b->needsAllReqs && !reqsMet) return false;
+	if (b->needsAllReqs) reqsMet = true;
+
+	for (int i = 0; i < b->illegalButtons.size(); i++)
+	{
+		if (b->illegalButtons[i]->clicked) return false;
+	}
+
+	return reqsMet;
+}
+
+void ButtonSystem::ToggleExclusiveButtons(ButtonComponent* b, bool click)
+{
+	for (int i = 0; i < b->exclusiveButtons.size(); i++)
+	{
+		if (b->exclusiveButtons[i] != b)
+		{
+			b->exclusiveButtons[i]->clicked = !click;
+		}
+	}
+}
+
+void ButtonSystem::AddComponent(Component* component)
+{
+	buttons.push_back((ButtonComponent*)component);
+}
+
+void ButtonSystem::PurgeEntity(Entity* e)
+{
+	for (int i = 0; i < buttons.size(); i++)
+	{
+		if (buttons[i]->entity == e)
+		{
+			ButtonComponent* s = buttons[i];
+			buttons.erase(std::remove(buttons.begin(), buttons.end(), s), buttons.end());
+			delete s;
+		}
+	}
+}
+
+#pragma endregion
+
+#pragma region Text Rendering System
+
+void TextRenderingSystem::Update(int activeScene, float deltaTime)
+{
+	for (int i = 0; i < texts.size(); i++)
+	{
+		TextComponent* t = texts[i];
+
+		if (t->active && t->entity->Get_Scene() == activeScene ||
+			t->active && t->entity->Get_Scene() == 0)
+		{
+			PositionComponent* pos = (PositionComponent*)t->entity->componentIDMap[positionComponentID];
+
+			if (pos->x + (t->boxWidth * t->scaleX / 2.0f) > Game::main.leftX && pos->x - (t->boxWidth * t->scaleX / 2.0f) < Game::main.rightX &&
+				pos->y + (t->boxHeight * t->scaleY / 2.0f) > Game::main.bottomY && pos->y - (t->boxHeight * t->scaleY / 2.0f) < Game::main.topY &&
+				pos->z < Game::main.camZ)
+			{
+				glm::vec2 off = Game::main.textRenderer->CalculateAlignment(t->text, t->scaleX, t->scaleY, t->alignment);
+
+				Game::main.textRenderer->RenderText(t->text, pos->x + t->xOffset + off.x, pos->y + t->yOffset + off.y, t->scaleX, t->scaleY, t->color);
+			}
+		}
+	}
+}
+
+void TextRenderingSystem::AddComponent(Component* component)
+{
+	texts.push_back((TextComponent*)component);
+}
+
+void TextRenderingSystem::PurgeEntity(Entity* e)
+{
+	for (int i = 0; i < texts.size(); i++)
+	{
+		if (texts[i]->entity == e)
+		{
+			TextComponent* s = texts[i];
+			texts.erase(std::remove(texts.begin(), texts.end(), s), texts.end());
+			delete s;
+		}
+	}
+}
+
+#pragma endregion
+
+#pragma endregion
+
+#pragma region Button Observers
+
+void TriggerObserver::Trigger()
+{
+	for (int i = 0; i < buttons.size(); i++)
+	{
+		if (buttons[i]->clicked)
+		{
+			for (int j = 0; j < buttons[i]->observers.size(); j++)
+			{
+				buttons[i]->observers[j]->Trigger();
+			}
+
+			buttons[i]->clicked = false;
+		}
+	}
+}
 
 #pragma endregion
