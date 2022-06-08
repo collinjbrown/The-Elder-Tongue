@@ -262,6 +262,7 @@ void ECS::Update(float deltaTime)
 		ECS::main.RegisterComponent(new PositionComponent(alphaWatermark, true, true, 0, 0, 100, 0), alphaWatermark);
 		ECS::main.RegisterComponent(new StaticSpriteComponent(alphaWatermark, true, (PositionComponent*)alphaWatermark->componentIDMap[positionComponentID], watermark->width, watermark->height, 2.0f, 2.0f, watermark, watermarkMap, false, false, false, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)), alphaWatermark);
 		ECS::main.RegisterComponent(new ImageComponent(alphaWatermark, true, Anchor::topRight, 0, 0, watermark->width, watermark->height, 2.0f, 2.0f), alphaWatermark);
+		// ECS::main.RegisterComponent(new TextComponent(alphaWatermark, true, "test", glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), 1.0f, 1.0f, 0, -50.0f, TextAlignment::center, 0, 0, 0, 0), alphaWatermark);
 
 		#pragma endregion
 
